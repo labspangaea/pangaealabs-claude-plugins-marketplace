@@ -1,0 +1,37 @@
+{
+  "skill_name": "make-pdf",
+  "note": "Improving an existing skill. baseline = docsmith @ git HEAD (pre-change, snapshot in skill-snapshot/); with_skill = current working tree (kawaii SVG hero/scene + callout + code-block; d2 pipeline removed in favor of hand-written SVG across all templates).",
+  "evals": [
+    {
+      "id": 0,
+      "name": "kawaii-feature-deck",
+      "prompt": "Make a cute kawaii-storybook slide deck (about 6 slides) introducing 'Pawmail', a friendly email app for pet owners. I'd like a hand-drawn mascot character somewhere, a soft storybook cover/backdrop, a couple of helpful tips and a warning, and one slide showing a tiny code snippet for the send API. Brand it as Pangaea Digital Labs.",
+      "expected_output": "A 16:9 (1440x810pt) kawaii-storybook PDF. With the new skill it should use a hand-written SVG mascot hero, a full-bleed SVG scene background, <aside class=\"callout ...\"> callouts for the tips/warning, and a styled fenced code block. Baseline (old skill) can only use emoji + plain lists + an unstyled code fence (no callout/SVG-art affordances exist), so it should look plainer.",
+      "files": [],
+      "assertions": [
+        {"text": "PDF built successfully (exists, >= 1 page)"},
+        {"text": "Page size is the deck format 1440 x 810 pts"},
+        {"text": "Authored at least one hand-written .svg and embedded it (SVG hero/character or scene)"},
+        {"text": "Source uses at least one <aside class=\"callout ...\"> callout (tip/warning)"},
+        {"text": "Source contains a fenced code block (the send API snippet)"},
+        {"text": "Source uses an SVG hero image and/or a marp ![bg ...] background"},
+        {"text": "Footer / colophon is branded 'Pangaea Digital Labs'"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "handbook-svg-diagram",
+      "prompt": "Turn this into a short handbook PDF and brand it as SIPGN: a guide titled 'Choosing a Vector Database'. Cover the tradeoffs between pgvector, Pinecone, and Qdrant, include an architecture diagram showing how a RAG app talks to the vector store, and a comparison table. Add a tip callout and a short glossary.",
+      "expected_output": "A book-trim (6.5x9.25in -> ~468x666pt) handbook PDF with a titled cover, a hand-written SVG architecture diagram embedded as a figure, a comparison, a ::: tip callout, and a Glossary. Regression guard for the d2->SVG removal: the embedded SVG must still render via pandoc/rsvg-convert with no diagram.lua, and no raw ```d2 should leak.",
+      "files": [],
+      "assertions": [
+        {"text": "PDF built successfully (exists, >= 1 page)"},
+        {"text": "Page size is the handbook book trim (~468 x 666 pts, NOT 1440x810)"},
+        {"text": "Authored at least one hand-written .svg diagram and embedded it"},
+        {"text": "No raw ```d2 fence leaked into the PDF text (d2->SVG regression guard)"},
+        {"text": "PDF text contains the title 'Choosing a Vector Database' (cover carries the title)"},
+        {"text": "Document ends with a Glossary"}
+      ]
+    }
+  ]
+}

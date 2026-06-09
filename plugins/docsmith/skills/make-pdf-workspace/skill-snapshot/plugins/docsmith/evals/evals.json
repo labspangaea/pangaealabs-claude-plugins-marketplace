@@ -1,0 +1,41 @@
+{
+  "skill_name": "make-pdf",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Render evals/sample/deck-sample.md to the claudecode-deck template (the skill renders ONE template and ONE company per run).",
+      "expected_output": "Exactly one 16:9 PDF for the single selected template, with the hand-written raw SVG diagram embedded, no raw ```d2 text, brand styling applied, and the company selected from the profile shown in the footer.",
+      "files": ["evals/sample/deck-sample.md", "evals/sample/profile.yaml"],
+      "assertions": [
+        "exactly one PDF is produced (the skill renders a single template per run)",
+        "the PDF page size is 1440 x 810 pts (16:9)",
+        "the PDF embeds at least one image (the raw SVG diagram)",
+        "no PDF text layer contains the literal '```d2' or 'direction: right'",
+        "the selected company name from the profile appears in the PDF footer"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Make a polished handbook PDF from evals/sample/handbook-sample.md.",
+      "expected_output": "A 6.5x9.25in LaTeX book PDF with a cover, dotted-leader Contents, chapter openers, callout cards, a pull quote, and the raw SVG diagram as a figure.",
+      "files": ["evals/sample/handbook-sample.md", "evals/sample/profile.yaml"],
+      "assertions": [
+        "PDF page size is 468 x 666 pts (6.5x9.25in book trim)",
+        "pdftotext contains 'Pro Tip' and 'CHEATSHEET'",
+        "PDF embeds the raw SVG figure and no raw '```d2' leaks",
+        "a Contents page with dotted leaders is present"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Render evals/sample/bgn-deck-sample.md to the bgn-deck template (the skill renders ONE template and ONE company per run).",
+      "expected_output": "A bgn-deck slide PDF matching the BGN brand (navy/green/gold, BGN Sans + Lora) with a cover, a big-stat, a KPI slide, the alur-operasional diagram on a split slide, and a closing.",
+      "files": ["evals/sample/bgn-deck-sample.md", "evals/sample/profile.yaml"],
+      "assertions": [
+        "PDF page size is 1440 x 810 pts",
+        "pdftotext contains 'Generasi Emas' and '15,2'",
+        "no raw d2 leaks (no '```d2' or 'direction:' in the PDF text); the alur-operasional diagram is embedded as an image"
+      ]
+    }
+  ]
+}

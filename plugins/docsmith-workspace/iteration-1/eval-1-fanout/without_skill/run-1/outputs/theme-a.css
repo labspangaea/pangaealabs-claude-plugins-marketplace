@@ -1,0 +1,109 @@
+/* @theme theme-a */
+/* Theme A — "Nocturne": deep indigo + electric cyan accent, modern editorial */
+
+@import 'default';
+
+:root {
+  --bg: #0d1026;
+  --bg2: #161a3a;
+  --ink: #eef0ff;
+  --muted: #9aa0d4;
+  --accent: #43e6ff;
+  --accent2: #7c5cff;
+  --rule: rgba(124, 92, 255, 0.35);
+  font-family: "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+}
+
+section {
+  width: 1280px;
+  height: 720px;
+  padding: 80px 96px;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(124,92,255,0.25), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(67,230,255,0.18), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1.45;
+}
+
+section h6 {
+  font-size: 18px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin: 0 0 18px 0;
+}
+
+section h1 {
+  font-size: 70px;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 24px 0;
+  color: var(--ink);
+}
+
+section h1 em {
+  font-style: normal;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+section p { color: var(--muted); max-width: 22em; margin: 8px 0; }
+
+section ul { list-style: none; padding: 0; margin: 20px 0; }
+section li {
+  margin: 14px 0;
+  padding-left: 24px;
+  position: relative;
+  color: var(--ink);
+}
+section li::before {
+  content: "";
+  position: absolute; left: 0; top: 0.55em;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+section strong { color: var(--accent); font-weight: 800; }
+
+section img { display: block; margin: 16px 0; max-height: 360px; }
+
+/* cover */
+section.cover { justify-content: center; }
+section.cover h1 { font-size: 92px; }
+
+/* kpi */
+section.kpi li { font-size: 30px; }
+section.kpi li strong { font-size: 40px; display: inline-block; min-width: 4em; }
+
+/* split */
+section.split { flex-direction: row; align-items: center; gap: 56px; }
+section.split > * { flex: 1; }
+
+/* quote */
+section.quote { justify-content: center; }
+section.quote blockquote {
+  font-size: 56px; line-height: 1.2; font-weight: 700;
+  border: none; margin: 0; max-width: 18em; color: var(--ink);
+}
+section.quote blockquote strong { color: var(--accent); }
+
+/* versus */
+section.versus li { font-size: 30px; }
+section.versus li strong { display: block; color: var(--accent2); font-size: 22px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* statement */
+section.statement { justify-content: center; }
+section.statement h1 { font-size: 80px; max-width: 14em; }
+
+/* closing */
+section.closing { justify-content: center; text-align: left; }
+section.closing h1 { font-size: 84px; }
+section.closing p { font-size: 22px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--accent); }

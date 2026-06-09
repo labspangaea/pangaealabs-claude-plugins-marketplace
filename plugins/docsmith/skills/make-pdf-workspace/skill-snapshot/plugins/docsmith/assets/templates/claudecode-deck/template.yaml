@@ -1,0 +1,5 @@
+description: "16:9 slides — Claude editorial (warm cream/clay, Instrument Serif + Manrope + JetBrains Mono). Minimal, premium, tech-talk feel."
+backend: marp-cli
+theme_name: docsmith-claudecode-deck
+theme_files:
+  - theme.css   # relative to assets/

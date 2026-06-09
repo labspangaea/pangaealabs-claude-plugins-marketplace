@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="810" viewBox="0 0 1440 810">
+  <!-- Pawmail storybook backdrop: soft dawn sky, rolling hills, floating mail -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F8E0E4"/>
+      <stop offset="45%" stop-color="#FBE8DA"/>
+      <stop offset="100%" stop-color="#FBF6E3"/>
+    </linearGradient>
+    <linearGradient id="hillBack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DCEFE0"/>
+      <stop offset="100%" stop-color="#CFE8DE"/>
+    </linearGradient>
+    <linearGradient id="hillFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#CFE8DE"/>
+      <stop offset="100%" stop-color="#B9DDC9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- sky -->
+  <rect x="0" y="0" width="1440" height="810" fill="url(#sky)"/>
+
+  <!-- soft sun -->
+  <circle cx="1150" cy="200" r="120" fill="#FBEF9E" opacity="0.55"/>
+  <circle cx="1150" cy="200" r="78" fill="#FBEF9E" opacity="0.7"/>
+
+  <!-- clouds -->
+  <g fill="#FFFFFF" opacity="0.85">
+    <ellipse cx="260" cy="150" rx="90" ry="38"/>
+    <ellipse cx="330" cy="160" rx="70" ry="30"/>
+    <ellipse cx="200" cy="165" rx="60" ry="26"/>
+    <ellipse cx="900" cy="110" rx="80" ry="32"/>
+    <ellipse cx="965" cy="120" rx="58" ry="26"/>
+  </g>
+
+  <!-- back hills -->
+  <path d="M0 600 q260 -120 520 -40 q300 92 560 -20 q200 -86 360 16 L1440 810 L0 810 Z" fill="url(#hillBack)"/>
+  <!-- front hills -->
+  <path d="M0 700 q320 -110 660 -28 q360 88 780 4 L1440 810 L0 810 Z" fill="url(#hillFront)"/>
+
+  <!-- floating mail + hearts in the sky -->
+  <g stroke="#C8623F" stroke-width="3" stroke-linejoin="round">
+    <g transform="translate(470 250) rotate(-10)">
+      <rect x="-34" y="-22" width="68" height="46" rx="6" fill="#FFFFFF"/>
+      <path d="M-34 -18 L0 8 L34 -18" fill="none"/>
+    </g>
+    <g transform="translate(760 200) rotate(8)">
+      <rect x="-28" y="-18" width="56" height="38" rx="6" fill="#FFFFFF"/>
+      <path d="M-28 -14 L0 6 L28 -14" fill="none"/>
+    </g>
+  </g>
+  <g fill="#E8604A" opacity="0.85">
+    <path d="M610 320 q-9 -12 -18 -3 q-7 8 18 23 q25 -15 18 -23 q-9 -9 -18 3 z"/>
+    <path d="M1010 300 q-7 -10 -14 -2 q-6 6 14 18 q20 -12 14 -18 q-7 -8 -14 2 z" opacity="0.7"/>
+  </g>
+
+  <!-- little flowers on the front hill -->
+  <g>
+    <g transform="translate(180 740)">
+      <circle r="9" fill="#F6C9C0"/><circle cx="-12" r="9" fill="#F6C9C0"/><circle cx="12" r="9" fill="#F6C9C0"/>
+      <circle cy="-12" r="9" fill="#F6C9C0"/><circle r="6" fill="#FBEF9E"/>
+    </g>
+    <g transform="translate(1240 760)">
+      <circle r="9" fill="#E2D9F0"/><circle cx="-12" r="9" fill="#E2D9F0"/><circle cx="12" r="9" fill="#E2D9F0"/>
+      <circle cy="-12" r="9" fill="#E2D9F0"/><circle r="6" fill="#FBEF9E"/>
+    </g>
+  </g>
+</svg>

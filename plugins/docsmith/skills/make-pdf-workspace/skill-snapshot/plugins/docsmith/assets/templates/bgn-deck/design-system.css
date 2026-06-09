@@ -1,0 +1,320 @@
+/* =========================================================================
+   BGN — Badan Gizi Nasional
+   Brand Colors + Typography Tokens
+   Source: https://www.bgn.go.id/logo-meaning
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap');
+
+/* ---------- Webfonts ---------------------------------------------------- */
+/* Brand face supplied by the user (uploaded woff2). Mapped to "BGN Sans".
+   The file appears to be a single weight subset (≈17 KB) — most likely
+   a Google-Fonts-derived face. Plus Jakarta Sans is kept as a fallback so
+   weights / glyphs the brand face doesn't cover still render cleanly.
+   If you have the full weight stack, drop more files into /fonts and add
+   matching @font-face declarations below. */
+@font-face {
+  font-family: "BGN Sans";
+  src: url("fonts/bgn-sans.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ============================================================
+     CORE BRAND PALETTE — straight from the logo-meaning page
+     ============================================================ */
+  --bgn-blue:        #071e49;   /* Biru Gelap  — wisdom, stability, trust */
+  --bgn-green:       #92d05d;   /* Hijau Terang — growth, health, nature */
+  --bgn-sky:         #b5e0ea;   /* Biru Muda Pastel — calmness, empathy */
+  --bgn-gold:        #d1b06c;   /* Emas — prosperity, Generasi Emas 2045 */
+
+  /* ============================================================
+     PALETTE SHADES (derived — keep aligned with brand spirit)
+     ============================================================ */
+  --bgn-blue-900:    #050f2e;
+  --bgn-blue-800:    #061847;
+  --bgn-blue-700:    #071e49;   /* = brand */
+  --bgn-blue-600:    #0e2c63;
+  --bgn-blue-500:    #1a3c80;
+  --bgn-blue-400:    #3a5ba3;
+  --bgn-blue-300:    #6b87c1;
+  --bgn-blue-200:    #a8b9d8;
+  --bgn-blue-100:    #d8e0ec;
+  --bgn-blue-50:     #eff2f8;
+
+  --bgn-green-900:   #2b4a1a;
+  --bgn-green-800:   #406d29;
+  --bgn-green-700:   #5a9438;
+  --bgn-green-600:   --bgn-green;
+  --bgn-green-500:   #92d05d;   /* = brand */
+  --bgn-green-400:   #a8db7a;
+  --bgn-green-300:   #bee698;
+  --bgn-green-200:   #d4f0bb;
+  --bgn-green-100:   #e8f8d9;
+  --bgn-green-50:    #f4fbeb;
+
+  --bgn-sky-700:     #6ab0c2;
+  --bgn-sky-500:     #b5e0ea;   /* = brand */
+  --bgn-sky-300:     #d2ecf2;
+  --bgn-sky-100:     #eaf5f8;
+  --bgn-sky-50:      #f5fafc;
+
+  --bgn-gold-900:    #6b5630;
+  --bgn-gold-700:    #a48751;
+  --bgn-gold-500:    #d1b06c;   /* = brand */
+  --bgn-gold-300:    #e3cb98;
+  --bgn-gold-100:    #f4ead2;
+  --bgn-gold-50:     #faf4e6;
+
+  /* Neutrals — warm, slightly cream-leaning to pair with gold */
+  --bgn-white:       #ffffff;
+  --bgn-cream:       #faf8f3;
+  --bgn-gray-50:     #f7f7f5;
+  --bgn-gray-100:    #eeeeea;
+  --bgn-gray-200:    #d9d9d2;
+  --bgn-gray-300:    #bfbfb6;
+  --bgn-gray-400:    #99998e;
+  --bgn-gray-500:    #6e6e64;
+  --bgn-gray-600:    #4e4e46;
+  --bgn-gray-700:    #353530;
+  --bgn-gray-800:    #1f1f1b;
+  --bgn-gray-900:    #0d0d0a;
+
+  /* Semantic colors */
+  --bgn-success:     var(--bgn-green-700);
+  --bgn-warning:     #d97706;
+  --bgn-danger:      #c8323a;        /* Indonesian flag red — used sparingly */
+  --bgn-info:        var(--bgn-blue-500);
+
+  /* ============================================================
+     SEMANTIC SURFACE / TEXT TOKENS
+     ============================================================ */
+  --bg-page:         var(--bgn-white);
+  --bg-page-alt:     var(--bgn-cream);
+  --bg-surface:      var(--bgn-white);
+  --bg-surface-alt:  var(--bgn-gray-50);
+  --bg-hero:         var(--bgn-blue);            /* deep navy hero */
+  --bg-hero-alt:     var(--bgn-blue-600);
+  --bg-section:      var(--bgn-cream);
+  --bg-inverse:      var(--bgn-blue);
+
+  --fg-1:            var(--bgn-blue);            /* primary text on light */
+  --fg-2:            var(--bgn-gray-700);        /* body text on light */
+  --fg-3:            var(--bgn-gray-500);        /* secondary / meta */
+  --fg-4:            var(--bgn-gray-400);        /* tertiary / caption */
+  --fg-on-dark-1:    var(--bgn-white);
+  --fg-on-dark-2:    rgba(255, 255, 255, 0.78);
+  --fg-on-dark-3:    rgba(255, 255, 255, 0.55);
+  --fg-link:         var(--bgn-blue-500);
+  --fg-link-hover:   var(--bgn-blue);
+
+  --border-soft:     var(--bgn-gray-100);
+  --border-default:  var(--bgn-gray-200);
+  --border-strong:   var(--bgn-gray-300);
+  --border-on-dark:  rgba(255, 255, 255, 0.14);
+
+  /* Accent surfaces */
+  --accent-primary:        var(--bgn-blue);
+  --accent-primary-text:   var(--bgn-white);
+  --accent-secondary:      var(--bgn-green-500);
+  --accent-secondary-text: var(--bgn-blue);
+  --accent-tertiary:       var(--bgn-gold);
+  --accent-quiet:          var(--bgn-sky);
+
+  /* ============================================================
+     SPACING — 4px base scale
+     ============================================================ */
+  --sp-0:  0;
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+  --sp-32: 128px;
+
+  /* ============================================================
+     RADII — generous, friendly civic feel
+     ============================================================ */
+  --r-xs:    4px;
+  --r-sm:    8px;
+  --r-md:    12px;
+  --r-lg:    16px;
+  --r-xl:    24px;
+  --r-2xl:   32px;
+  --r-pill:  999px;
+  --r-card:  20px;   /* canonical card radius on bgn.go.id */
+
+  /* ============================================================
+     SHADOWS — soft, never heavy. Government site is restrained.
+     ============================================================ */
+  --shadow-xs:  0 1px 2px rgba(7, 30, 73, 0.06);
+  --shadow-sm:  0 2px 6px rgba(7, 30, 73, 0.07);
+  --shadow-md:  0 6px 20px rgba(7, 30, 73, 0.08);
+  --shadow-lg:  0 16px 40px rgba(7, 30, 73, 0.10);
+  --shadow-xl:  0 28px 60px rgba(7, 30, 73, 0.14);
+  --shadow-ring-blue:  0 0 0 4px rgba(7, 30, 73, 0.15);
+  --shadow-ring-green: 0 0 0 4px rgba(146, 208, 93, 0.30);
+
+  /* ============================================================
+     MOTION
+     ============================================================ */
+  --ease-out:        cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out:     cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:        140ms;
+  --dur-base:        220ms;
+  --dur-slow:        420ms;
+
+  /* ============================================================
+     TYPOGRAPHY
+     ============================================================ */
+  --font-sans:  "BGN Sans", "Plus Jakarta Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Lora", "Source Serif Pro", Georgia, serif;
+  --font-mono:  ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* Display + heading scale (matches the giant headlines on bgn.go.id) */
+  --fs-display: clamp(2.5rem, 4.2vw + 0.5rem, 4.5rem);    /* 40–72px */
+  --fs-h1:      clamp(2rem, 2.8vw + 0.6rem, 3.25rem);     /* 32–52px */
+  --fs-h2:      clamp(1.625rem, 1.8vw + 0.7rem, 2.5rem);  /* 26–40px */
+  --fs-h3:      clamp(1.25rem, 0.9vw + 0.8rem, 1.625rem); /* 20–26px */
+  --fs-h4:      1.125rem;                                  /* 18px */
+  --fs-body:    1rem;                                      /* 16px */
+  --fs-sm:      0.875rem;                                  /* 14px */
+  --fs-xs:      0.75rem;                                   /* 12px */
+  --fs-eyebrow: 0.8125rem;                                 /* 13px — section labels */
+
+  --lh-tight:   1.08;
+  --lh-snug:    1.22;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.65;
+
+  --tracking-tight:   -0.025em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.04em;
+  --tracking-widest:  0.14em;
+
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semi:     600;
+  --fw-bold:     700;
+  --fw-extra:    800;
+
+  /* Container */
+  --container-max: 1240px;
+  --container-pad: clamp(20px, 4vw, 48px);
+}
+
+/* =========================================================================
+   SEMANTIC TYPE HELPERS — drop into any HTML/JSX project
+   ========================================================================= */
+.bgn-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--fw-semi);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--bgn-green-700);
+}
+
+.bgn-display {
+  font-family: var(--font-sans);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-extra);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+  text-wrap: balance;
+}
+
+.bgn-h1 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+  text-wrap: balance;
+}
+
+.bgn-h2 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+  text-wrap: balance;
+}
+
+.bgn-h3 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-snug);
+  color: var(--fg-1);
+}
+
+.bgn-h4 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-normal);
+  color: var(--fg-1);
+}
+
+.bgn-body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-relaxed);
+  color: var(--fg-2);
+  text-wrap: pretty;
+}
+
+.bgn-body-sm {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+  color: var(--fg-2);
+}
+
+.bgn-caption {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+  color: var(--fg-3);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  font-weight: var(--fw-medium);
+}
+
+.bgn-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  color: var(--fg-1);
+}
+
+.bgn-code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--bgn-gray-100);
+  padding: 0.15em 0.45em;
+  border-radius: var(--r-xs);
+}
+
+/* Element selectors so basic markup looks correct out-of-the-box */
+.bgn-prose h1 { @extend .bgn-h1; }
+.bgn-prose h2 { @extend .bgn-h2; }
+.bgn-prose h3 { @extend .bgn-h3; }
+.bgn-prose p  { @extend .bgn-body; margin-block: 0.6em; }

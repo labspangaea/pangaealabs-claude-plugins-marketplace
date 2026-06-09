@@ -1,0 +1,30 @@
+{
+  "summary": {
+    "pass_rate": 1.0,
+    "passed": 4,
+    "failed": 0,
+    "total": 4
+  },
+  "expectations": [
+    {
+      "text": "two PDFs produced",
+      "passed": true,
+      "evidence": "2 pdf(s): ['bgn-deck.pdf', 'claudecode-deck.pdf']"
+    },
+    {
+      "text": "each PDF is 16:9 1440 x 810 pts",
+      "passed": true,
+      "evidence": "{'bgn-deck.pdf': '1440 x 810 pts', 'claudecode-deck.pdf': '1440 x 810 pts'}"
+    },
+    {
+      "text": "each PDF embeds >=1 image",
+      "passed": true,
+      "evidence": "{'bgn-deck.pdf': 9, 'claudecode-deck.pdf': 4}"
+    },
+    {
+      "text": "no raw d2 leak",
+      "passed": true,
+      "evidence": "{'bgn-deck.pdf': 0, 'claudecode-deck.pdf': 0}"
+    }
+  ]
+}

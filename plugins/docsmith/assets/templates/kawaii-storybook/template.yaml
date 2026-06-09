@@ -1,0 +1,6 @@
+description: "16:9 slides — pastel storybook / NotebookLM (soft washes, rounded cards, chip labels, verdict pills, emoji + hand-drawn SVG heroes, full-bleed SVG scenes, callouts, code blocks). Playful, cute, friendly."
+backend: marp-cli
+theme_name: docsmith-kawaii-storybook
+html: true   # enable raw-HTML passthrough for <aside class="callout …"> callouts
+theme_files:
+  - theme.css   # relative to assets/

@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "two PDFs produced",
+      "passed": true,
+      "evidence": "2 pdf(s): ['nocturne-theme-a.pdf', 'terracotta-theme-b.pdf']"
+    },
+    {
+      "text": "each PDF is 16:9 1440 x 810 pts",
+      "passed": false,
+      "evidence": "{'nocturne-theme-a.pdf': '960 x 540 pts', 'terracotta-theme-b.pdf': '960 x 540 pts'}"
+    },
+    {
+      "text": "each PDF embeds >=1 image",
+      "passed": true,
+      "evidence": "{'nocturne-theme-a.pdf': 4, 'terracotta-theme-b.pdf': 5}"
+    },
+    {
+      "text": "no raw d2 leak",
+      "passed": true,
+      "evidence": "{'nocturne-theme-a.pdf': 0, 'terracotta-theme-b.pdf': 0}"
+    }
+  ]
+}

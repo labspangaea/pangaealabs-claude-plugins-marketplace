@@ -1,0 +1,15 @@
+{
+  "name": "pangaealabs-claude-plugins-marketplace",
+  "description": "Claude Code plugin marketplace by Pangaea Labs. Add this marketplace once and install any plugin from it.",
+  "owner": {
+    "name": "Pangaea Labs",
+    "url": "https://github.com/labspangaea"
+  },
+  "plugins": [
+    {
+      "name": "docsmith",
+      "source": "./plugins/docsmith",
+      "description": "Turn markdown into professional, on-brand PDFs across design-system templates. Ships handbook (LaTeX book via pandoc+tectonic) plus bgn-deck and claudecode-deck (16:9 slides via marp-cli) and kawaii-storybook. The make-pdf skill fans one source out to several PDFs via parallel subagents; every visual is hand-written raw SVG embedded inline (no d2, Mermaid, or image generation). Layered config (global profile + per-template overrides + per-doc front-matter) under ~/.docsmith/."
+    }
+  ]
+}

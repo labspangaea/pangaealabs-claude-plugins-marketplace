@@ -1,0 +1,24 @@
+/* docsmith — claudecode-deck tokens, reconstructed from the
+   "Claude for Everyone" deck. Warm cream + clay, editorial serif.
+   Fonts via Google Fonts (OFL): Instrument Serif, Manrope, JetBrains Mono. */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --cc-paper:     #F0EEE6;   /* warm cream page */
+  --cc-surface:   #F7F6EF;   /* card fill */
+  --cc-clay:      #B85838;   /* PRIMARY accent */
+  --cc-clay-soft: #D8896B;
+  --cc-peach:     #F5E6DA;   /* highlighted card / pill fill */
+  --cc-ink:       #262620;   /* warm near-black */
+  --cc-ink-2:     #54514A;   /* secondary text */
+  --cc-hairline:  #E2E0D6;   /* card borders */
+  --cc-espresso:  #262218;   /* dark full-bleed slide bg */
+  --cc-success:    #2F7D4F;   /* pro / do card accent */
+  --cc-success-bg: #E7F1E9;   /* pro / do card fill */
+  --cc-error:      #B5443B;   /* con / don't card accent */
+  --cc-error-bg:   #F6E6E2;   /* con / don't card fill */
+
+  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-sans:  "Manrope", system-ui, -apple-system, sans-serif;
+  --font-mono:  "JetBrains Mono", ui-monospace, Menlo, monospace;
+}

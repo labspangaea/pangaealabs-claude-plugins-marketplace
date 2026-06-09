@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "eval_name": "handbook-sample",
+  "prompt": "Make a polished handbook PDF from plugins/docsmith/evals/sample/handbook-sample.md (a LaTeX-style book with a cover, Contents, chapter openers, callout cards, a pull quote, and a D2 diagram).",
+  "assertions": [
+    { "text": "PDF page size is 468 x 666 pts (6.5x9.25in book trim)", "passed": null, "evidence": "" },
+    { "text": "pdftotext contains 'Pro Tip' and 'CHEATSHEET'", "passed": null, "evidence": "" },
+    { "text": "a Contents page is present", "passed": null, "evidence": "" },
+    { "text": "the d2 diagram is embedded and no raw '```d2' leaks", "passed": null, "evidence": "" }
+  ]
+}

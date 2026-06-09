@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 392" font-family="sans-serif">
+  <defs>
+    <marker id="arrowBgn" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 z" fill="#071e49"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1: Perencanaan menu -->
+  <rect x="50" y="14" width="300" height="68" rx="12" fill="#faf8f3" stroke="#071e49" stroke-width="2.5"/>
+  <text x="200" y="46" text-anchor="middle" font-size="21" font-weight="bold" fill="#071e49">Perencanaan menu</text>
+  <text x="200" y="69" text-anchor="middle" font-size="13" fill="#5a6b7d">ahli gizi menyusun menu mingguan</text>
+
+  <!-- connector 1 -->
+  <line x1="200" y1="82" x2="200" y2="110" stroke="#071e49" stroke-width="2.5" marker-end="url(#arrowBgn)"/>
+
+  <!-- Step 2: Produksi di SPPG (sky) -->
+  <rect x="50" y="114" width="300" height="68" rx="12" fill="#b5e0ea" stroke="#071e49" stroke-width="2.5"/>
+  <text x="200" y="146" text-anchor="middle" font-size="21" font-weight="bold" fill="#071e49">Produksi di SPPG</text>
+  <text x="200" y="169" text-anchor="middle" font-size="13" fill="#244b57">4.872 dapur, diawasi BPOM</text>
+
+  <!-- connector 2 -->
+  <line x1="200" y1="182" x2="200" y2="210" stroke="#071e49" stroke-width="2.5" marker-end="url(#arrowBgn)"/>
+
+  <!-- Step 3: Distribusi harian (green accent) -->
+  <rect x="50" y="214" width="300" height="68" rx="12" fill="#92d05d" stroke="#071e49" stroke-width="2.5"/>
+  <text x="200" y="246" text-anchor="middle" font-size="21" font-weight="bold" fill="#071e49">Distribusi harian</text>
+  <text x="200" y="269" text-anchor="middle" font-size="13" fill="#1b3a2a">porsi dikirim setiap hari sekolah</text>
+
+  <!-- connector 3 -->
+  <line x1="200" y1="282" x2="200" y2="310" stroke="#071e49" stroke-width="2.5" marker-end="url(#arrowBgn)"/>
+
+  <!-- Step 4: Pelaporan & verifikasi (gold) -->
+  <rect x="50" y="314" width="300" height="68" rx="12" fill="#d1b06c" stroke="#071e49" stroke-width="2.5"/>
+  <text x="200" y="346" text-anchor="middle" font-size="21" font-weight="bold" fill="#071e49">Pelaporan &amp; verifikasi</text>
+  <text x="200" y="369" text-anchor="middle" font-size="13" fill="#3a2e10">kepatuhan terpantau via portal GINA</text>
+</svg>

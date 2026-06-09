@@ -1,0 +1,22 @@
+[
+  {"query": "i've got a markdown file with our Q2 review notes (~/work/q2-review.md) — can you turn it into a polished slide deck PDF in the BGN brand?", "should_trigger": true},
+  {"query": "make me a handbook-style PDF book out of ~/docs/onboarding.md, with chapters, a cover, and callout boxes for tips and warnings", "should_trigger": true},
+  {"query": "render this report to a professional pdf — actually give me both a deck and a book version from the same source", "should_trigger": true},
+  {"query": "turn these meeting notes into a nice presentation pdf for the team tomorrow, something that looks designed not generic", "should_trigger": true},
+  {"query": "I need a good-looking PDF of my markdown and it should include a diagram of the data pipeline — use d2 for the diagram", "should_trigger": true},
+  {"query": "build a claudecode-style slide deck from intro.md and export it to pdf", "should_trigger": true},
+  {"query": "can you produce an on-brand Badan Gizi Nasional deck from this content about the MBG program coverage?", "should_trigger": true},
+  {"query": "make a professional pdf handbook from my notes.md — needs a title page and a table of contents", "should_trigger": true},
+  {"query": "one markdown source, render it to all of our docsmith templates as PDFs please", "should_trigger": true},
+  {"query": "convert draft.md into a polished 16:9 slide pdf using our design system", "should_trigger": true},
+  {"query": "merge these two existing PDFs into one file and add page numbers at the bottom", "should_trigger": false},
+  {"query": "extract the text from this scanned PDF invoice so I can paste the line items into a sheet", "should_trigger": false},
+  {"query": "just convert report.md to a plain quick PDF, no styling, I don't care how it looks", "should_trigger": false},
+  {"query": "help me figure out what slides should go in our sales pitch deck — what's a good narrative order?", "should_trigger": false},
+  {"query": "fix the CSS on our marketing website's hero section, the buttons overflow on mobile", "should_trigger": false},
+  {"query": "create a D2 diagram of our microservices architecture and save the svg", "should_trigger": false},
+  {"query": "compress this 40MB PDF down so I can email it under the 25MB limit", "should_trigger": false},
+  {"query": "what's the difference between marp and reveal.js for making slides?", "should_trigger": false},
+  {"query": "rename all the .md files in this folder to kebab-case", "should_trigger": false},
+  {"query": "translate this PDF report from Indonesian to English and keep the formatting", "should_trigger": false}
+]

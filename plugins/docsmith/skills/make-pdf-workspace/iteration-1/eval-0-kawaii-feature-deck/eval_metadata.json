@@ -1,0 +1,14 @@
+{
+  "eval_id": 0,
+  "eval_name": "kawaii-feature-deck",
+  "prompt": "Make a cute kawaii-storybook slide deck (about 6 slides) introducing 'Pawmail', a friendly email app for pet owners. I'd like a hand-drawn mascot character somewhere, a soft storybook cover/backdrop, a couple of helpful tips and a warning, and one slide showing a tiny code snippet for the send API. Brand it as Pangaea Digital Labs.",
+  "assertions": [
+    {"text": "PDF built successfully (exists, >= 1 page)"},
+    {"text": "Page size is the deck format 1440 x 810 pts"},
+    {"text": "Authored at least one hand-written .svg and embedded it (SVG hero/character or scene)"},
+    {"text": "Source uses at least one <aside class=\"callout ...\"> callout (tip/warning)"},
+    {"text": "Source contains a fenced code block (the send API snippet)"},
+    {"text": "Source uses an SVG hero image and/or a marp ![bg ...] background"},
+    {"text": "Footer / colophon is branded 'Pangaea Digital Labs'"}
+  ]
+}

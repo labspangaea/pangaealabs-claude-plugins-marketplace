@@ -1,0 +1,77 @@
+% docsmith handbook cover — \dscover draws a branded title page from \ds* macros
+% (build.py injects \def\dstitle{...} etc. into the body before calling \dscover).
+\providecommand{\dstitle}{}
+\providecommand{\dssubtitle}{}
+\providecommand{\dsauthor}{}
+\providecommand{\dscompany}{}
+\providecommand{\dsversion}{}
+\providecommand{\dsdate}{}
+\providecommand{\dslogo}{}
+% full-profile macros for the author/colophon page (default empty so a legacy
+% profile that omits them still renders — each line is guarded below)
+\providecommand{\dsemail}{}
+\providecommand{\dswebsite}{}
+\providecommand{\dscopyright}{}
+\providecommand{\dsconfidentiality}{}
+\providecommand{\dswordmark}{}
+
+\newcommand{\dscover}{%
+  \thispagestyle{empty}%
+  \raggedright
+  \vspace*{0.12\textheight}
+  {\def\dsnil{}\ifx\dslogo\dsnil\else\includegraphics[height=1.7cm]{\dslogo}\par\vspace{18pt}\fi}
+  {\sffamily\bfseries\footnotesize\color{navy}\MakeUppercase{\dscompany}\par}
+  \vspace{6pt}
+  {\color{navy}\rule{\textwidth}{1.2pt}\par}
+  \vspace{20pt}
+  {\sffamily\bfseries\fontsize{34}{40}\selectfont\color{navy}\dstitle\par}
+  \vspace{12pt}
+  {\rmfamily\itshape\Large\color{rulegrey}\dssubtitle\par}
+  \vfill
+  {\sffamily\small\color{black}\dsauthor\par}
+  \vspace{2pt}
+  {\sffamily\footnotesize\color{rulegrey}\dsdate\quad\dsversion\par}
+  \clearpage
+}
+
+% ── Author / colophon page ──────────────────────────────────────────────────
+% Renders ONE page listing the chosen org's complete profile. Every field is
+% guarded: an empty macro (e.g. an unset website/wordmark) skips its line, so
+% there are never blank "Website:" labels. Styled to match the navy cover.
+\makeatletter
+% \dsmetaline{Label}{value} — emit "Label  value" only if value is non-empty.
+% The value is captured into a temp macro so \ifx ... \@empty can test it even
+% when it is a \def'd token (\dscompany etc.).
+\newcommand{\dsmetaline}[2]{%
+  \begingroup
+  \edef\ds@val{#2}%
+  \ifx\ds@val\@empty\else
+    \par\vspace{7pt}%
+    {\sffamily\footnotesize\bfseries\color{navysoft}\MakeUppercase{#1}}\par
+    \vspace{1pt}%
+    {\rmfamily\normalsize\color{black}#2}\par
+  \fi
+  \endgroup}
+\makeatother
+
+\newcommand{\dsauthorpage}{%
+  \clearpage
+  \thispagestyle{empty}%
+  \raggedright
+  \vspace*{0.16\textheight}
+  {\def\dsnil{}\ifx\dslogo\dsnil\else
+     \includegraphics[height=1.5cm]{\dslogo}\par\vspace{20pt}\fi}
+  {\color{navy}\rule{\textwidth}{1.2pt}\par}
+  \vspace{16pt}
+  {\sffamily\bfseries\Large\color{navy}About this document\par}
+  \vspace{2pt}
+  \dsmetaline{Company}{\dscompany}%
+  \dsmetaline{Author}{\dsauthor}%
+  \dsmetaline{Email}{\dsemail}%
+  \dsmetaline{Website}{\dswebsite}%
+  \dsmetaline{Copyright}{\dscopyright}%
+  \dsmetaline{Confidentiality}{\dsconfidentiality}%
+  \par\vfill
+  {\color{navy}\rule{\textwidth}{0.4pt}\par}
+  \clearpage
+}

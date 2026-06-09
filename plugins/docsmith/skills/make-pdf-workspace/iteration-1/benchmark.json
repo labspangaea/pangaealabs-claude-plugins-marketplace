@@ -1,0 +1,273 @@
+{
+  "metadata": {
+    "skill_name": "make-pdf",
+    "skill_path": "/Users/harry/projects/claude-plugins/plugins/docsmith/skills/make-pdf",
+    "executor_model": "claude-opus-4-8[1m]",
+    "analyzer_model": "claude-opus-4-8[1m]",
+    "timestamp": "2026-06-09T11:10:36Z",
+    "evals_run": [
+      0,
+      1
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8571,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 184.2,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "PDF built successfully (exists, >= 1 page)",
+          "passed": true,
+          "evidence": "exists=True, pages=7"
+        },
+        {
+          "text": "Page size is the deck format 1440 x 810 pts",
+          "passed": true,
+          "evidence": "Page size: 1440 x 810 pts"
+        },
+        {
+          "text": "Authored at least one hand-written .svg and embedded it",
+          "passed": true,
+          "evidence": "2 svg(s) ['posty-mascot.svg', 'storybook-backdrop.svg']; source refs .svg=True"
+        },
+        {
+          "text": "Source uses at least one <aside class=\"callout ...\"> callout",
+          "passed": false,
+          "evidence": "no callout aside in source"
+        },
+        {
+          "text": "Source contains a fenced code block",
+          "passed": true,
+          "evidence": "``` fence markers: 2"
+        },
+        {
+          "text": "Uses an SVG hero image and/or a marp ![bg ...] background",
+          "passed": true,
+          "evidence": "![bg present=False; svg embed=True"
+        },
+        {
+          "text": "Branded 'Pangaea Digital Labs'",
+          "passed": true,
+          "evidence": "'Pangaea' in PDF text"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 174.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "PDF built successfully (exists, >= 1 page)",
+          "passed": true,
+          "evidence": "exists=True, pages=11"
+        },
+        {
+          "text": "Page size is the handbook book trim (~468 x 666 pts, NOT 1440x810)",
+          "passed": true,
+          "evidence": "Page size: 468 x 666 pts"
+        },
+        {
+          "text": "Authored at least one hand-written .svg diagram and embedded it",
+          "passed": true,
+          "evidence": "1 svg(s); source refs .svg=True"
+        },
+        {
+          "text": "No raw ```d2 fence leaked into the PDF text",
+          "passed": true,
+          "evidence": "'```d2' occurrences in PDF text: 0"
+        },
+        {
+          "text": "PDF text contains the title 'Choosing a Vector Database'",
+          "passed": true,
+          "evidence": "found (whitespace-normalized)"
+        },
+        {
+          "text": "Document ends with a Glossary",
+          "passed": true,
+          "evidence": "found 'Glossary'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 148.4,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "PDF built successfully (exists, >= 1 page)",
+          "passed": true,
+          "evidence": "exists=True, pages=6"
+        },
+        {
+          "text": "Page size is the deck format 1440 x 810 pts",
+          "passed": true,
+          "evidence": "Page size: 1440 x 810 pts"
+        },
+        {
+          "text": "Authored at least one hand-written .svg and embedded it",
+          "passed": true,
+          "evidence": "2 svg(s) ['mascot.svg', 'scene.svg']; source refs .svg=True"
+        },
+        {
+          "text": "Source uses at least one <aside class=\"callout ...\"> callout",
+          "passed": true,
+          "evidence": "found <aside class=callout>"
+        },
+        {
+          "text": "Source contains a fenced code block",
+          "passed": true,
+          "evidence": "``` fence markers: 2"
+        },
+        {
+          "text": "Uses an SVG hero image and/or a marp ![bg ...] background",
+          "passed": true,
+          "evidence": "![bg present=True; svg embed=True"
+        },
+        {
+          "text": "Branded 'Pangaea Digital Labs'",
+          "passed": true,
+          "evidence": "'Pangaea' in PDF text"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 168.6,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "PDF built successfully (exists, >= 1 page)",
+          "passed": true,
+          "evidence": "exists=True, pages=13"
+        },
+        {
+          "text": "Page size is the handbook book trim (~468 x 666 pts, NOT 1440x810)",
+          "passed": true,
+          "evidence": "Page size: 468 x 666 pts"
+        },
+        {
+          "text": "Authored at least one hand-written .svg diagram and embedded it",
+          "passed": true,
+          "evidence": "1 svg(s); source refs .svg=True"
+        },
+        {
+          "text": "No raw ```d2 fence leaked into the PDF text",
+          "passed": true,
+          "evidence": "'```d2' occurrences in PDF text: 0"
+        },
+        {
+          "text": "PDF text contains the title 'Choosing a Vector Database'",
+          "passed": true,
+          "evidence": "found (whitespace-normalized)"
+        },
+        {
+          "text": "Document ends with a Glossary",
+          "passed": true,
+          "evidence": "found 'Glossary'"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "old_skill": {
+      "pass_rate": {
+        "mean": 0.9285,
+        "stddev": 0.101,
+        "min": 0.8571,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 179.1,
+        "stddev": 7.2125,
+        "min": 174.0,
+        "max": 184.2
+      },
+      "tokens": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 158.5,
+        "stddev": 14.2836,
+        "min": 148.4,
+        "max": 168.6
+      },
+      "tokens": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "delta": {
+      "pass_rate": "-0.07",
+      "time_seconds": "+20.6",
+      "tokens": "+0"
+    }
+  },
+  "notes": [
+    "Discriminating case = eval-0 (kawaii-feature-deck): with_skill 100% (7/7) vs baseline 86% (6/7). The one baseline failure is the callout check \u2014 the pre-change kawaii template has NO callout class, so the baseline fell back to blockquote 'verdict pills' + an unstyled code fence. That gap is exactly what this change adds.",
+    "Regression guard = eval-1 (handbook-svg-diagram): BOTH configs 100% (6/6), including 'no ```d2 leaked' and 'hand-written SVG embedded'. Confirms removing the d2 pipeline did not break handbook SVG embedding \u2014 pandoc's native rsvg-convert path renders the figure in both versions.",
+    "Most assertions are NON-discriminating (pass in both configs): PDF builds, page size, SVG embed, title, glossary. They verify 'nothing broke', not 'skill adds value'. Only the callout assertion separates the versions because the new kawaii features are ADDITIVE \u2014 a baseline that doesn't know them simply omits them instead of failing. The real value (callouts, styled code blocks, richer SVG hero/scene art, design polish) is QUALITATIVE \u2014 judge it in the Outputs tab.",
+    "Assertion fix mid-eval: 'title in PDF text' was a false-negative \u2014 the handbook cover wraps 'Choosing a Vector / Database' across two lines so pdftotext split it. Grader now compares whitespace-normalized text; both eval-1 runs then passed. The title was visually present throughout.",
+    "Cost/time: with_skill was cheaper AND faster on the kawaii case (148s / 49k tok vs baseline 184s / 70k) and comparable on handbook (169s/40k vs 174s/44k) \u2014 the new affordances added no overhead.",
+    "Only 1 run per configuration, so pass rates have no variance estimate. To get a confidence signal, expand to 3 runs/config in a later iteration."
+  ]
+}

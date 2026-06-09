@@ -1,0 +1,5 @@
+description: "16:9 slides — pastel storybook / NotebookLM (soft washes, rounded cards, chip labels, verdict pills, emoji mascots). Playful, cute, friendly."
+backend: marp-cli
+theme_name: docsmith-kawaii-storybook
+theme_files:
+  - theme.css   # relative to assets/

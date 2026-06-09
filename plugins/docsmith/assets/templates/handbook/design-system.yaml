@@ -1,0 +1,17 @@
+# handbook design system (tokens) — extracted from ai-roadmap.pdf.
+# Flat color names map 1:1 to LaTeX \definecolor names used by preamble.tex.
+# Override per-doc via front-matter `overrides.colors`, or globally via
+# ~/.docsmith/template/handbook.yaml.
+colors:
+  navy:          "#003060"   # PRIMARY — chapter numbers, rules, headings, links
+  navysoft:      "#2D5A8F"   # subsections / secondary headings
+  amber:         "#E0821A"   # Pro Tip pill + border
+  amberdeep:     "#C0561A"   # Watch Out / deep accent
+  violet:        "#5A3A8A"   # In Plain English
+  greenok:       "#1A7A3A"   # Do / success
+  rulegrey:      "#8A8A8A"   # soft rules, captions
+  navytint:      "#EAF1F9"   # Interview Anchor fill
+  cheatred:      "#CC0000"   # Cheatsheet banner
+  cheatreddark:  "#900C18"
+type:
+  base_size: "11pt"

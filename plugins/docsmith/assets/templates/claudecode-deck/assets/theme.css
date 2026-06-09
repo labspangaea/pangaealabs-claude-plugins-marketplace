@@ -1,0 +1,196 @@
+/* docsmith — claudecode-deck marp theme (Claude editorial style).
+   Tokens from design-system.css. Shares the deck class vocabulary with
+   bgn-deck so one source renders in either theme.
+   Authoring: `###### EYEBROW`, `# Headline with *accent*`, body, lists. */
+
+section {
+  width: 1920px; height: 1080px; box-sizing: border-box;
+  padding: 110px 140px;
+  background: var(--cc-paper, #F0EEE6);
+  color: var(--cc-ink-2, #54514A);
+  font-family: var(--font-sans); font-size: 30px; line-height: 1.55; position: relative;
+}
+
+/* ---- type ---- */
+h6 { /* eyebrow: mono tracked caps with a clay dot */
+  font-family: var(--font-mono); font-weight: 500; font-size: 21px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--cc-clay, #B85838);
+  margin: 0 0 26px; }
+h6::before { content: "● "; color: var(--cc-clay, #B85838); font-size: 16px; }
+h1 { font-family: var(--font-serif); font-weight: 400; font-size: 100px; line-height: 1.02;
+     color: var(--cc-ink, #262620); margin: 0 0 26px; letter-spacing: -0.005em; }
+h2 { font-family: var(--font-serif); font-weight: 400; font-size: 66px; line-height: 1.06;
+     color: var(--cc-ink, #262620); margin: 0 0 18px; }
+h3 { font-family: var(--font-serif); font-weight: 400; font-size: 40px; color: var(--cc-ink); margin: 0 0 10px; }
+h1 em, h2 em, h3 em { font-style: italic; color: var(--cc-clay, #B85838); }
+p { margin: 0 0 18px; max-width: 30ch; color: var(--cc-ink-2); }
+section:not(.cover):not(.statement):not(.quote):not(.closing) p { max-width: none; }
+strong { color: var(--cc-ink, #262620); font-weight: 700; }
+em { font-style: italic; }
+
+ul { list-style: none; padding: 0; margin: 14px 0; }
+li { position: relative; padding-left: 36px; margin: 14px 0; }
+li::before { content: "▸"; position: absolute; left: 4px; top: 2px; color: var(--cc-clay, #B85838); }
+code { font-family: var(--font-mono); background: var(--cc-peach); padding: .08em .4em; border-radius: 6px;
+  color: var(--cc-clay); }
+
+/* ---- footer + page number ---- */
+footer { position: absolute; left: 140px; right: 70px; bottom: 60px;
+  margin: 0; padding: 0; height: 40px;
+  font-family: var(--font-mono); font-size: 21px; line-height: 40px; letter-spacing: 0.08em;
+  color: var(--cc-ink-2); text-transform: uppercase;
+  display: flex; align-items: center; gap: 14px; }
+footer img { height: 38px; width: auto; vertical-align: middle; text-transform: none; }
+/* page number sits in an identical bottom/height band to the footer, with Marp's
+   default pagination padding+margin reset to 0 — otherwise that inset lifts the
+   number above the footer line (the misalignment users see). */
+section::after { color: var(--cc-clay, #B85838); font-family: var(--font-mono);
+  font-size: 21px; line-height: 40px; position: absolute; right: 70px; bottom: 60px;
+  margin: 0; padding: 0; height: 40px; display: flex; align-items: center; }
+
+/* ===================== COVER ===================== */
+section.cover { display: flex; flex-direction: column; justify-content: center; }
+section.cover h1 { font-size: 150px; line-height: .98; }
+section.cover p { font-size: 34px; max-width: 40ch; }
+
+/* ===================== STATEMENT (dark espresso) ===================== */
+section.statement { background: var(--cc-espresso, #262218); color: rgba(240,238,230,.82);
+  display: flex; flex-direction: column; justify-content: center; }
+section.statement h1, section.statement h2, section.statement h3 { color: #F0EEE6; }
+section.statement h1 em, section.statement h2 em { color: var(--cc-dark-accent, var(--cc-clay-soft, #D8896B)); }
+section.statement strong { color: #F0EEE6; }
+section.statement p, section.statement li { color: rgba(240,238,230,.86); }
+section.statement h6 { color: var(--cc-dark-accent, var(--cc-clay-soft, #D8896B)); }
+section.statement h6::before { color: var(--cc-dark-accent, var(--cc-clay-soft, #D8896B)); }
+section.statement footer { color: rgba(240,238,230,.72); }
+section.statement footer img { filter: brightness(0) invert(1); }
+section.statement::after { color: rgba(240,238,230,.55); }
+
+/* ===================== CLOSING ===================== */
+section.closing { display: flex; flex-direction: column; justify-content: center; }
+section.closing h1 { font-size: 130px; }
+section.closing h1 em { color: var(--cc-clay, #B85838); }
+
+/* ===================== QUOTE ===================== */
+section.quote { display: flex; flex-direction: column; justify-content: center; }
+section.quote blockquote { margin: 0; border: 0; font-family: var(--font-serif); font-style: italic;
+  font-size: 72px; line-height: 1.18; color: var(--cc-ink); max-width: 26ch; }
+section.quote blockquote strong, section.quote blockquote em { color: var(--cc-clay); font-style: italic; }
+
+/* ===================== SPLIT (content image floats right) ===================== */
+/* Scope to CONTENT images only — marp wraps a lone `![](x)` in its own <p>, so
+   `section.split p img` hits diagrams but NOT the footer <img> logo. A bare
+   `section.split img` also matched the footer logo, which then inherited width:44%
+   + the white card and blew the footer up into a wrapped 2-line box. */
+/* No white card: the figure sits directly on the cream wash for an editorial,
+   integrated look. Diagram nodes carry their own ink/clay strokes, so they stay
+   legible without a frame. */
+section.split p img { float: right; width: 48%; margin: 0 0 30px 80px; }
+section.split p, section.split li { max-width: none; }
+
+/* ===================== BIGSTAT ===================== */
+section.bigstat h1 { font-size: 220px; line-height: .9; }
+section.bigstat h1 em { font-size: 96px; }
+
+/* ===================== CARD GRIDS ===================== */
+section.cards ul, section.kpi ul, section.pillars ul, section.agenda ul,
+section.compare2 ul, section.compare3 ul, section.cards3 ul, section.steps ul,
+section.people ul, section.versus ul, section.glossary ul, section.models ul,
+section.filegrid ul, section.featurepair ul, section.timeline ul {
+  display: grid; gap: 30px; margin-top: 30px; list-style: none; padding: 0;
+}
+section.cards li, section.kpi li, section.pillars li, section.agenda li,
+section.compare2 li, section.compare3 li, section.cards3 li, section.steps li,
+section.people li, section.versus li, section.glossary li, section.models li,
+section.filegrid li, section.featurepair li, section.timeline li {
+  background: var(--cc-surface, #F7F6EF); border: 1px solid var(--cc-hairline, #E2E0D6);
+  border-radius: 16px; padding: 34px 38px; margin: 0;
+}
+section.cards li::before, section.kpi li::before, section.pillars li::before,
+section.agenda li::before, section.compare2 li::before, section.compare3 li::before,
+section.cards3 li::before, section.steps li::before, section.people li::before,
+section.versus li::before, section.glossary li::before, section.models li::before,
+section.filegrid li::before, section.featurepair li::before, section.timeline li::before { content: none; }
+section.cards li strong, section.pillars li strong, section.compare2 li strong,
+section.compare3 li strong, section.cards3 li strong, section.steps li strong,
+section.people li strong, section.glossary li strong, section.models li strong,
+section.featurepair li strong {
+  display: block; font-family: var(--font-serif); font-weight: 400; font-size: 40px;
+  margin-bottom: 6px; color: var(--cc-ink); }
+
+section.pillars ul, section.compare2 ul, section.featurepair ul, section.people ul { grid-template-columns: 1fr 1fr; }
+section.kpi ul, section.cards3 ul, section.compare3 ul, section.agenda ul, section.steps ul, section.models ul { grid-template-columns: repeat(3, 1fr); }
+section.versus ul { grid-template-columns: 1fr 1fr; }
+section.glossary ul, section.timeline ul, section.filegrid ul { grid-template-columns: repeat(4, 1fr); }
+
+/* kpi: big serif value */
+section.kpi li strong { font-size: 92px; line-height: 1; }
+/* models / cards3 middle highlight (peach) */
+section.models li:nth-child(2), section.cards3 li:nth-child(2), section.kpi li:nth-child(2) {
+  background: var(--cc-peach, #F5E6DA); border-color: var(--cc-clay-soft); }
+
+/* agenda: mono numbers */
+section.agenda ul { counter-reset: ag; }
+section.agenda li { counter-increment: ag; position: relative; }
+section.agenda li strong { color: var(--cc-ink); }
+section.agenda li::after { content: counter(ag, decimal-leading-zero) " ·";
+  position: absolute; top: 30px; left: 38px; font-family: var(--font-mono);
+  font-size: 22px; color: var(--cc-clay); }
+section.agenda li { padding-top: 70px; }
+
+/* versus: before(muted) / after(peach+clay) */
+section.versus li:first-child strong { color: var(--cc-ink-2); }
+section.versus li:last-child { background: var(--cc-peach); border-color: var(--cc-clay-soft); }
+section.versus li:last-child strong { color: var(--cc-clay); }
+
+/* ===================== BLOCKQUOTE CALLOUT (on any non-quote slide) ===================== */
+/* A `> line` on a normal content slide becomes a clay-spined callout pill — lift a
+   key takeaway out of the body without spending a whole quote slide on it. The big
+   centered treatment stays reserved for `section.quote`. */
+section:not(.quote) blockquote {
+  margin: 26px 0 0; padding: 22px 32px; border: 0; border-left: 6px solid var(--cc-clay);
+  background: var(--cc-peach); border-radius: 0 14px 14px 0;
+  font-family: var(--font-sans); font-style: normal; font-size: 30px; line-height: 1.4;
+  color: var(--cc-ink); max-width: none; }
+section:not(.quote) blockquote strong, section:not(.quote) blockquote em { color: var(--cc-clay); }
+
+/* ===================== STACK (figure on top, text/quote below) ===================== */
+/* Top-bottom alternative to split: heading, then a large centered figure, then an
+   optional caption or `> callout`. Use when a wide diagram (timeline, flow, roadmap)
+   reads better full-width than squeezed into a side column. */
+section.stack h1 { font-size: 78px; }
+section.stack p:has(img) { max-width: none; text-align: center; margin: 0; }
+section.stack p img { display: block; margin: 6px auto 14px; width: auto;
+  max-width: 94%; max-height: 560px; }
+section.stack p:not(:has(img)) { text-align: center; max-width: 48ch; margin: 0 auto; }
+section.stack blockquote { max-width: 64ch; margin: 6px auto 0; }
+
+/* ===================== ICONCARDS (svg icon + title/desc per card) ===================== */
+/* Turn a flat product/role list into labelled, scannable cards, each with a small
+   SVG icon pinned left and the title+desc stacked beside it. Author each item as
+   `- ![](/abs/ic-x.svg) **Title** description`. Default 3-up; add `cols2` for 2-up. */
+section.iconcards ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 30px;
+  list-style: none; padding: 0; }
+section.iconcards.cols2 ul { grid-template-columns: 1fr 1fr; }
+section.iconcards li { list-style: none; margin: 0; position: relative;
+  background: var(--cc-surface); border: 1px solid var(--cc-hairline); border-radius: 16px;
+  padding: 30px 34px 30px 122px; min-height: 72px; }
+section.iconcards li::before { content: none; }
+section.iconcards li img { position: absolute; left: 30px; top: 50%; transform: translateY(-50%);
+  width: 64px; height: 64px; }
+section.iconcards li strong { display: block; font-family: var(--font-serif); font-weight: 400;
+  font-size: 38px; margin-bottom: 4px; color: var(--cc-ink); }
+
+/* ===================== PROCON (success / error card pair) ===================== */
+/* Two cards where the contrast IS the point: the first tinted success-green
+   (pros / do), the last error-red (cons / don't). Clearer than two neutral cards. */
+section.procon ul { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;
+  list-style: none; padding: 0; }
+section.procon li { list-style: none; margin: 0; border-radius: 16px; padding: 34px 38px; border: 1px solid; }
+section.procon li::before { content: none; }
+section.procon li strong { display: block; font-family: var(--font-serif); font-weight: 400;
+  font-size: 40px; margin-bottom: 6px; }
+section.procon li:first-child { background: var(--cc-success-bg); border-color: var(--cc-success); }
+section.procon li:first-child strong { color: var(--cc-success); }
+section.procon li:last-child { background: var(--cc-error-bg); border-color: var(--cc-error); }
+section.procon li:last-child strong { color: var(--cc-error); }

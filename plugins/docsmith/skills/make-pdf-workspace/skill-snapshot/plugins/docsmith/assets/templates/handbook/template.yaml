@@ -1,0 +1,29 @@
+description: "LaTeX book (6.5×9.25in) — navy serif body, callout cards, chapter openers, dotted-leader TOC. Best for handbooks, guides, and long reports."
+backend: pandoc-tectonic
+pandoc_args:
+  - --top-level-division=chapter
+  - --number-sections
+  - -V
+  - documentclass=book
+  - -V
+  - classoption=11pt
+  - -V
+  - classoption=twoside
+  - -V
+  - classoption=openright
+  # External citation links render in blue (like an <a href>) and stay clickable;
+  # internal links (TOC / cross-refs) stay black for a clean look. Pandoc's own
+  # hyperref setup applies these in the right order (xcolor dvipsnames loaded first).
+  - -V
+  - colorlinks=true
+  - -V
+  - linkcolor=black
+  - -V
+  - urlcolor=NavyBlue
+  - -V
+  - citecolor=NavyBlue
+header_includes:   # rendered after the generated _tokens.tex
+  - preamble.tex
+  - titlepage.tex
+lua_filters:       # diagram.lua is prepended automatically
+  - callouts.lua

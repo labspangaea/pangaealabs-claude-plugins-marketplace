@@ -1,0 +1,8 @@
+{
+  "name": "docsmith",
+  "description": "Turn markdown into professional, on-brand PDFs across multiple design-system templates. Ships 4 templates — `handbook` (LaTeX book via pandoc+tectonic), `bgn-deck`, `claudecode-deck`, and `kawaii-storybook` (16:9 slides via marp-cli) — each driven by an extracted design system. Inline ```d2 diagrams render once and are shared across templates; one source fans out to several PDFs at once. Layered config (global profile + per-template overrides + per-doc front-matter) under ~/.docsmith/.",
+  "version": "0.4.1",
+  "author": {
+    "name": "Harry"
+  }
+}

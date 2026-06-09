@@ -1,0 +1,166 @@
+/* docsmith — bgn-deck marp theme (BGN Badan Gizi Nasional).
+   Tokens come from the composed design-system.css (colors_and_type.css).
+   Authoring: `###### EYEBROW`, `# Headline with *accent*`, body, and lists.
+   Card-grid classes turn a markdown list into cards (each <li> = one card;
+   **bold** inside an <li> becomes the card's emphasised value/title). */
+
+/* ---- slide canvas: 1920x1080 px -> 1440x810 pt PDF (16:9) ---- */
+section {
+  width: 1920px; height: 1080px; box-sizing: border-box;
+  padding: 100px 130px;
+  background: var(--bgn-cream, #faf8f3);
+  color: var(--fg-2, #353530);
+  font-family: var(--font-sans);
+  font-size: 30px; line-height: 1.5; position: relative;
+}
+
+/* ---- type ---- */
+h6 { /* eyebrow */
+  font-weight: 700; font-size: 22px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--bgn-green-700, #5a9438); margin: 0 0 20px;
+}
+h1 { font-weight: 800; font-size: 80px; line-height: 1.05; letter-spacing: -0.02em;
+     color: var(--bgn-blue, #071e49); margin: 0 0 24px; }
+h2 { font-weight: 800; font-size: 60px; line-height: 1.08; letter-spacing: -0.02em;
+     color: var(--bgn-blue, #071e49); margin: 0 0 20px; }
+h3 { font-weight: 700; font-size: 34px; color: var(--bgn-blue, #071e49); margin: 0 0 12px; }
+h1 em, h2 em { font-family: var(--font-serif); font-style: italic; color: var(--bgn-green-700, #5a9438); }
+p { margin: 0 0 18px; max-width: 28ch; }
+section.wide p, section:not(.cover):not(.statement):not(.quote):not(.closing) p { max-width: none; }
+strong { color: var(--bgn-blue, #071e49); font-weight: 700; }
+em { font-style: italic; }
+
+/* default bullet list */
+ul { list-style: none; padding: 0; margin: 12px 0; }
+li { position: relative; padding-left: 42px; margin: 16px 0; }
+li::before { content: ""; position: absolute; left: 4px; top: 14px;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--bgn-green-500, #92d05d); }
+code { font-family: var(--font-mono); background: var(--bgn-gray-100); padding: .1em .4em; border-radius: 6px; }
+
+/* ---- tables (comparison / scorecard matrix) ---- */
+table { border-collapse: separate; border-spacing: 0; width: 100%;
+  margin: 30px 0; font-size: 28px; }
+thead th { color: var(--bgn-blue, #071e49); font-weight: 800;
+  padding: 18px 30px; text-align: center; white-space: nowrap;
+  border-bottom: 3px solid var(--bgn-green-500, #92d05d); }
+thead th:first-child { text-align: left; }
+tbody td { padding: 16px 30px; text-align: center; vertical-align: middle;
+  border-bottom: 1px solid var(--bgn-gray-200, #e7e5df); }
+tbody td:first-child { text-align: left; font-weight: 700;
+  color: var(--bgn-blue, #071e49); white-space: nowrap; }
+tbody tr:nth-child(even) td { background: var(--bgn-gray-50, #f4f2ec); }
+table li::before { display: none; }
+
+/* ---- footer + page number ---- */
+footer { position: absolute; left: 130px; bottom: 48px;
+  color: var(--bgn-gray-500); font-weight: 700; font-size: 21px;
+  display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+footer img { height: 40px; width: auto; vertical-align: middle; flex: none; }
+section.statement footer, section.closing footer { color: var(--fg-on-dark-3, rgba(255,255,255,.55)); }
+section[data-marpit-pagination]::after,
+section::after { /* marp pagination. Its containing block is inset by the slide's 100px
+                    padding, while the footer sits at bottom:48px relative to the full slide;
+                    -52px (= 48 − 100) drops the number onto the same baseline as the footer. */
+  color: var(--bgn-gold-700, #a48751); font-family: var(--font-mono);
+  font-size: 22px; right: 60px; bottom: -52px; }
+
+/* ---- ornament: faint corner dot grid ---- */
+section::before {
+  content: ""; position: absolute; top: 70px; right: 90px; width: 180px; height: 120px;
+  background-image: radial-gradient(var(--bgn-gray-200) 2px, transparent 2px);
+  background-size: 22px 22px; opacity: .5; pointer-events: none;
+}
+section.cover::before, section.statement::before, section.closing::before { display: none; }
+
+/* ===================== COVER ===================== */
+section.cover { text-align: center; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 130px; }
+section.cover img { width: 150px; height: auto; margin: 0 auto 30px;
+  display: block; float: none; border-radius: 0; box-shadow: none; }
+section.cover footer, section.cover::after,
+section.closing footer, section.closing::after { display: none; }  /* no footer/page-number on title & closing slides */
+section.cover h6 { color: var(--bgn-gold-700, #a48751); }
+section.cover h1 { font-size: 108px; margin: 12px 0; }
+section.cover p { max-width: 34ch; color: var(--fg-3); font-size: 34px; }
+section.cover hr { width: 120px; height: 4px; border: 0; margin: 28px auto 0;
+  background: linear-gradient(90deg, var(--bgn-green-500), var(--bgn-gold-500)); }
+
+/* ===================== STATEMENT (dark) ===================== */
+section.statement { background: var(--bgn-blue, #071e49); color: var(--fg-on-dark-2, rgba(255,255,255,.78));
+  display: flex; flex-direction: column; justify-content: center; }
+section.statement h1, section.statement h2, section.statement h3 { color: #fff; }
+section.statement h1 em { color: var(--bgn-gold, #d1b06c); }
+section.statement h6 { color: var(--bgn-green-400, #a8db7a); }
+section.statement strong { color: #fff; }
+
+/* ===================== CLOSING ===================== */
+section.closing { background: var(--bgn-blue, #071e49); color: #fff; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; }
+section.closing h6 { color: var(--bgn-gold, #d1b06c); }
+section.closing h1 { color: #fff; font-size: 100px; }
+section.closing h1 em { color: var(--bgn-gold, #d1b06c); }
+section.closing p { color: var(--fg-on-dark-2); }
+
+/* ===================== QUOTE ===================== */
+section.quote { display: flex; flex-direction: column; justify-content: center; }
+section.quote blockquote { margin: 0; border: 0; font-family: var(--font-serif);
+  font-style: italic; font-size: 60px; line-height: 1.25; color: var(--bgn-blue); max-width: 30ch; }
+section.quote blockquote strong, section.quote blockquote em { color: var(--bgn-gold-700, #a48751); }
+
+/* ===================== SPLIT (image floats, content flows) ===================== */
+section.split img { float: right; width: 44%; margin: 0 0 30px 80px;
+  border-radius: var(--r-card, 20px); border: 1px solid var(--bgn-gray-200, #e7e5df); }
+/* keep the footer logo immune to the split image rule above */
+section.split footer img { float: none; width: auto; height: 40px;
+  margin: 0; border-radius: 0; box-shadow: none; }
+section.split p, section.split li { max-width: none; }
+
+/* ===================== BIGSTAT ===================== */
+section.bigstat h1 { font-size: 200px; line-height: .9; color: var(--bgn-blue); }
+section.bigstat h1 em { font-size: 90px; color: var(--bgn-gold-700); }
+
+/* ===================== CARD GRIDS ===================== */
+/* each <li> becomes a card; **bold** lead = title/value */
+section.cards ul, section.kpi ul, section.pillars ul, section.agenda ul,
+section.compare2 ul, section.cards3 ul, section.steps ul, section.people ul,
+section.versus ul, section.timeline ul, section.logowall ul {
+  display: grid; gap: 34px; margin-top: 28px; list-style: none; padding: 0;
+}
+section.cards li, section.kpi li, section.pillars li, section.agenda li,
+section.compare2 li, section.cards3 li, section.steps li, section.people li,
+section.versus li, section.timeline li, section.logowall li {
+  background: #fff; border-radius: var(--r-card, 20px);
+  border: 1px solid var(--bgn-gray-200, #e7e5df);
+  padding: 36px 40px; margin: 0; padding-left: 40px;
+}
+section.cards li::before, section.kpi li::before, section.pillars li::before,
+section.agenda li::before, section.compare2 li::before, section.cards3 li::before,
+section.steps li::before, section.people li::before, section.versus li::before,
+section.timeline li::before, section.logowall li::before { display: none; }
+section.cards li strong, section.cards3 li strong, section.pillars li strong,
+section.compare2 li strong, section.steps li strong, section.people li strong {
+  display: block; font-size: 34px; margin-bottom: 6px; color: var(--bgn-blue); }
+
+section.pillars ul, section.compare2 ul, section.people ul { grid-template-columns: 1fr 1fr; }
+section.kpi ul, section.cards3 ul, section.agenda ul, section.steps ul { grid-template-columns: repeat(3, 1fr); }
+section.versus ul { grid-template-columns: 1fr 1fr; }
+section.timeline ul, section.logowall ul { grid-template-columns: repeat(4, 1fr); }
+
+/* kpi: big value */
+section.kpi li strong { display: block; font-size: 84px; line-height: 1; color: var(--bgn-blue); margin-bottom: 10px; }
+section.kpi li:nth-child(2) { background: var(--bgn-blue); color: var(--fg-on-dark-2); }
+section.kpi li:nth-child(2) strong { color: #fff; }
+
+/* agenda: numbered cards */
+section.agenda ul { counter-reset: ag; }
+section.agenda li { counter-increment: ag; position: relative; padding-right: 86px; }
+section.agenda li strong { display: block; font-size: 34px; margin-bottom: 6px; color: var(--bgn-blue); }
+section.agenda li::after { content: counter(ag, decimal-leading-zero);
+  position: absolute; top: 24px; right: 36px; font-family: var(--font-mono);
+  font-size: 30px; color: var(--bgn-gold-500); }
+
+/* versus: before(red) / after(green) */
+section.versus li:first-child { border: 2px dashed var(--bgn-gray-300); box-shadow: none; background: var(--bgn-gray-50); }
+section.versus li:first-child strong { color: var(--bgn-danger, #c8323a); }
+section.versus li:last-child { border: 2px solid var(--bgn-gold-500); }
+section.versus li:last-child strong { color: var(--bgn-green-700); }

@@ -1,0 +1,388 @@
+/* docsmith — kawaii-storybook marp theme (pastel "storybook / NotebookLM").
+   Tokens from design-system.css. Shares the deck class vocabulary with the
+   other decks so one source renders here, restyled in the kawaii idiom, plus
+   signature classes: path (+ accept/reject/caution), laws, scorecard, flow,
+   scenarios, roadmap, figure.
+   Authoring: `###### CHIP`, `# Headline with *accent*`, body, lists.
+   Drop emoji (🐻🦊🦉🐹🐈‍⬛) inline as mascots — in a heading they render large. */
+
+/* ---- slide canvas: 1920x1080 px -> 1440x810 pt PDF (16:9) ---- */
+section {
+  width: 1920px; height: 1080px; box-sizing: border-box;
+  padding: 96px 128px;
+  color: var(--ks-ink-2, #4A4A4A);
+  font-family: var(--font-sans);
+  font-size: 30px; line-height: 1.5; position: relative;
+  background: linear-gradient(135deg, var(--ks-wash-1a), var(--ks-wash-1b));
+}
+
+/* ---- rotating pastel washes (one per slide; class rules below override) ---- */
+section:nth-of-type(6n+1) { background: linear-gradient(135deg, var(--ks-wash-1a), var(--ks-wash-1b)); }
+section:nth-of-type(6n+2) { background: linear-gradient(135deg, var(--ks-wash-2a), var(--ks-wash-2b)); }
+section:nth-of-type(6n+3) { background: linear-gradient(135deg, var(--ks-wash-3a), var(--ks-wash-3b)); }
+section:nth-of-type(6n+4) { background: linear-gradient(135deg, var(--ks-wash-4a), var(--ks-wash-4b)); }
+section:nth-of-type(6n+5) { background: linear-gradient(135deg, var(--ks-wash-5a), var(--ks-wash-5b)); }
+section:nth-of-type(6n)   { background: linear-gradient(135deg, var(--ks-wash-6a), var(--ks-wash-6b)); }
+
+/* ---- type ---- */
+h6 { /* eyebrow → pastel chip */
+  display: inline-block; font-family: var(--font-display); font-weight: 800;
+  font-size: 22px; letter-spacing: 0.04em; text-transform: uppercase;
+  background: var(--ks-chip-violet); color: var(--ks-chip-violet-t);
+  padding: 0.28em 0.9em; border-radius: var(--ks-r-pill); margin: 0 0 22px;
+  box-shadow: var(--ks-shadow-sm);
+}
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 88px;
+     line-height: 1.04; letter-spacing: -0.01em; color: var(--ks-ink); margin: 0 0 24px; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 60px;
+     line-height: 1.08; color: var(--ks-ink); margin: 0 0 18px; }
+h3 { font-family: var(--font-display); font-weight: 700; font-size: 36px;
+     color: var(--ks-ink); margin: 0 0 10px; }
+h1 em, h2 em, h3 em { font-style: normal; color: var(--ks-accent); }
+p { margin: 0 0 18px; max-width: 30ch; }
+section:not(.cover):not(.statement):not(.quote):not(.closing):not(.figure) p { max-width: none; }
+strong { color: var(--ks-ink); font-weight: 800; }
+em { font-style: italic; }
+a { color: var(--ks-accent); text-decoration: none; }
+
+/* default bullet list — soft pastel dot */
+ul { list-style: none; padding: 0; margin: 14px 0; }
+li { position: relative; padding-left: 42px; margin: 16px 0; }
+li::before { content: ""; position: absolute; left: 4px; top: 14px;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--ks-accent); opacity: .85; }
+code { font-family: var(--font-mono); background: var(--ks-chip-amber);
+  color: var(--ks-chip-amber-t); padding: .08em .4em; border-radius: 8px; }
+
+/* fenced ``` code block → a soft rounded "card" with a violet spine (inline
+   `code` keeps its amber chip). A slide clips overflow rather than scrolling, so
+   long lines WRAP instead of vanishing — keep on-slide snippets short. */
+pre { font-family: var(--font-mono); font-size: 23px; line-height: 1.5;
+  background: #FFFDF6; color: var(--ks-ink); border: 1px solid var(--ks-hairline);
+  border-left: 8px solid var(--ks-chip-violet); border-radius: var(--ks-r-card);
+  padding: 24px 30px; margin: 22px 0; white-space: pre-wrap; overflow-wrap: anywhere;
+  box-shadow: var(--ks-shadow-sm); }
+pre code { background: none; color: inherit; padding: 0; border-radius: 0;
+  font-family: inherit; font-size: inherit; }
+/* syntax highlighting — marp emits highlight.js token spans; color them in the
+   soft kawaii chip palette so code reads clearly without a harsh terminal look. */
+pre code .hljs-comment, pre code .hljs-quote { color: var(--ks-ink-soft); font-style: italic; }
+pre code .hljs-keyword, pre code .hljs-selector-tag, pre code .hljs-built_in,
+pre code .hljs-meta, pre code .hljs-section { color: var(--ks-chip-violet-t); }
+pre code .hljs-string, pre code .hljs-attr, pre code .hljs-symbol,
+pre code .hljs-regexp, pre code .hljs-addition { color: var(--ks-chip-green-t); }
+pre code .hljs-number, pre code .hljs-literal, pre code .hljs-bullet { color: var(--ks-chip-amber-t); }
+pre code .hljs-title, pre code .hljs-name, pre code .hljs-type,
+pre code .hljs-variable, pre code .hljs-template-variable, pre code .hljs-attribute { color: var(--ks-chip-blue-t); }
+pre code .hljs-params { color: var(--ks-ink); }
+pre code .hljs-deletion { color: var(--ks-reject-b); }
+pre code .hljs-emphasis { font-style: italic; }
+pre code .hljs-strong { font-weight: 700; }
+
+/* emoji mascots (marp twemoji <img class="emoji">) — always inline at text size,
+   so they read as mascots in headings (big) and bodies (small) without floating */
+img.emoji { display: inline-block; height: 1.1em; width: auto; vertical-align: -0.18em;
+  margin: 0 .04em; background: none; box-shadow: none; border-radius: 0; float: none; }
+
+/* ---- footer + page number ---- */
+/* footer text and page number share bottom:50px and bottom-align, so the
+   company·author line sits on the same baseline as the page number (the logo
+   bottom-aligns with the text rather than pushing it up). */
+footer { position: absolute; left: 128px; bottom: 50px;
+  color: var(--ks-ink-soft); font-weight: 800; font-size: 24px; line-height: 1;
+  display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+/* The slide-class hero rules (section.split/path/figure img:not(.emoji)) also
+   match the footer's logo <img> — they outrank `footer img` and leak their
+   float/width/margins onto it, shifting the footer differently per slide. Pin the
+   footer logo with !important so it renders identically on every slide class. */
+footer img { height: 38px !important; width: auto !important; max-width: none !important;
+  margin: 0 !important; float: none !important; border-radius: 0 !important;
+  box-shadow: none !important; background: none !important; vertical-align: middle; }
+/* marp reserves a footer band and parks the page number ABOVE it, so matching
+   `bottom` doesn't align them; translateY drops the number onto the footer line
+   (a uniform post-layout shift, independent of each slide's padding). */
+section::after { /* marp pagination */
+  color: var(--ks-accent); font-family: var(--font-mono);
+  font-size: 22px; line-height: 1; right: 64px; bottom: 50px;
+  transform: translateY(80px); }
+
+/* ===================== chip colour cycle (cards / path / laws) ===================== */
+section.cards li:nth-child(5n+1), section.pillars li:nth-child(5n+1), section.compare2 li:nth-child(5n+1),
+section.compare3 li:nth-child(5n+1), section.cards3 li:nth-child(5n+1), section.steps li:nth-child(5n+1),
+section.people li:nth-child(5n+1), section.glossary li:nth-child(5n+1), section.models li:nth-child(5n+1),
+section.filegrid li:nth-child(5n+1), section.featurepair li:nth-child(5n+1), section.timeline li:nth-child(5n+1),
+section.laws li:nth-child(5n+1), section.path li:nth-child(5n+1) { --_chip: var(--ks-chip-blue); --_chip-t: var(--ks-chip-blue-t); }
+section.cards li:nth-child(5n+2), section.pillars li:nth-child(5n+2), section.compare2 li:nth-child(5n+2),
+section.compare3 li:nth-child(5n+2), section.cards3 li:nth-child(5n+2), section.steps li:nth-child(5n+2),
+section.people li:nth-child(5n+2), section.glossary li:nth-child(5n+2), section.models li:nth-child(5n+2),
+section.filegrid li:nth-child(5n+2), section.featurepair li:nth-child(5n+2), section.timeline li:nth-child(5n+2),
+section.laws li:nth-child(5n+2), section.path li:nth-child(5n+2) { --_chip: var(--ks-chip-green); --_chip-t: var(--ks-chip-green-t); }
+section.cards li:nth-child(5n+3), section.pillars li:nth-child(5n+3), section.compare2 li:nth-child(5n+3),
+section.compare3 li:nth-child(5n+3), section.cards3 li:nth-child(5n+3), section.steps li:nth-child(5n+3),
+section.people li:nth-child(5n+3), section.glossary li:nth-child(5n+3), section.models li:nth-child(5n+3),
+section.filegrid li:nth-child(5n+3), section.featurepair li:nth-child(5n+3), section.timeline li:nth-child(5n+3),
+section.laws li:nth-child(5n+3), section.path li:nth-child(5n+3) { --_chip: var(--ks-chip-amber); --_chip-t: var(--ks-chip-amber-t); }
+section.cards li:nth-child(5n+4), section.pillars li:nth-child(5n+4), section.compare2 li:nth-child(5n+4),
+section.compare3 li:nth-child(5n+4), section.cards3 li:nth-child(5n+4), section.steps li:nth-child(5n+4),
+section.people li:nth-child(5n+4), section.glossary li:nth-child(5n+4), section.models li:nth-child(5n+4),
+section.filegrid li:nth-child(5n+4), section.featurepair li:nth-child(5n+4), section.timeline li:nth-child(5n+4),
+section.laws li:nth-child(5n+4), section.path li:nth-child(5n+4) { --_chip: var(--ks-chip-pink); --_chip-t: var(--ks-chip-pink-t); }
+section.cards li:nth-child(5n+5), section.pillars li:nth-child(5n+5), section.compare2 li:nth-child(5n+5),
+section.compare3 li:nth-child(5n+5), section.cards3 li:nth-child(5n+5), section.steps li:nth-child(5n+5),
+section.people li:nth-child(5n+5), section.glossary li:nth-child(5n+5), section.models li:nth-child(5n+5),
+section.filegrid li:nth-child(5n+5), section.featurepair li:nth-child(5n+5), section.timeline li:nth-child(5n+5),
+section.laws li:nth-child(5n+5), section.path li:nth-child(5n+5) { --_chip: var(--ks-chip-violet); --_chip-t: var(--ks-chip-violet-t); }
+
+/* ===================== CARD GRIDS ===================== */
+section.cards ul, section.kpi ul, section.pillars ul, section.agenda ul,
+section.compare2 ul, section.compare3 ul, section.cards3 ul, section.steps ul,
+section.people ul, section.versus ul, section.timeline ul, section.glossary ul,
+section.models ul, section.filegrid ul, section.featurepair ul, section.logowall ul {
+  display: grid; gap: 32px; margin-top: 26px; list-style: none; padding: 0;
+}
+section.cards li, section.kpi li, section.pillars li, section.agenda li,
+section.compare2 li, section.compare3 li, section.cards3 li, section.steps li,
+section.people li, section.versus li, section.timeline li, section.glossary li,
+section.models li, section.filegrid li, section.featurepair li, section.logowall li {
+  background: var(--ks-card); border: 1px solid var(--ks-hairline);
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-md);
+  padding: 32px 36px; margin: 0;
+}
+section.cards li::before, section.kpi li::before, section.pillars li::before,
+section.agenda li::before, section.compare2 li::before, section.compare3 li::before,
+section.cards3 li::before, section.steps li::before, section.people li::before,
+section.versus li::before, section.timeline li::before, section.glossary li::before,
+section.models li::before, section.filegrid li::before, section.featurepair li::before,
+section.logowall li::before { content: none; }
+/* card title → pastel chip (colour from --_chip cycle) */
+section.cards li strong, section.pillars li strong, section.compare2 li strong,
+section.compare3 li strong, section.cards3 li strong, section.steps li strong,
+section.people li strong, section.glossary li strong, section.models li strong,
+section.filegrid li strong, section.featurepair li strong, section.timeline li strong {
+  display: inline-block; font-family: var(--font-display); font-weight: 700;
+  font-size: 26px; padding: 0.16em 0.7em; border-radius: var(--ks-r-pill);
+  margin: 0 0 14px; background: var(--_chip, var(--ks-chip-blue)); color: var(--_chip-t, var(--ks-chip-blue-t)); }
+
+section.pillars ul, section.compare2 ul, section.people ul, section.featurepair ul { grid-template-columns: 1fr 1fr; }
+section.kpi ul, section.cards3 ul, section.compare3 ul, section.agenda ul, section.steps ul, section.models ul { grid-template-columns: repeat(3, 1fr); }
+section.versus ul { grid-template-columns: 1fr 1fr; }
+section.timeline ul, section.glossary ul, section.filegrid ul, section.logowall ul { grid-template-columns: repeat(4, 1fr); }
+section.cards ul { grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); }
+
+/* kpi: big value (no chip) */
+section.kpi li strong { display: block; background: none; padding: 0; margin: 0 0 8px;
+  font-family: var(--font-display); font-size: 92px; line-height: 1; color: var(--ks-accent); }
+/* one highlighted card in trios */
+section.kpi li:nth-child(2), section.cards3 li:nth-child(2), section.models li:nth-child(2) {
+  background: var(--ks-wash-6a); border-color: var(--ks-chip-amber); }
+
+/* agenda: mono numbers */
+section.agenda ul { counter-reset: ag; }
+section.agenda li { counter-increment: ag; padding-top: 64px; }
+section.agenda li::after { content: counter(ag, decimal-leading-zero);
+  position: absolute; top: 26px; left: 36px; font-family: var(--font-mono);
+  font-size: 26px; color: var(--ks-accent); }
+
+/* versus: before(muted) / after(accept) */
+section.versus li:first-child { border: 2px dashed var(--ks-hairline); box-shadow: var(--ks-shadow-sm); }
+section.versus li:first-child strong { background: var(--ks-reject-tint); color: var(--ks-reject-b); }
+section.versus li:last-child { border: 2px solid var(--ks-accept-a); background: var(--ks-accept-tint); }
+section.versus li:last-child strong { background: var(--ks-accept-a); color: #fff; }
+
+/* ===================== BIGSTAT ===================== */
+section.bigstat h1 { font-size: 220px; line-height: .9; color: var(--ks-accent); }
+section.bigstat h1 em { font-size: 96px; color: var(--ks-ink); }
+
+/* ===================== SPLIT (image floats, content flows) ===================== */
+section.split img:not(.emoji) { float: right; width: 44%; margin: 0 0 30px 70px;
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-lg); background: #fff; }
+section.split p, section.split li { max-width: none; }
+
+/* ===================== PATH (signature analysis: hero + chip-cards + verdict) ===================== */
+/* extra bottom padding reserves a clear band for the footer + page number, so
+   the verdict pill sits above the branding instead of colliding with it. */
+section.path { padding-top: 72px; padding-bottom: 104px; }
+/* hero: a real image floats left as a card. Emoji (hero, verdict, or in cards)
+   stay clean inline mascots via the global img.emoji rule — no white card. */
+/* definite height (capped) so a tall/portrait SVG hero can't balloon to ~800px
+   and shove the cleared verdict pill down onto the footer band. */
+section.path img:not(.emoji) { float: left; height: 44vh; width: auto; max-width: 42%;
+  margin: 6px 46px 24px 0;
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-lg); background: #fff; }
+section.path ul { list-style: none; padding: 0; margin: 14px 0 0;
+  display: flex; flex-direction: column; gap: 16px; }
+section.path li { background: var(--ks-card); border: 1px solid var(--ks-hairline);
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-sm); padding: 20px 28px; margin: 0; }
+section.path li::before { content: none; }
+/* footer + page number stay visible on path slides (branding on every content
+   slide); section.path's padding-bottom reserves the band so they don't collide
+   with the verdict pill. */
+section.path li strong { display: inline-block; font-family: var(--font-display);
+  font-weight: 700; font-size: 24px; padding: 0.16em 0.7em; border-radius: var(--ks-r-pill);
+  margin: 0 0 8px; background: var(--_chip, var(--ks-chip-blue)); color: var(--_chip-t, var(--ks-chip-blue-t)); }
+
+/* ===================== LAWS (2×2 quad) ===================== */
+section.laws ul { display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+  margin-top: 26px; list-style: none; padding: 0; }
+section.laws li { background: var(--ks-card); border: 1px solid var(--ks-hairline);
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-md); padding: 30px 34px; margin: 0; }
+section.laws li::before { content: none; }
+section.laws li strong { display: inline-block; font-family: var(--font-display);
+  font-weight: 700; font-size: 28px; padding: 0.16em 0.7em; border-radius: var(--ks-r-pill);
+  margin: 0 0 12px; background: var(--_chip, var(--ks-chip-blue)); color: var(--_chip-t, var(--ks-chip-blue-t)); }
+
+/* ===================== SCORECARD (clipboard matrix + conclusion) ===================== */
+section.scorecard table { width: 100%; border-collapse: separate; border-spacing: 0;
+  background: var(--ks-card); border: 1px solid var(--ks-hairline);
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-md); overflow: hidden;
+  margin-top: 22px; font-size: 30px; }
+section.scorecard th, section.scorecard td { padding: 16px 20px; text-align: center;
+  border-bottom: 1px solid var(--ks-hairline); }
+section.scorecard thead th { background: var(--ks-wash-4b); font-family: var(--font-display);
+  font-weight: 700; color: var(--ks-ink); }
+section.scorecard tbody tr:nth-child(even) td { background: #FBFAF5; }
+section.scorecard tbody tr:last-child td { border-bottom: 0; }
+section.scorecard th:first-child, section.scorecard td:first-child { text-align: left;
+  font-weight: 800; color: var(--ks-ink); }
+section.scorecard td { font-size: 34px; }
+
+/* ===================== FLOW (numbered stops + connectors) ===================== */
+section.flow ul { list-style: none; padding: 0; margin: 52px 0 0;
+  display: flex; align-items: stretch; counter-reset: flw; }
+section.flow li { flex: 1; background: var(--ks-card); border: 1px solid var(--ks-hairline);
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-sm);
+  padding: 30px 26px; margin: 0 34px 0 0; position: relative; counter-increment: flw; }
+section.flow li:last-child { margin-right: 0; }
+section.flow li::before { content: counter(flw); position: absolute; top: -24px; left: 24px;
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--ks-chip-blue), var(--ks-chip-violet));
+  color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 26px;
+  display: flex; align-items: center; justify-content: center; box-shadow: var(--ks-shadow-sm); }
+section.flow li::after { content: "›"; position: absolute; right: -28px; top: 50%;
+  transform: translateY(-50%); font-family: var(--font-display); font-weight: 800;
+  font-size: 44px; color: var(--ks-accent); }
+section.flow li:last-child::after { content: none; }
+section.flow li strong { display: block; font-family: var(--font-display);
+  font-weight: 700; color: var(--ks-ink); font-size: 26px; margin-bottom: 6px; }
+
+/* ===================== SCENARIOS (stage → action → result rows) ===================== */
+section.scenarios ul { list-style: none; padding: 0; margin: 28px 0 0;
+  display: flex; flex-direction: column; gap: 22px; }
+section.scenarios li { background: var(--ks-card); border: 1px solid var(--ks-hairline);
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-sm); padding: 24px 34px; margin: 0;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; font-size: 28px; }
+section.scenarios li::before { content: none; }
+section.scenarios li strong { display: inline-block; font-family: var(--font-display);
+  font-weight: 700; font-size: 24px; padding: 0.14em 0.7em; border-radius: var(--ks-r-pill);
+  background: var(--ks-chip-blue); color: var(--ks-chip-blue-t); }
+section.scenarios li:last-child { background: var(--ks-accept-tint); border-color: var(--ks-accept-a); }
+section.scenarios li:last-child strong { background: var(--ks-accept-a); color: #fff; }
+
+/* ===================== ROADMAP (zig-zag signposts) ===================== */
+section.roadmap ul { list-style: none; padding: 0; margin: 28px 0 0;
+  display: flex; flex-direction: column; gap: 24px; counter-reset: rm; }
+section.roadmap li { background: var(--ks-card); border: 1px solid var(--ks-hairline);
+  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-sm);
+  padding: 24px 32px 24px 100px; margin: 0; position: relative; counter-increment: rm; width: 70%; }
+section.roadmap li:nth-child(even) { align-self: flex-end; }
+section.roadmap li::before { content: counter(rm); position: absolute; left: 26px; top: 50%;
+  transform: translateY(-50%); width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--ks-chip-amber), var(--ks-chip-pink));
+  color: var(--ks-ink); font-family: var(--font-display); font-weight: 800; font-size: 30px;
+  display: flex; align-items: center; justify-content: center; box-shadow: var(--ks-shadow-sm); }
+section.roadmap li strong { display: block; font-family: var(--font-display);
+  color: var(--ks-ink); font-size: 28px; margin-bottom: 4px; }
+
+/* ===================== FIGURE (title + one large hero / emoji) ===================== */
+/* padding-bottom reserves a band so centered content (esp. a wrapped title +
+   tall hero + multi-line caption) never spills onto the footer. */
+section.figure { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-bottom: 112px; }
+section.figure h1 { font-size: 110px; line-height: 1.04; }
+section.figure h2 { font-size: 92px; }
+/* definite height (not just max-*) so an SVG hero with only a viewBox — no
+   intrinsic px size — still gets a real box instead of collapsing to nothing. */
+section.figure img:not(.emoji) { display: block; margin: 18px auto 0; height: 40vh; width: auto;
+  max-width: 78%; border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-lg); background: #fff; }
+section.figure img.emoji { height: 200px; margin: 12px 0; }   /* a standalone emoji hero, no card */
+/* a hand-written SVG character/hero (`![Bara](/abs/hero.svg)`) floats like any
+   image hero, on a soft white card by default. For a character that should sit
+   directly on the pastel wash, drop the card with the `bare` modifier:
+   `<!-- _class: figure bare -->` (also works on `path`). */
+section.figure.bare img:not(.emoji), section.path.bare img:not(.emoji) {
+  background: none; box-shadow: none; border-radius: 0; }
+section.figure p { max-width: 42ch; color: var(--ks-ink-soft); }
+
+/* ===================== VERDICT / CONCLUSION blockquote ===================== */
+blockquote { margin: 26px 0 0; border: 0; background: var(--ks-accept-tint);
+  border-radius: var(--ks-r-card); padding: 22px 34px; color: var(--ks-ink);
+  font-weight: 700; font-size: 30px; box-shadow: var(--ks-shadow-sm); }
+blockquote strong { color: inherit; }
+section.path blockquote, section.scorecard blockquote { clear: both; }
+section.path blockquote { margin-top: 18px; }
+section.accept blockquote { background: linear-gradient(135deg, var(--ks-accept-a), var(--ks-accept-b));
+  color: #fff; border-radius: var(--ks-r-pill); box-shadow: var(--ks-shadow-md); }
+section.reject blockquote { background: linear-gradient(135deg, var(--ks-reject-a), var(--ks-reject-b));
+  color: #fff; border-radius: var(--ks-r-pill); box-shadow: var(--ks-shadow-md); }
+section.caution blockquote { background: var(--ks-caution); color: var(--ks-caution-t);
+  border-radius: var(--ks-r-pill); }
+
+/* ===================== CALLOUTS ( <aside class="callout tip"> … ) ===================== */
+/* Marp doesn't run the handbook's pandoc `:::` filter, so callouts are authored as
+   raw-HTML asides (HTML passthrough is enabled for this deck via template.yaml).
+   IMPORTANT: leave a blank line around the inner content so marp parses the
+   markdown inside the aside:
+       <aside class="callout tip">
+
+       **Pro tip** — body text with `code` and **bold**.
+
+       </aside>
+   The colour vocabulary mirrors the handbook: tip · note/anchor · warning ·
+   plain · do · dont — so the same idea reads the same across templates. */
+.callout { background: var(--ks-card); border: 1px solid var(--ks-hairline);
+  border-left: 10px solid var(--ks-accent); border-radius: var(--ks-r-card);
+  padding: 22px 30px; margin: 22px 0; box-shadow: var(--ks-shadow-sm); font-size: 28px; }
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child  { margin-bottom: 0; }
+.callout p, .callout li { max-width: none; }
+.callout strong { color: var(--ks-ink); }
+.callout.tip     { background: var(--ks-caution-tint); border-left-color: var(--ks-chip-amber-t); }
+.callout.note,
+.callout.anchor  { background: #EAF2FA;               border-left-color: var(--ks-chip-blue-t); }
+.callout.warning { background: var(--ks-reject-tint); border-left-color: var(--ks-reject-b); }
+.callout.plain   { background: #F0EAFA;               border-left-color: var(--ks-chip-violet-t); }
+.callout.do      { background: var(--ks-accept-tint); border-left-color: var(--ks-accept-b); }
+.callout.dont    { background: var(--ks-reject-tint); border-left-color: var(--ks-reject-b); }
+
+/* ===================== COVER ===================== */
+section.cover { text-align: center; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 130px;
+  background: linear-gradient(135deg, var(--ks-wash-1a), var(--ks-wash-3a) 55%, var(--ks-wash-4a)); }
+section.cover h6 { background: var(--ks-card); color: var(--ks-accent); }
+section.cover h1 { font-size: 124px; margin: 12px 0; }
+section.cover p { max-width: 36ch; color: var(--ks-ink-soft); font-size: 34px; }
+section.cover hr { width: 130px; height: 6px; border: 0; margin: 26px auto 0; border-radius: 999px;
+  background: linear-gradient(90deg, var(--ks-reject-a), var(--ks-chip-amber-t), var(--ks-accept-a)); }
+
+/* ===================== STATEMENT (cocoa dark) ===================== */
+section.statement { background: var(--ks-ink); color: rgba(255,255,255,.82);
+  display: flex; flex-direction: column; justify-content: center; }
+section.statement h1, section.statement h2, section.statement h3 { color: #FFF8EF; }
+section.statement h1 em, section.statement h2 em { color: var(--ks-caution); }
+section.statement h6 { background: rgba(255,255,255,.14); color: #FFF8EF; }
+section.statement strong { color: #FFF8EF; }
+section.statement footer { color: rgba(255,255,255,.6); }
+
+/* ===================== QUOTE ===================== */
+section.quote { display: flex; flex-direction: column; justify-content: center; }
+section.quote blockquote { margin: 0; background: none; box-shadow: none; padding: 0;
+  font-family: var(--font-serif); font-style: italic; font-weight: 500;
+  font-size: 64px; line-height: 1.22; color: var(--ks-ink); max-width: 28ch; }
+section.quote blockquote strong, section.quote blockquote em { color: var(--ks-accent); font-style: italic; }
+
+/* ===================== CLOSING ===================== */
+section.closing { text-align: center; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--ks-wash-5a), var(--ks-wash-2a) 60%, var(--ks-wash-1a)); }
+section.closing h6 { background: var(--ks-card); color: var(--ks-accent); }
+section.closing h1 { font-size: 116px; }
+section.closing h1 em { color: var(--ks-accent); }
+section.closing p { max-width: 40ch; color: var(--ks-ink-soft); }

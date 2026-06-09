@@ -1,0 +1,56 @@
+/* docsmith — kawaii-storybook tokens, extracted from "The Secure Cloud Village".
+   A soft pastel "storybook / NotebookLM" deck: rounded puffy cards, per-slide
+   pastel gradient washes, pastel chip labels, colour-coded verdict pills.
+   Fonts via Google Fonts (OFL): Baloo 2 (display), Nunito (body), Lora (quotes). */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Lora:ital,wght@1,500;1,600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* --- ink --- */
+  --ks-ink:       #3D3A37;   /* headline warm charcoal */
+  --ks-ink-2:     #4A4A4A;   /* body */
+  --ks-ink-soft:  #7A746C;   /* captions / footnotes */
+  --ks-accent:    #C8623F;   /* clay/coral — *em* accent words */
+
+  /* --- surfaces --- */
+  --ks-card:      #FFFFFF;   /* card fill */
+  --ks-hairline:  #E2DBC9;   /* card borders (carry depth now that shadows are off) */
+  --ks-note:      #FBEF9E;   /* sticky-note */
+
+  /* --- per-slide pastel washes (cycled) --- */
+  --ks-wash-1a: #FBF6E3; --ks-wash-1b: #F4EFDA;  /* butter  */
+  --ks-wash-2a: #DCEFE0; --ks-wash-2b: #CFE8DE;  /* mint    */
+  --ks-wash-3a: #F8E0E4; --ks-wash-3b: #F1DCEA;  /* rose    */
+  --ks-wash-4a: #E7E1F1; --ks-wash-4b: #DEE6F4;  /* lavender*/
+  --ks-wash-5a: #DDEAF6; --ks-wash-5b: #D7EAEC;  /* sky     */
+  --ks-wash-6a: #FBE8DA; --ks-wash-6b: #F6E3CF;  /* peach   */
+
+  /* --- chip palette (fill / text), cycled across cards --- */
+  --ks-chip-blue:    #CFE4F2; --ks-chip-blue-t:    #2E5C7E;
+  --ks-chip-green:   #D4ECD6; --ks-chip-green-t:   #3E7A4E;
+  --ks-chip-amber:   #F6E7B8; --ks-chip-amber-t:   #8A6D2E;
+  --ks-chip-pink:    #F6D9DE; --ks-chip-pink-t:    #9E4C5C;
+  --ks-chip-violet:  #E2D9F0; --ks-chip-violet-t:  #6B5594;
+
+  /* --- verdict / status --- */
+  --ks-accept-a:  #7FCB86; --ks-accept-b:  #6BBE73;
+  --ks-reject-a:  #E8604A; --ks-reject-b:  #D94A38;
+  --ks-caution:   #F3D98A; --ks-caution-t: #8A6D2E;
+  --ks-accept-tint:  #E8F6E9;
+  --ks-reject-tint:  #FBE3DD;
+  --ks-caution-tint: #FBF1D5;
+
+  /* --- shape --- */
+  --ks-r-card: 28px;
+  --ks-r-pill: 999px;
+  /* Blurred box-shadows render as hard grey rectangles in macOS Preview / many
+     PDF viewers, so depth comes from borders + white-on-pastel contrast instead. */
+  --ks-shadow-sm: none;
+  --ks-shadow-md: none;
+  --ks-shadow-lg: none;
+
+  /* --- type --- */
+  --font-display: "Baloo 2", "Comic Sans MS", system-ui, sans-serif;
+  --font-sans:    "Nunito", system-ui, -apple-system, sans-serif;
+  --font-serif:   "Lora", Georgia, "Times New Roman", serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;
+}

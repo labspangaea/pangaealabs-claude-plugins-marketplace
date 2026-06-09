@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="560" viewBox="0 0 520 560">
+  <!-- Pawmail mascot: a friendly puppy mail-carrier holding an envelope -->
+  <defs>
+    <radialGradient id="furG" cx="50%" cy="38%" r="70%">
+      <stop offset="0%" stop-color="#FBE3C8"/>
+      <stop offset="100%" stop-color="#E9C49C"/>
+    </radialGradient>
+    <linearGradient id="envG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F3ECDB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- soft shadow under the character -->
+  <ellipse cx="260" cy="520" rx="150" ry="26" fill="#D9B98F" opacity="0.35"/>
+
+  <!-- body -->
+  <path d="M150 360 Q150 300 260 300 Q370 300 370 360 L360 470 Q360 510 260 510 Q160 510 160 470 Z"
+        fill="#F6CFA0" stroke="#D9A56E" stroke-width="4"/>
+  <!-- little satchel strap -->
+  <path d="M205 312 L320 460" stroke="#C8623F" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <!-- mail satchel -->
+  <rect x="300" y="430" width="92" height="74" rx="14" fill="#C8623F" stroke="#A84B2C" stroke-width="4"/>
+  <rect x="300" y="430" width="92" height="26" rx="12" fill="#E07A55"/>
+  <circle cx="346" cy="468" r="9" fill="#FBEF9E" stroke="#A84B2C" stroke-width="3"/>
+
+  <!-- ears -->
+  <path d="M150 150 Q110 120 116 200 Q120 248 168 232 Z" fill="#C99263" stroke="#A8753F" stroke-width="4"/>
+  <path d="M370 150 Q410 120 404 200 Q400 248 352 232 Z" fill="#C99263" stroke="#A8753F" stroke-width="4"/>
+
+  <!-- head -->
+  <circle cx="260" cy="210" r="135" fill="url(#furG)" stroke="#D9A56E" stroke-width="4"/>
+
+  <!-- cheek blushes -->
+  <ellipse cx="168" cy="248" rx="26" ry="16" fill="#F4A6A0" opacity="0.55"/>
+  <ellipse cx="352" cy="248" rx="26" ry="16" fill="#F4A6A0" opacity="0.55"/>
+
+  <!-- eyes -->
+  <circle cx="212" cy="200" r="20" fill="#3D3A37"/>
+  <circle cx="308" cy="200" r="20" fill="#3D3A37"/>
+  <circle cx="219" cy="193" r="6" fill="#FFFFFF"/>
+  <circle cx="315" cy="193" r="6" fill="#FFFFFF"/>
+
+  <!-- snout + nose -->
+  <ellipse cx="260" cy="256" rx="44" ry="34" fill="#FFF6EA" stroke="#E3C49C" stroke-width="3"/>
+  <ellipse cx="260" cy="244" rx="16" ry="11" fill="#3D3A37"/>
+  <!-- smiling mouth -->
+  <path d="M260 256 Q260 286 232 290" fill="none" stroke="#3D3A37" stroke-width="4" stroke-linecap="round"/>
+  <path d="M260 256 Q260 286 288 290" fill="none" stroke="#3D3A37" stroke-width="4" stroke-linecap="round"/>
+  <path d="M244 296 Q260 308 276 296" fill="none" stroke="#C8623F" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- paws holding the envelope -->
+  <ellipse cx="180" cy="430" rx="34" ry="26" fill="#F6CFA0" stroke="#D9A56E" stroke-width="4"/>
+  <ellipse cx="340" cy="430" rx="34" ry="26" fill="#F6CFA0" stroke="#D9A56E" stroke-width="4"/>
+
+  <!-- envelope held in front -->
+  <g>
+    <rect x="186" y="392" width="148" height="100" rx="10" fill="url(#envG)" stroke="#C8623F" stroke-width="4"/>
+    <path d="M186 400 L260 452 L334 400" fill="none" stroke="#C8623F" stroke-width="4" stroke-linecap="round"/>
+    <!-- heart stamp -->
+    <path d="M310 414 q-9 -11 -18 0 q-9 11 0 20 l9 9 l9 -9 q9 -11 0 -20 z" fill="#E8604A"/>
+  </g>
+
+  <!-- floating sparkles -->
+  <path d="M96 120 l6 14 l14 6 l-14 6 l-6 14 l-6 -14 l-14 -6 l14 -6 z" fill="#F3D98A"/>
+  <path d="M430 96 l5 11 l11 5 l-11 5 l-5 11 l-5 -11 l-11 -5 l11 -5 z" fill="#A9C8E8"/>
+  <circle cx="440" cy="300" r="7" fill="#C9B3E8"/>
+</svg>

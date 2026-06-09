@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="520" viewBox="0 0 880 520">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 z" fill="#003060"/>
+    </marker>
+    <marker id="arrowamber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 z" fill="#E0821A"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="880" height="520" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="440" y="34" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="bold" fill="#003060" text-anchor="middle">RAG App ↔ Vector Store</text>
+  <text x="440" y="56" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#5A3A8A" text-anchor="middle">Retrieval-augmented query path and offline indexing path</text>
+
+  <!-- User -->
+  <rect x="40" y="120" width="150" height="70" rx="8" fill="#003060"/>
+  <text x="115" y="152" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF" text-anchor="middle">User</text>
+  <text x="115" y="172" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#CFE0F0" text-anchor="middle">asks a question</text>
+
+  <!-- RAG App / Orchestrator -->
+  <rect x="300" y="100" width="200" height="110" rx="8" fill="#FFFFFF" stroke="#003060" stroke-width="2.5"/>
+  <text x="400" y="128" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#003060" text-anchor="middle">RAG Application</text>
+  <line x1="312" y1="140" x2="488" y2="140" stroke="#E0821A" stroke-width="1.5"/>
+  <text x="400" y="160" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#333333" text-anchor="middle">1. embed query</text>
+  <text x="400" y="178" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#333333" text-anchor="middle">2. retrieve top-k</text>
+  <text x="400" y="196" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#333333" text-anchor="middle">3. build prompt + call LLM</text>
+
+  <!-- Embedding model -->
+  <rect x="300" y="270" width="200" height="64" rx="8" fill="#5A3A8A"/>
+  <text x="400" y="298" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Embedding Model</text>
+  <text x="400" y="318" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#E0D4F0" text-anchor="middle">text → vector</text>
+
+  <!-- Vector Store -->
+  <rect x="640" y="100" width="200" height="110" rx="8" fill="#FFFFFF" stroke="#E0821A" stroke-width="2.5"/>
+  <text x="740" y="128" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#E0821A" text-anchor="middle">Vector Store</text>
+  <line x1="652" y1="140" x2="828" y2="140" stroke="#003060" stroke-width="1.5"/>
+  <text x="740" y="160" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#333333" text-anchor="middle">pgvector / Pinecone</text>
+  <text x="740" y="178" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#333333" text-anchor="middle">/ Qdrant</text>
+  <text x="740" y="196" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#666666" text-anchor="middle">ANN index + metadata</text>
+
+  <!-- LLM -->
+  <rect x="640" y="270" width="200" height="64" rx="8" fill="#1A7A3A"/>
+  <text x="740" y="298" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">LLM</text>
+  <text x="740" y="318" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#D4F0DD" text-anchor="middle">grounded answer</text>
+
+  <!-- Offline ingestion -->
+  <rect x="40" y="400" width="800" height="90" rx="8" fill="#F4F6F9" stroke="#003060" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="60" y="426" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#003060">Offline indexing (build time)</text>
+  <rect x="70" y="438" width="150" height="40" rx="6" fill="#FFFFFF" stroke="#5A3A8A" stroke-width="1.5"/>
+  <text x="145" y="463" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5A3A8A" text-anchor="middle">Documents</text>
+  <rect x="300" y="438" width="150" height="40" rx="6" fill="#FFFFFF" stroke="#5A3A8A" stroke-width="1.5"/>
+  <text x="375" y="463" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5A3A8A" text-anchor="middle">Chunk + Embed</text>
+  <rect x="530" y="438" width="150" height="40" rx="6" fill="#FFFFFF" stroke="#E0821A" stroke-width="1.5"/>
+  <text x="605" y="463" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#E0821A" text-anchor="middle">Upsert vectors</text>
+  <line x1="220" y1="458" x2="295" y2="458" stroke="#5A3A8A" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="450" y1="458" x2="525" y2="458" stroke="#5A3A8A" stroke-width="2" marker-end="url(#arrowamber)"/>
+  <path d="M680,458 L760,458 L760,210" fill="none" stroke="#E0821A" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrowamber)"/>
+
+  <!-- Query path arrows -->
+  <line x1="190" y1="155" x2="295" y2="155" stroke="#003060" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="240" y="146" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#003060" text-anchor="middle">query</text>
+
+  <!-- App to embedding -->
+  <line x1="380" y1="210" x2="380" y2="265" stroke="#5A3A8A" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="420" y1="265" x2="420" y2="212" stroke="#5A3A8A" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="455" y="245" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#5A3A8A" text-anchor="middle">vector</text>
+
+  <!-- App to vector store -->
+  <line x1="500" y1="140" x2="635" y2="140" stroke="#003060" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="567" y="131" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#003060" text-anchor="middle">ANN search</text>
+  <line x1="635" y1="170" x2="500" y2="170" stroke="#E0821A" stroke-width="2.5" marker-end="url(#arrowamber)"/>
+  <text x="567" y="188" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#E0821A" text-anchor="middle">top-k chunks</text>
+
+  <!-- App to LLM -->
+  <line x1="480" y1="210" x2="660" y2="265" stroke="#1A7A3A" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="585" y="232" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#1A7A3A" text-anchor="middle">prompt + context</text>
+  <line x1="700" y1="265" x2="470" y2="208" stroke="#1A7A3A" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Answer back to user -->
+  <path d="M300,190 L115,190 L115,192" fill="none" stroke="#1A7A3A" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="210" y="206" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#1A7A3A" text-anchor="middle">grounded answer</text>
+</svg>

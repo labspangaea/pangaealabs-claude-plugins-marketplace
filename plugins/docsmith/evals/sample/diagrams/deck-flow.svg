@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 360" font-family="sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 z" fill="#071e49"/>
+    </marker>
+  </defs>
+
+  <!-- Node 1: Markdown source -->
+  <rect x="70" y="20" width="240" height="70" rx="12" fill="#faf8f3" stroke="#071e49" stroke-width="2.5"/>
+  <text x="190" y="52" text-anchor="middle" font-size="22" font-weight="bold" fill="#071e49">Markdown</text>
+  <text x="190" y="75" text-anchor="middle" font-size="14" fill="#5a6b7d">one source file</text>
+
+  <!-- connector 1 -->
+  <line x1="190" y1="90" x2="190" y2="140" stroke="#071e49" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Node 2: docsmith (accent) -->
+  <rect x="70" y="145" width="240" height="70" rx="12" fill="#92d05d" stroke="#071e49" stroke-width="2.5"/>
+  <text x="190" y="177" text-anchor="middle" font-size="22" font-weight="bold" fill="#071e49">docsmith</text>
+  <text x="190" y="200" text-anchor="middle" font-size="14" fill="#1b3a2a">apply a template</text>
+
+  <!-- connector 2 -->
+  <line x1="190" y1="215" x2="190" y2="265" stroke="#071e49" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Node 3: PDF deck -->
+  <rect x="70" y="270" width="240" height="70" rx="12" fill="#b5e0ea" stroke="#071e49" stroke-width="2.5"/>
+  <text x="190" y="302" text-anchor="middle" font-size="22" font-weight="bold" fill="#071e49">PDF deck</text>
+  <text x="190" y="325" text-anchor="middle" font-size="14" fill="#244b57">on-brand output</text>
+</svg>

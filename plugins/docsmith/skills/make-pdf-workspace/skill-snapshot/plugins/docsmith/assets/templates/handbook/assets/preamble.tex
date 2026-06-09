@@ -1,0 +1,153 @@
+% ── docsmith handbook preamble — colours come from the generated _tokens.tex ──
+% book class, Latin Modern serif body, navy palette, fancyhdr running heads,
+% titlesec chapter/section styling, tcolorbox callout cards, lettrine, pullquote.
+
+\usepackage[paperwidth=6.5in,paperheight=9.25in,
+            inner=0.9in,outer=0.75in,top=0.95in,bottom=1in,
+            headsep=14pt,footskip=26pt]{geometry}
+
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\setlist{leftmargin=1.4em,topsep=3pt,itemsep=2pt,parsep=0pt}
+\usepackage[most]{tcolorbox}
+\usepackage{lettrine}
+\usepackage{parskip}   % airy block paragraphs, matching the reference
+
+\usepackage{titlesec}
+% Chapter opener: large navy number flush right, navy rule, navy sans title.
+\titleformat{\chapter}[display]
+  {\sffamily\bfseries\color{navy}}
+  {\raggedleft\fontsize{58}{58}\selectfont\thechapter}
+  {6pt}
+  {\color{navy}\titlerule[1.2pt]\vspace{10pt}\Huge\raggedright}
+\titlespacing*{\chapter}{0pt}{6pt}{34pt}
+% Front/back-matter titles (Contents, Terminology): serif bold black.
+\titleformat{name=\chapter,numberless}[hang]
+  {\rmfamily\bfseries\Huge\color{black}}{}{0pt}{}
+\titlespacing*{name=\chapter,numberless}{0pt}{10pt}{24pt}
+
+\titleformat{\section}
+  {\sffamily\bfseries\large\color{navy}}{\thesection}{0.6em}{}
+\titleformat{\subsection}
+  {\sffamily\bfseries\normalsize\color{navysoft}}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+
+\usepackage{fancyhdr}
+\providecommand{\dslogo}{}
+\providecommand{\dscompany}{}
+\providecommand{\dsauthor}{}
+% footer brand: logo (if supplied) + company name + author, muted grey.
+% Renders inline as: [logo]  Company · Author  — the " · Author" half is
+% suppressed when \dsauthor is empty, and the logo when \dslogo is empty.
+\makeatletter
+\newcommand{\dsfootbrand}{%
+  {\def\dsnil{}\ifx\dslogo\dsnil\else
+     \raisebox{-3.2pt}{\includegraphics[height=13pt]{\dslogo}}\hspace{7pt}\fi}%
+  \small\sffamily\color{rulegrey}\dscompany
+  {\edef\ds@a{\dsauthor}\ifx\ds@a\@empty\else\,\textperiodcentered\,\dsauthor\fi}}
+\makeatother
+\pagestyle{fancy}
+\fancyhf{}
+% L/R (not LE/LO/RE/RO) => identical placement on every page, one- or two-sided
+\fancyhead[L]{\small\sffamily\color{rulegrey}\nouppercase{\leftmark}}
+\fancyfoot[L]{\dsfootbrand}
+\fancyfoot[R]{\small\sffamily\color{rulegrey}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{rulegrey}\leaders\hrule height\headrulewidth\hfill}}
+% chapter-opener pages use the 'plain' style — give them the SAME footer (logo +
+% page number), no header rule, so numbering never jumps to the header/center.
+\fancypagestyle{plain}{\fancyhf{}%
+  \fancyfoot[L]{\dsfootbrand}\fancyfoot[R]{\small\sffamily\color{rulegrey}\thepage}%
+  \renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0pt}}
+
+% ── Callout cards — tab label overlapping the top-left edge, rounded, shadow ──
+\newtcolorbox{protip}{enhanced, breakable, boxrule=0.4pt, arc=2.4mm,
+  colback=yellow!7!white, colframe=amber!70!white, drop fuzzy shadow=black!28,
+  left=3mm,right=3mm,top=2.2mm,bottom=2.2mm,
+  attach boxed title to top left={yshift=-2.6mm, xshift=4mm},
+  boxed title style={colback=amber, colframe=amber, arc=1mm, boxrule=0pt},
+  coltitle=white, title=Pro Tip, fonttitle=\bfseries\sffamily\footnotesize,
+  before skip=10pt, after skip=8pt}
+
+\newtcolorbox{anchorbox}{enhanced, breakable, boxrule=0.4pt, arc=2.4mm,
+  colback=navytint, colframe=navysoft!55!white, drop fuzzy shadow=black!28,
+  left=3mm,right=3mm,top=2.2mm,bottom=2.2mm,
+  attach boxed title to top left={yshift=-2.6mm, xshift=4mm},
+  boxed title style={colback=navy, colframe=navy, arc=1mm, boxrule=0pt},
+  coltitle=white, title=Note, fonttitle=\bfseries\sffamily\footnotesize,
+  before skip=10pt, after skip=8pt}
+
+\newtcolorbox{warningbox}{enhanced, breakable, boxrule=0.4pt, arc=2.4mm,
+  colback=orange!7!white, colframe=amberdeep!60!white, drop fuzzy shadow=black!28,
+  left=3mm,right=3mm,top=2.2mm,bottom=2.2mm,
+  attach boxed title to top left={yshift=-2.6mm, xshift=4mm},
+  boxed title style={colback=amberdeep, colframe=amberdeep, arc=1mm, boxrule=0pt},
+  coltitle=white, title=Watch Out, fonttitle=\bfseries\sffamily\footnotesize,
+  before skip=10pt, after skip=8pt}
+
+\newtcolorbox{plainbox}{enhanced, breakable, boxrule=0.4pt, arc=2.4mm,
+  colback=violet!5!white, colframe=violet!45!white, drop fuzzy shadow=black!28,
+  left=3mm,right=3mm,top=2.2mm,bottom=2.2mm,
+  attach boxed title to top left={yshift=-2.6mm, xshift=4mm},
+  boxed title style={colback=violet, colframe=violet, arc=1mm, boxrule=0pt},
+  coltitle=white, title=In Plain English, fonttitle=\bfseries\sffamily\footnotesize,
+  before skip=10pt, after skip=8pt}
+
+\newtcolorbox{dobox}{enhanced, breakable, boxrule=0.4pt, arc=2.4mm,
+  colback=green!5!white, colframe=greenok!50!white, drop fuzzy shadow=black!22,
+  left=3mm,right=3mm,top=2.2mm,bottom=2.2mm,
+  attach boxed title to top left={yshift=-2.6mm, xshift=4mm},
+  boxed title style={colback=greenok, colframe=greenok, arc=1mm, boxrule=0pt},
+  coltitle=white, title=Do, fonttitle=\bfseries\sffamily\footnotesize,
+  before skip=10pt, after skip=4pt}
+
+\newtcolorbox{dontbox}{enhanced, breakable, boxrule=0.4pt, arc=2.4mm,
+  colback=red!4!white, colframe=amberdeep!45!white, drop fuzzy shadow=black!22,
+  left=3mm,right=3mm,top=2.2mm,bottom=2.2mm,
+  attach boxed title to top left={yshift=-2.6mm, xshift=4mm},
+  boxed title style={colback=amberdeep, colframe=amberdeep, arc=1mm, boxrule=0pt},
+  coltitle=white, title=Don't, fonttitle=\bfseries\sffamily\footnotesize,
+  before skip=6pt, after skip=8pt}
+
+% Cheatsheet — full-width red banner header, centred caps title, no shadow.
+\newtcolorbox{cheatsheetbox}{enhanced, breakable, boxrule=0.6pt, arc=0mm,
+  colback=white, colframe=cheatred, coltitle=white,
+  colbacktitle=cheatred, halign title=center, toptitle=1mm, bottomtitle=1mm,
+  left=3mm,right=3mm,top=2.2mm,bottom=2.2mm,
+  title=\MakeUppercase{Cheatsheet}, fonttitle=\bfseries\sffamily\small,
+  before skip=10pt, after skip=8pt}
+
+% Pull quote — large navy italic with a thick navy left rule.
+\newtcolorbox{pullquote}{enhanced, breakable, boxrule=0pt, sharp corners,
+  colback=white, colframe=white, left=6mm, right=2mm, top=2mm, bottom=2mm,
+  borderline west={2.5pt}{0pt}{navy},
+  fontupper=\itshape\large\color{navy}, before skip=12pt, after skip=10pt}
+
+% figure helper used by the diagram filter
+\newcommand{\dgram}[3]{%
+  \begin{center}\includegraphics[#2]{#1}\\[3pt]
+  {\footnotesize\itshape\color{rulegrey}#3}\end{center}}
+
+\usepackage{fvextra}
+\fvset{fontsize=\footnotesize,breaklines=true,breakanywhere=true}
+\providecommand{\tightlist}{\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}}
+
+% ── Block code ──────────────────────────────────────────────────────────────
+% Pandoc wraps every fenced code block (```bash, ```text, …) in a `Shaded`
+% environment around an fvextra `Highlighting` verbatim. By default `Shaded` is a
+% no-op, so code renders as bare text. Style it as a tinted card with a navy left
+% rule so code blocks read like the callout cards. Guarded so it works whether or
+% not pandoc has already defined `Shaded` (i.e. whether or not the doc has code).
+\definecolor{codebg}{HTML}{F5F7FA}
+\makeatletter
+\@ifundefined{Shaded}{\newenvironment}{\renewenvironment}{Shaded}
+  {\begin{tcolorbox}[breakable, enhanced, boxrule=0pt, arc=1.6mm,
+     colback=codebg, colframe=codebg,
+     borderline west={2.2pt}{0pt}{navysoft},
+     left=3.5mm, right=3mm, top=2mm, bottom=2mm,
+     before skip=9pt, after skip=9pt]}
+  {\end{tcolorbox}}
+\makeatother

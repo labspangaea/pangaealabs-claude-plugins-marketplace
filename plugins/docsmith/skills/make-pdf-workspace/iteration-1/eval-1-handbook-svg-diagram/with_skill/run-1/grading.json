@@ -1,0 +1,47 @@
+{
+  "expectations": [
+    {
+      "text": "PDF built successfully (exists, >= 1 page)",
+      "passed": true,
+      "evidence": "exists=True, pages=13"
+    },
+    {
+      "text": "Page size is the handbook book trim (~468 x 666 pts, NOT 1440x810)",
+      "passed": true,
+      "evidence": "Page size: 468 x 666 pts"
+    },
+    {
+      "text": "Authored at least one hand-written .svg diagram and embedded it",
+      "passed": true,
+      "evidence": "1 svg(s); source refs .svg=True"
+    },
+    {
+      "text": "No raw ```d2 fence leaked into the PDF text",
+      "passed": true,
+      "evidence": "'```d2' occurrences in PDF text: 0"
+    },
+    {
+      "text": "PDF text contains the title 'Choosing a Vector Database'",
+      "passed": true,
+      "evidence": "found (whitespace-normalized)"
+    },
+    {
+      "text": "Document ends with a Glossary",
+      "passed": true,
+      "evidence": "found 'Glossary'"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 168.6
+  },
+  "execution_metrics": {
+    "errors_encountered": 0,
+    "total_tool_calls": 0
+  }
+}
