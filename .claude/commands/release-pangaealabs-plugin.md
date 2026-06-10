@@ -67,11 +67,24 @@ If the bump arg is anything else, stop with an error.
 
 Use the **Edit** tool on `<PLUGIN_JSON>`. Replace the single `"version": "<old>",` line with `"version": "<new>",`. Do not touch any other field.
 
-### 6. Update the README (if it carries a version)
+### 6. Record the release in `release.md`
 
-This marketplace's `README.md` and `marketplace.json` describe plugins in **prose** — there is no per-plugin version cell to bump (unlike a tabular marketplace). So there is normally **nothing to do here**: skip this step.
+Every release MUST add a human-readable entry to `$REPO/release.md` (the marketplace changelog). Get today's date, then prepend a new entry **directly below** the `<!-- RELEASES:TOP ... -->` marker line (newest first):
 
-Only act if you have deliberately added a versioned plugins table or a "current version" badge to `README.md`; in that case, Edit that single version string from `<OLD_VERSION>` to `<NEW_VERSION>` and nothing else. A stale README is never a release blocker.
+```bash
+DATE=$(date +%F)   # e.g. 2026-06-10
+```
+
+Use the **Edit** tool to insert, immediately after the `<!-- RELEASES:TOP ... -->` line, a block of the form:
+
+```
+## <plugin-name> <new-version> — <DATE>
+<commit subject>
+```
+
+Use the commit subject as the one-line summary; if the user supplied a longer body, add a short bullet list beneath it. Keep the newest entry at the top — never reorder or rewrite older entries.
+
+> The marketplace `README.md` / `marketplace.json` describe plugins in **prose** with no per-plugin version cell, so there is nothing to bump there. (Only edit a README version string if you have deliberately added a versioned table or a "current version" badge.)
 
 ### 7. Validate the marketplace
 
@@ -96,13 +109,13 @@ git -C "$REPO" diff --stat
 Ask the user explicitly: *"Bump `<plugin-name>` to `<new>` and commit with message: `<commit subject>` ? (yes/no)"*
 
 - If the user replies `yes` (or any clear affirmative — `y`, `ok`, `go`), continue.
-- If the user replies anything other than a clear yes (or asks a question), **revert the version bump** with another Edit on `plugin.json` (and the README cell, if you touched one in step 6), leave the rest of their working tree untouched, and stop.
+- If the user replies anything other than a clear yes (or asks a question), **revert the version bump** with another Edit on `plugin.json` and remove the `release.md` entry you added in step 6, leave the rest of their working tree untouched, and stop.
 
 ### 10. Stage an explicit file list and commit
 
 ```bash
 # Pass an explicit space-separated list of modified files; never `git add -A` or `git add .`.
-git -C "$REPO" add plugins/$PLUGIN_NAME/.claude-plugin/plugin.json <other-modified-files>
+git -C "$REPO" add plugins/$PLUGIN_NAME/.claude-plugin/plugin.json release.md <other-modified-files>
 
 git -C "$REPO" commit -m "<plugin-name>: <commit subject> (<new-version>)
 
