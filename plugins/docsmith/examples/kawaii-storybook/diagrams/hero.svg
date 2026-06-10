@@ -17,8 +17,8 @@
     </linearGradient>
   </defs>
 
-  <!-- soft rounded sky panel (not a full-bleed white ground) -->
-  <rect x="20" y="20" width="860" height="520" rx="48" fill="url(#sky)"/>
+  <!-- transparent ground — the art sits directly on the slide's pastel wash
+       (no panel/white fill), so it blends into the kawaii background. -->
 
   <!-- drifting pastel clouds -->
   <g opacity="0.9">
