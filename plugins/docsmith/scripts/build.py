@@ -52,6 +52,35 @@ def _render_log(line: str) -> None:
         pass
 
 
+def _run_capturing(cmd, **kwargs):
+    """Run a backend command, capturing its stderr so a failure can be logged with a
+    real root cause, while still surfacing that stderr to the terminal. Returns
+    (returncode, stderr_text)."""
+    r = subprocess.run(cmd, stderr=subprocess.PIPE, text=True, **kwargs)
+    if r.stderr:
+        sys.stderr.write(r.stderr)
+    return r.returncode, (r.stderr or "")
+
+
+def _write_error_log(template: str, rc: int, out, stderr_text: str) -> str:
+    """On a failed render, write the backend's stderr tail to
+    ~/.docsmith/render-errors/<ts>-<template>.log and return its path (best-effort).
+
+    This gives the render.log FAIL line — and any triage tooling watching it — an
+    actual root cause (the pandoc/marp/tectonic error) instead of just an exit code.
+    """
+    try:
+        d = Path(os.path.expanduser("~/.docsmith/render-errors"))
+        d.mkdir(parents=True, exist_ok=True)
+        ts = _dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+        p = d / f"{ts}-{template}.log"
+        tail = "\n".join((stderr_text or "").splitlines()[-40:])
+        p.write_text(f"# docsmith render FAIL — {template} (rc={rc})\n# out: {out}\n\n{tail}\n")
+        return str(p)
+    except Exception:
+        return ""
+
+
 def resolve_org(profile_raw, chosen_name: str | None):
     """Collapse a profile into the single effective org dict.
 
@@ -196,7 +225,7 @@ def _tex_escape(s: str) -> str:
 
 
 def build_handbook(tmpl_dir: Path, manifest: dict, merged: dict,
-                   profile: dict, src: Path, out: Path) -> int:
+                   profile: dict, src: Path, out: Path) -> tuple[int, str]:
     ds = load_yaml(tmpl_dir / "design-system.yaml")
     ds = deep_merge(ds, {"colors": merged.get("overrides", {}).get("colors", {})})
     tmp = Path(tempfile.mkdtemp(prefix="docsmith-hb-"))
@@ -261,12 +290,11 @@ def build_handbook(tmpl_dir: Path, manifest: dict, merged: dict,
         cmd += ["-H", str(h)]
     for f in lua:
         cmd += ["--lua-filter", str(f)]
-    r = subprocess.run(cmd)
-    return r.returncode
+    return _run_capturing(cmd)
 
 
 def build_marp(tmpl_dir: Path, manifest: dict, merged: dict,
-               profile: dict, src: Path, out: Path) -> int:
+               profile: dict, src: Path, out: Path) -> tuple[int, str]:
     theme_name = manifest.get("theme_name", f"docsmith-{tmpl_dir.name}")
     assets = tmpl_dir / "assets"
     ds_css = [tmpl_dir / "design-system.css"] + [assets / f for f in manifest.get("theme_files", [])]
@@ -304,9 +332,8 @@ def build_marp(tmpl_dir: Path, manifest: dict, merged: dict,
     env.setdefault("CHROME_PATH", _find_chrome())
     # Close stdin: marp-cli reads stdin when it's an open pipe (e.g. spawned from
     # a detached shell or subagent) and blocks indefinitely waiting for EOF.
-    r = subprocess.run(cmd, env={k: v for k, v in env.items() if v},
-                       stdin=subprocess.DEVNULL)
-    return r.returncode
+    return _run_capturing(cmd, env={k: v for k, v in env.items() if v},
+                          stdin=subprocess.DEVNULL)
 
 
 def _find_chrome() -> str:
@@ -397,15 +424,17 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
 
     if backend == "pandoc-tectonic":
-        rc = build_handbook(tmpl_dir, manifest, merged, profile, src, out)
+        rc, err = build_handbook(tmpl_dir, manifest, merged, profile, src, out)
     elif backend == "marp-cli":
-        rc = build_marp(tmpl_dir, manifest, merged, profile, src, out)
+        rc, err = build_marp(tmpl_dir, manifest, merged, profile, src, out)
     else:
         print(f"unknown backend '{backend}' in {tmpl_dir/'template.yaml'}", file=sys.stderr)
         return 2
 
     if rc != 0:
-        _render_log(f"FAIL {args.template} (rc={rc}) {out}")
+        errlog = _write_error_log(args.template, rc, out, err)
+        _render_log(f"FAIL {args.template} (rc={rc}) {out}"
+                    + (f" [err: {errlog}]" if errlog else ""))
         print(f"render failed (backend={backend}, rc={rc})", file=sys.stderr)
         return rc
 
