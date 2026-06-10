@@ -29,6 +29,27 @@ Mermaid, or image generation).
 - `claudecode-deck` — 16:9 Claude/"claudecode"-branded slides (marp-cli)
 - `kawaii-storybook` — 16:9 pastel storybook / NotebookLM-style deck (marp-cli)
 
+**Preview — one source, four looks** _(rendered demos from [`plugins/docsmith/examples/`](plugins/docsmith/examples/))_
+
+<table>
+<tr>
+<td width="50%"><img src="plugins/docsmith/examples/handbook/pages/page-01.png" width="100%"><br><sub><b>handbook</b> — LaTeX book · cover</sub></td>
+<td width="50%"><img src="plugins/docsmith/examples/handbook/pages/page-08.png" width="100%"><br><sub>callouts + clickable links</sub></td>
+</tr>
+<tr>
+<td><img src="plugins/docsmith/examples/corporate-deck/pages/page-01.png" width="100%"><br><sub><b>corporate-deck</b> — formal slides · cover</sub></td>
+<td><img src="plugins/docsmith/examples/corporate-deck/pages/page-04.png" width="100%"><br><sub>KPI grid</sub></td>
+</tr>
+<tr>
+<td><img src="plugins/docsmith/examples/claudecode-deck/pages/page-01.png" width="100%"><br><sub><b>claudecode-deck</b> — editorial · cover</sub></td>
+<td><img src="plugins/docsmith/examples/claudecode-deck/pages/page-14.png" width="100%"><br><sub>dark statement slide</sub></td>
+</tr>
+<tr>
+<td><img src="plugins/docsmith/examples/kawaii-storybook/pages/page-01.png" width="100%"><br><sub><b>kawaii-storybook</b> — pastel storybook · cover</sub></td>
+<td><img src="plugins/docsmith/examples/kawaii-storybook/pages/page-04.png" width="100%"><br><sub>verdict path slide</sub></td>
+</tr>
+</table>
+
 Layered config lives under `~/.docsmith/` (global profile + per-template overrides
 + per-doc front-matter), so the plugin location is portable.
 
