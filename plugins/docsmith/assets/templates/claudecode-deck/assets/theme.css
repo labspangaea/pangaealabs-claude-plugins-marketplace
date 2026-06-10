@@ -63,7 +63,11 @@ section.statement p, section.statement li { color: rgba(240,238,230,.86); }
 section.statement h6 { color: var(--cc-dark-accent, var(--cc-clay-soft, #D8896B)); }
 section.statement h6::before { color: var(--cc-dark-accent, var(--cc-clay-soft, #D8896B)); }
 section.statement footer { color: rgba(240,238,230,.72); }
-section.statement footer img { filter: brightness(0) invert(1); }
+/* No img filter here: the brand logo may be full-color (e.g. a clay mark with a
+   white cloud), and brightness(0) invert(1) would flatten every pixel to a solid
+   white box. Render the logo in its real colors. If a user's logo is dark
+   monochrome and disappears on this dark slide, the fix is a light logo variant —
+   do NOT reintroduce brightness(0) invert(1). */
 section.statement::after { color: rgba(240,238,230,.55); }
 
 /* ===================== CLOSING ===================== */
