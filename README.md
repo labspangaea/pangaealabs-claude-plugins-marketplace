@@ -83,7 +83,12 @@ Copy [`plugins/docsmith/examples/profile.example.yaml`](plugins/docsmith/example
 </details>
 
 ```bash
+# install
 /plugin install docsmith@pangaealabs-claude-plugins-marketplace
+
+# update later — refresh the catalog, then the plugin, then restart Claude Code
+/plugin marketplace update pangaealabs-claude-plugins-marketplace
+/plugin update docsmith@pangaealabs-claude-plugins-marketplace
 ```
 
 Then, in any project:
