@@ -1,0 +1,8 @@
+[
+  {
+    "name": "render-log",
+    "command": "mkdir -p \"$HOME/.docsmith\" && touch \"$HOME/.docsmith/render.log\" && exec tail -n0 -F \"$HOME/.docsmith/render.log\"",
+    "description": "docsmith PDF render results (one OK/FAIL line per build)",
+    "when": "on-skill-invoke:make-pdf"
+  }
+]
