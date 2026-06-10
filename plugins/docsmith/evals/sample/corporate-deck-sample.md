@@ -49,7 +49,7 @@ di 38 provinsi.
 
 # Dari dapur SPPG ke meja penerima manfaat.
 
-![Alur operasional MBG: perencanaan menu, produksi di SPPG, distribusi harian, lalu pelaporan dan verifikasi.](/Users/harry/projects/claude-plugins/plugins/docsmith/evals/sample/diagrams/alur-operasional.svg)
+![Alur operasional MBG: perencanaan menu, produksi di SPPG, distribusi harian, lalu pelaporan dan verifikasi.](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/evals/sample/diagrams/alur-operasional.svg)
 
 Ahli gizi BGN menyusun menu mingguan; 4.872 dapur memproduksi porsi seimbang
 yang diawasi BPOM; porsi dikirim setiap hari sekolah; kepatuhan terpantau

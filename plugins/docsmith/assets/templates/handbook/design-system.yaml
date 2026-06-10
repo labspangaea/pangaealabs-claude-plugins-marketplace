@@ -13,5 +13,6 @@ colors:
   navytint:      "#EAF1F9"   # Interview Anchor fill
   cheatred:      "#CC0000"   # Cheatsheet banner
   cheatreddark:  "#900C18"
+  linkblue:      "#2F80ED"   # hyperlinks: TOC, internal refs, URLs, citations
 type:
   base_size: "11pt"

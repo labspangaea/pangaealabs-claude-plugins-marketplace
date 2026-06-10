@@ -11,17 +11,20 @@ pandoc_args:
   - classoption=twoside
   - -V
   - classoption=openright
-  # External citation links render in blue (like an <a href>) and stay clickable;
-  # internal links (TOC / cross-refs) stay black for a clean look. Pandoc's own
-  # hyperref setup applies these in the right order (xcolor dvipsnames loaded first).
+  # Every hyperlink — TOC entries, internal cross-refs, external URLs, and
+  # citations — renders in one uniform light blue (linkblue, #2F80ED, defined in
+  # design-system.yaml and emitted into the generated _tokens.tex before this).
+  # colorlinks keeps them text-coloured (no boxes) while staying clickable.
   - -V
   - colorlinks=true
   - -V
-  - linkcolor=black
+  - linkcolor=linkblue
   - -V
-  - urlcolor=NavyBlue
+  - toccolor=linkblue
   - -V
-  - citecolor=NavyBlue
+  - urlcolor=linkblue
+  - -V
+  - citecolor=linkblue
 header_includes:   # rendered after the generated _tokens.tex
   - preamble.tex
   - titlepage.tex
