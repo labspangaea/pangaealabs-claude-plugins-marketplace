@@ -24,71 +24,72 @@ system into a finished PDF. The look is the template's; the brand is your profil
 
 ## Gallery — every template's components, rendered
 
-Each template below ships a runnable demo under [`examples/`](examples/) that
-exercises **all** its slide classes / callout components, so the PDF doubles as a
-visual catalog. Pages shown are pulled straight from those demos (rendered with the
-made-up [`examples/profile.example.yaml`](examples/profile.example.yaml)).
+Each template ships a runnable demo under [`examples/`](examples/) that renders
+**every** slide class / callout component, so each PDF doubles as a visual catalog —
+and each folder has a `CLASSES.md` listing every class with its page. Demos render
+with the made-up [`examples/profile.example.yaml`](examples/profile.example.yaml),
+including its **footer logo** (hand-written SVG under [`examples/logo/`](examples/logo/)).
 
-### `handbook` — *The Async Team Handbook* (Acme Corp)
+### `handbook` — *The Async Team Handbook* (Acme Corp) · 11 pp
 <table>
 <tr>
-<td width="50%"><img src="examples/handbook/pages/page-01.png" width="100%"><br><sub><b>Cover</b> — title page + wordmark</sub></td>
-<td width="50%"><img src="examples/handbook/pages/page-08.png" width="100%"><br><sub><b>Callouts</b> — do / don't / cheatsheet + clickable links</sub></td>
+<td width="50%"><img src="examples/handbook/pages/page-01.png" width="100%"><br><sub><b>Cover</b> — title page + Acme logo</sub></td>
+<td width="50%"><img src="examples/handbook/pages/page-08.png" width="100%"><br><sub><b>Callouts</b> — do / don't / cheatsheet</sub></td>
 </tr>
 <tr>
-<td><img src="examples/handbook/pages/page-07.png" width="100%"><br><sub><b>Diagram</b> — hand-written raw SVG, SVG→PDF</sub></td>
-<td><img src="examples/handbook/pages/page-10.png" width="100%"><br><sub><b>Glossary</b> — two-column term table</sub></td>
+<td><img src="examples/handbook/pages/page-06.png" width="100%"><br><sub><b>Diagram</b> — hand-written raw SVG, SVG→PDF</sub></td>
+<td><img src="examples/handbook/pages/page-11.png" width="100%"><br><sub><b>Glossary</b> — two-column term table</sub></td>
 </tr>
 </table>
 
 > **Try it:** `Turn examples/handbook/async-handbook.md into a handbook PDF for Acme Corp`
-> 🔎 **For detail, check the example folder [`examples/handbook/`](examples/handbook/)** — full PDF, source `.md`, the SVG, and the example prompt.
+> 📋 **All components →** [`examples/handbook/CLASSES.md`](examples/handbook/CLASSES.md) · folder [`examples/handbook/`](examples/handbook/)
 
-### `corporate-deck` — *FY26 Strategy Review* (Acme Corp)
+### `corporate-deck` — *FY26 Strategy Review* (Acme Corp) · 19 slides
 <table>
 <tr>
 <td width="50%"><img src="examples/corporate-deck/pages/page-01.png" width="100%"><br><sub><b>cover</b></sub></td>
 <td width="50%"><img src="examples/corporate-deck/pages/page-04.png" width="100%"><br><sub><b>kpi</b> — metric grid</sub></td>
 </tr>
 <tr>
-<td><img src="examples/corporate-deck/pages/page-08.png" width="100%"><br><sub><b>split</b> — SVG figure beside content (no box/card)</sub></td>
-<td><img src="examples/corporate-deck/pages/page-13.png" width="100%"><br><sub><b>iconcards</b> — SVG icons + titles</sub></td>
+<td><img src="examples/corporate-deck/pages/page-08.png" width="100%"><br><sub><b>split</b> — SVG figure, no box/card</sub></td>
+<td><img src="examples/corporate-deck/pages/page-18.png" width="100%"><br><sub><b>iconcards</b> — SVG icons + titles</sub></td>
 </tr>
 </table>
 
 > **Try it:** `Make a corporate-deck from examples/corporate-deck/acme-qbr.md, brand Acme Corp`
-> 🔎 **For detail, check the example folder [`examples/corporate-deck/`](examples/corporate-deck/)** — the 17-slide PDF covers cover · agenda · bigstat · kpi · pillars · cards3 · compare2 · split · steps · timeline · versus · procon · iconcards · stack · quote · statement · closing.
-> 🅰️ This demo also shows a **footer logo** — a hand-written SVG ([`examples/logo/acme.svg`](examples/logo/acme.svg)); set your org's `logo:` in the profile to do the same (here passed via `--logo`).
+> 📋 **All 19 classes →** [`examples/corporate-deck/CLASSES.md`](examples/corporate-deck/CLASSES.md) · folder [`examples/corporate-deck/`](examples/corporate-deck/)
+> 🅰️ The footer shows the **Acme logo** — hand-written SVG ([`examples/logo/acme.svg`](examples/logo/acme.svg)), set via the profile's `logo:`.
 
-### `claudecode-deck` — *Nimbus — Product Launch* (Nimbus Studio)
+### `claudecode-deck` — *Nimbus — Product Launch* (Nimbus Studio) · 22 slides
 <table>
 <tr>
 <td width="50%"><img src="examples/claudecode-deck/pages/page-01.png" width="100%"><br><sub><b>cover</b> — editorial serif + clay accent</sub></td>
-<td width="50%"><img src="examples/claudecode-deck/pages/page-05.png" width="100%"><br><sub><b>glossary</b> — hairline cards</sub></td>
+<td width="50%"><img src="examples/claudecode-deck/pages/page-10.png" width="100%"><br><sub><b>glossary</b> — hairline cards</sub></td>
 </tr>
 <tr>
-<td><img src="examples/claudecode-deck/pages/page-09.png" width="100%"><br><sub><b>split</b> — transparent SVG on the cream wash</sub></td>
-<td><img src="examples/claudecode-deck/pages/page-14.png" width="100%"><br><sub><b>statement</b> — dark espresso slide</sub></td>
+<td><img src="examples/claudecode-deck/pages/page-15.png" width="100%"><br><sub><b>split</b> — transparent SVG on the cream wash</sub></td>
+<td><img src="examples/claudecode-deck/pages/page-21.png" width="100%"><br><sub><b>statement</b> — dark espresso slide</sub></td>
 </tr>
 </table>
 
 > **Try it:** `Render examples/claudecode-deck/nimbus-launch.md to claudecode-deck`
-> 🔎 **For detail, check the example folder [`examples/claudecode-deck/`](examples/claudecode-deck/)** — the 15-slide PDF also covers models · filegrid · featurepair · compare3 · steps · iconcards · stack · quote · closing.
+> 📋 **All 22 classes →** [`examples/claudecode-deck/CLASSES.md`](examples/claudecode-deck/CLASSES.md) · folder [`examples/claudecode-deck/`](examples/claudecode-deck/)
 
-### `kawaii-storybook` — *Cloud Safety, Explained* (Nimbus Studio)
+### `kawaii-storybook` — *Cloud Safety, Explained* (Nimbus Studio) · 28 pp
 <table>
 <tr>
 <td width="50%"><img src="examples/kawaii-storybook/pages/page-01.png" width="100%"><br><sub><b>cover</b> — pastel wash + emoji mascots</sub></td>
-<td width="50%"><img src="examples/kawaii-storybook/pages/page-04.png" width="100%"><br><sub><b>path</b> — hero + green verdict pill</sub></td>
+<td width="50%"><img src="examples/kawaii-storybook/pages/page-08.png" width="100%"><br><sub><b>path</b> — hero + green verdict pill</sub></td>
 </tr>
 <tr>
-<td><img src="examples/kawaii-storybook/pages/page-08.png" width="100%"><br><sub><b>scorecard</b> — 🟢🟡🔴 matrix</sub></td>
-<td><img src="examples/kawaii-storybook/pages/page-11.png" width="100%"><br><sub><b>roadmap</b> — zig-zag signposts</sub></td>
+<td><img src="examples/kawaii-storybook/pages/page-16.png" width="100%"><br><sub><b>scorecard</b> — 🟢🟡🔴 matrix</sub></td>
+<td><img src="examples/kawaii-storybook/pages/page-21.png" width="100%"><br><sub><b>roadmap</b> — zig-zag signposts</sub></td>
 </tr>
 </table>
 
 > **Try it:** `Make a cute kawaii-storybook from examples/kawaii-storybook/cloud-safety.md`
-> 🔎 **For detail, check the example folder [`examples/kawaii-storybook/`](examples/kawaii-storybook/)** — the 18-slide PDF also covers bigstat · pillars · path accept/reject/caution · laws · flow · scenarios · figure · code · callouts · quote · statement · closing.
+> 📋 **All 24 classes →** [`examples/kawaii-storybook/CLASSES.md`](examples/kawaii-storybook/CLASSES.md) · folder [`examples/kawaii-storybook/`](examples/kawaii-storybook/)
 
 ## Use it
 Invoke the **`/docsmith:make-pdf`** skill (or just ask Claude to "make a PDF /

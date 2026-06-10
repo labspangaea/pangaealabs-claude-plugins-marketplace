@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="80" viewBox="0 0 280 80" fill="none" font-family="sans-serif">
+  <g stroke="#071e49" stroke-width="4" stroke-linecap="round" fill="none">
+    <path d="M22 56 L22 24 L46 56 L46 24"/>
+  </g>
+  <circle cx="60" cy="26" r="6" fill="#92d05d"/>
+  <text x="80" y="48" font-size="30" font-weight="700" fill="#071e49" letter-spacing="-0.5">Northwind</text>
+</svg>

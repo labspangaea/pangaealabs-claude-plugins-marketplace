@@ -16,6 +16,18 @@ Durable task execution for product teams who would rather not babysit a queue. S
 
 ---
 
+<!-- _class: agenda -->
+
+###### What we'll cover
+
+# The *runsheet*
+
+- **The problem** Why background work quietly becomes the scariest part of a system.
+- **The model** Jobs, runs, and queues — the whole vocabulary on one page.
+- **The proof** Numbers, lifecycle, and a rollout you can plan around.
+
+---
+
 <!-- _class: bigstat -->
 
 ###### Why now
@@ -23,6 +35,18 @@ Durable task execution for product teams who would rather not babysit a queue. S
 # 99.98%
 
 of jobs land on the *first try* — no dead-letter archaeology, no 3 a.m. replays.
+
+---
+
+<!-- _class: kpi -->
+
+###### The numbers that matter
+
+# Boring, *by the metric*
+
+- **50 ms** p95 cold-start before a handler runs — fast enough to sit in a request path.
+- **99.98%** of jobs succeed on the first attempt, no manual replay required.
+- **3 regions** live today for execution close to your data, with more on the way.
 
 ---
 
@@ -38,6 +62,29 @@ of jobs land on the *first try* — no dead-letter archaeology, no 3 a.m. replay
 
 ---
 
+<!-- _class: cards3 -->
+
+###### What the platform handles
+
+# Three jobs *off your plate*
+
+- **Persistence** Every request is written to durable storage before it runs, so a crash can never silently drop work.
+- **Scheduling** Workers lease, run, and retry on their own — you never tune a broker or rebalance a shard.
+- **History** Inputs, retries, logs, and results stay queryable long after the job is done.
+
+---
+
+<!-- _class: compare2 -->
+
+###### Two ways to run a job
+
+# Inline *or* in the background
+
+- **Inline call** Block the request, wait for the result, return it directly. Simple, but every slow dependency becomes the user's wait.
+- **Background job** Submit, return immediately, and let Nimbus finish the work durably. The user moves on; the result lands when it's ready.
+
+---
+
 <!-- _class: models -->
 
 ###### Pick a plan
@@ -47,6 +94,17 @@ of jobs land on the *first try* — no dead-letter archaeology, no 3 a.m. replay
 - **Starter** 10k jobs / month. Shared workers, 7-day history. Ideal for side projects and early prototypes.
 - **Team** 5M jobs / month. Dedicated workers, 30-day history, priority queues, and on-call alerting.
 - **Scale** Unmetered jobs. Multi-region execution, 1-year history, custom retention, and a named reliability engineer.
+
+---
+
+<!-- _class: people -->
+
+###### Who's behind it
+
+# A small, *senior team*
+
+- **Lee Park** Founder & CEO. Built and ran job infrastructure at two prior platforms before deciding it should be boring.
+- **Ria Okafor** Head of Reliability. Spent a decade keeping queues quiet at scale; now she keeps yours quiet too.
 
 ---
 
@@ -99,6 +157,17 @@ of jobs land on the *first try* — no dead-letter archaeology, no 3 a.m. replay
 
 ---
 
+<!-- _class: versus -->
+
+###### What actually changes
+
+# Before Nimbus, *after Nimbus*
+
+- **Before** Hand-rolled retry loops, a dead-letter table nobody reads, and a pager that fires at 3 a.m. when a job quietly vanishes.
+- **After** One durable timeline per job, automatic retries with history, and a queue you genuinely stop thinking about.
+
+---
+
 <!-- _class: split -->
 
 ###### Under the hood
@@ -146,6 +215,17 @@ Every submission walks the same four stops. The edge authenticates and rate-limi
 ![Nimbus rollout timeline: private alpha, open beta, general release, multi-region](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/claudecode-deck/diagrams/stack.svg)
 
 > Open beta is live today; general release lands next quarter with billing and SLAs.
+
+---
+
+<!-- _class: procon -->
+
+###### When to reach for it
+
+# Use it *for the right work*
+
+- **Great fit** Webhooks, emails, exports, billing runs, and anything that can finish slightly later without anyone waiting on the request.
+- **Skip it** Tight synchronous reads where the caller needs the answer in the same millisecond — keep those inline, not queued.
 
 ---
 
