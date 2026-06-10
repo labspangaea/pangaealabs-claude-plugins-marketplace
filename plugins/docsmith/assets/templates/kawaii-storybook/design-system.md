@@ -56,9 +56,11 @@ ABSOLUTE path. Marp embeds the SVG via Chrome (`--allow-local-files`), so the sa
 
 - **SVG hero / character** — `![Bara the bear](/abs/diagrams/hero.svg)` is the hero
   image in `path` / `figure` / `split` / `cover`, exactly where a big emoji goes.
-  It floats on a soft white card by default; add the **`bare`** modifier
-  (`<!-- _class: figure bare -->`) to let a transparent character sit directly on
-  the wash. Emoji remain the zero-effort default — SVG is the richer option.
+  It sits **directly on the pastel wash — no white card.** So author the SVG with a
+  **transparent ground**: no `#fff` fill and no full background/panel `<rect>` — let
+  the art (clouds, character, props) float on the slide's wash. The `bare` modifier
+  (`<!-- _class: figure bare -->`) only squares off the rounded corners. Emoji
+  remain the zero-effort default — SVG is the richer option.
   Give the file explicit `width`+`height` (not only a `viewBox`) — Chrome embeds it
   as an `<img>`, and a size-less SVG collapses to nothing on the slide.
 - **Full-bleed SVG scene (background)** — marp's native background directive:

@@ -194,7 +194,7 @@ section.bigstat h1 em { font-size: 96px; color: var(--ks-ink); }
 
 /* ===================== SPLIT (image floats, content flows) ===================== */
 section.split img:not(.emoji) { float: right; width: 44%; margin: 0 0 30px 70px;
-  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-lg); background: #fff; }
+  border-radius: var(--ks-r-card); }
 section.split p, section.split li { max-width: none; }
 
 /* ===================== PATH (signature analysis: hero + chip-cards + verdict) ===================== */
@@ -207,7 +207,7 @@ section.path { padding-top: 72px; padding-bottom: 104px; }
    and shove the cleared verdict pill down onto the footer band. */
 section.path img:not(.emoji) { float: left; height: 44vh; width: auto; max-width: 42%;
   margin: 6px 46px 24px 0;
-  border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-lg); background: #fff; }
+  border-radius: var(--ks-r-card); }
 section.path ul { list-style: none; padding: 0; margin: 14px 0 0;
   display: flex; flex-direction: column; gap: 16px; }
 section.path li { background: var(--ks-card); border: 1px solid var(--ks-hairline);
@@ -301,14 +301,14 @@ section.figure h2 { font-size: 92px; }
 /* definite height (not just max-*) so an SVG hero with only a viewBox — no
    intrinsic px size — still gets a real box instead of collapsing to nothing. */
 section.figure img:not(.emoji) { display: block; margin: 18px auto 0; height: 40vh; width: auto;
-  max-width: 78%; border-radius: var(--ks-r-card); box-shadow: var(--ks-shadow-lg); background: #fff; }
+  max-width: 78%; border-radius: var(--ks-r-card); }
 section.figure img.emoji { height: 200px; margin: 12px 0; }   /* a standalone emoji hero, no card */
-/* a hand-written SVG character/hero (`![Bara](/abs/hero.svg)`) floats like any
-   image hero, on a soft white card by default. For a character that should sit
-   directly on the pastel wash, drop the card with the `bare` modifier:
-   `<!-- _class: figure bare -->` (also works on `path`). */
+/* Image heroes (split / path / figure) sit DIRECTLY on the pastel wash — no white
+   card, no shadow — so hand-written SVG art MUST use a transparent ground (no #fff
+   or filled panel rect) to blend in. The `bare` modifier additionally squares off
+   the rounded corners: `<!-- _class: figure bare -->` (also works on `path`). */
 section.figure.bare img:not(.emoji), section.path.bare img:not(.emoji) {
-  background: none; box-shadow: none; border-radius: 0; }
+  border-radius: 0; }
 section.figure p { max-width: 42ch; color: var(--ks-ink-soft); }
 
 /* ===================== VERDICT / CONCLUSION blockquote ===================== */
@@ -317,7 +317,13 @@ blockquote { margin: 26px 0 0; border: 0; background: var(--ks-accept-tint);
   font-weight: 700; font-size: 30px; box-shadow: var(--ks-shadow-sm); }
 blockquote strong { color: inherit; }
 section.path blockquote, section.scorecard blockquote { clear: both; }
-section.path blockquote { margin-top: 18px; }
+/* Vertically center the verdict text in its pill: flex-center the inner <p>,
+   drop its default top/bottom margins, and stop a trailing emoji from drooping
+   below the baseline (which lengthened the line box downward and made the text
+   sit high). */
+section.path blockquote { margin-top: 18px; display: flex; align-items: center; }
+section.path blockquote > p { margin: 0; width: 100%; }
+section.path blockquote img.emoji { vertical-align: middle; }
 section.accept blockquote { background: linear-gradient(135deg, var(--ks-accept-a), var(--ks-accept-b));
   color: #fff; border-radius: var(--ks-r-pill); box-shadow: var(--ks-shadow-md); }
 section.reject blockquote { background: linear-gradient(135deg, var(--ks-reject-a), var(--ks-reject-b));
