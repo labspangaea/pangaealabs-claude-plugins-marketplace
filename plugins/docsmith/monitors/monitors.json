@@ -4,5 +4,11 @@
     "command": "mkdir -p \"$HOME/.docsmith\" && touch \"$HOME/.docsmith/render.log\" && exec tail -n0 -F \"$HOME/.docsmith/render.log\"",
     "description": "docsmith PDF render results (one OK/FAIL line per build)",
     "when": "on-skill-invoke:make-pdf"
+  },
+  {
+    "name": "toolchain-doctor",
+    "command": "mkdir -p \"$HOME/.docsmith\"; python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py\" 2>&1 | sed 's/^/[toolchain] /' || true; touch \"$HOME/.docsmith/toolchain.log\"; exec tail -n0 -F \"$HOME/.docsmith/toolchain.log\"",
+    "description": "docsmith toolchain health at build start (pandoc/tectonic/rsvg/marp/Chrome), then tails ~/.docsmith/toolchain.log for events",
+    "when": "on-skill-invoke:make-pdf"
   }
 ]

@@ -103,6 +103,24 @@ gallery, and runnable demos with example prompts live in
 **[the docsmith README](plugins/docsmith/README.md#gallery--every-templates-components-rendered)**
 and **[`plugins/docsmith/examples/`](plugins/docsmith/examples/)**.
 
+## Maintaining docsmith
+
+_Repo-internal commands for maintainers — **not shipped to docsmith users** (end users get inline error help from `/make-pdf` while it builds)._
+
+Two monitors in `plugins/docsmith/monitors/monitors.json` arm on `/make-pdf` and stream signal into the session:
+
+| Monitor | Streams |
+|---|---|
+| `render-log` | tails `~/.docsmith/render.log` — one OK/FAIL line per build (`build.py` writes it) |
+| `toolchain-doctor` | runs `doctor.py` at build start to flag a missing/broken toolchain (pandoc/tectonic/rsvg/marp/Chrome) — the **environment** failure class, caught before a render fails — then tails `~/.docsmith/toolchain.log` |
+
+On a render failure, two commands form a detect → fix self-healing loop:
+
+| Skill | Role | Triggered when |
+|---|---|---|
+| `docsmith-render-triage` | Reads the captured stderr from a FAIL, decides content bug vs docsmith infra bug | A render fails |
+| `docsmith-fix-loop` | Fixes a confirmed skill/template/script finding, proves it with an eval + audit | Triage says it's an infra bug |
+
 ## License
 
 © [Pangaea Digital Labs](https://www.pangaea.id/) — [www.pangaea.id](https://www.pangaea.id/)
