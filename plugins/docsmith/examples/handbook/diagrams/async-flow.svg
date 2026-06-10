@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="320" viewBox="0 0 880 320">
+  <!-- Async communication flow — hand-written, navy palette #003060 -->
+  <rect x="0" y="0" width="880" height="320" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="440" y="34" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#003060" text-anchor="middle">The Async Message Lifecycle</text>
+  <line x1="320" y1="44" x2="560" y2="44" stroke="#003060" stroke-width="2"/>
+
+  <!-- Stage 1: Write -->
+  <rect x="30" y="110" width="170" height="90" rx="10" fill="#EAF1F9" stroke="#003060" stroke-width="2"/>
+  <text x="115" y="150" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#003060" text-anchor="middle">1 · Write</text>
+  <text x="115" y="174" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2D5A8F" text-anchor="middle">Context-rich</text>
+  <text x="115" y="190" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2D5A8F" text-anchor="middle">message</text>
+
+  <!-- Stage 2: Triage -->
+  <rect x="250" y="110" width="170" height="90" rx="10" fill="#EAF1F9" stroke="#003060" stroke-width="2"/>
+  <text x="335" y="150" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#003060" text-anchor="middle">2 · Triage</text>
+  <text x="335" y="174" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2D5A8F" text-anchor="middle">Tag urgency</text>
+  <text x="335" y="190" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2D5A8F" text-anchor="middle">&amp; owner</text>
+
+  <!-- Stage 3: Resolve -->
+  <rect x="470" y="110" width="170" height="90" rx="10" fill="#EAF1F9" stroke="#003060" stroke-width="2"/>
+  <text x="555" y="150" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#003060" text-anchor="middle">3 · Resolve</text>
+  <text x="555" y="174" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2D5A8F" text-anchor="middle">Focused deep</text>
+  <text x="555" y="190" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2D5A8F" text-anchor="middle">work block</text>
+
+  <!-- Stage 4: Record -->
+  <rect x="690" y="110" width="170" height="90" rx="10" fill="#003060" stroke="#003060" stroke-width="2"/>
+  <text x="775" y="150" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">4 · Record</text>
+  <text x="775" y="174" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#EAF1F9" text-anchor="middle">Decision in</text>
+  <text x="775" y="190" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#EAF1F9" text-anchor="middle">the doc</text>
+
+  <!-- Arrows between stages -->
+  <line x1="200" y1="155" x2="244" y2="155" stroke="#003060" stroke-width="2"/>
+  <path d="M 244 155 L 234 150 L 234 160 Z" fill="#003060"/>
+
+  <line x1="420" y1="155" x2="464" y2="155" stroke="#003060" stroke-width="2"/>
+  <path d="M 464 155 L 454 150 L 454 160 Z" fill="#003060"/>
+
+  <line x1="640" y1="155" x2="684" y2="155" stroke="#003060" stroke-width="2"/>
+  <path d="M 684 155 L 674 150 L 674 160 Z" fill="#003060"/>
+
+  <!-- Feedback loop: Record back to Write (the doc informs the next message) -->
+  <path d="M 775 200 L 775 270 L 115 270 L 115 200" fill="none" stroke="#2D5A8F" stroke-width="2" stroke-dasharray="6 5"/>
+  <path d="M 115 200 L 110 210 L 120 210 Z" fill="#2D5A8F"/>
+  <circle cx="445" cy="270" r="5" fill="#2D5A8F"/>
+  <text x="445" y="292" font-family="Helvetica, Arial, sans-serif" font-size="12" font-style="italic" fill="#2D5A8F" text-anchor="middle">searchable history feeds the next message</text>
+</svg>

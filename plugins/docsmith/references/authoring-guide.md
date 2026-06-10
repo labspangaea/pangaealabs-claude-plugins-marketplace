@@ -6,7 +6,7 @@ contract.
 ## Front-matter (per document)
 ```yaml
 ---
-template: handbook            # default target; or  templates: [handbook, bgn-deck]
+template: handbook            # default target; or  templates: [handbook, corporate-deck]
 title: "My Document"
 subtitle: "..."
 date: auto                    # auto = today
@@ -55,7 +55,7 @@ temp dir, so relative image paths won't resolve.
 - Long docs: close with a `## Glossary` (term/meaning table). After building, run
   `scripts/strip_blank_pages.py OUT.pdf` to drop the `book`-class filler pages.
 
-## decks (bgn-deck, claudecode-deck, kawaii-storybook) — marp
+## decks (corporate-deck, claudecode-deck, kawaii-storybook) — marp
 - Separate slides with `---`.
 - Pick a layout per slide with a marp directive: `<!-- _class: kpi -->`.
 - Slide elements:
@@ -105,5 +105,5 @@ A soft pastel storybook theme. Beyond the shared vocabulary it adds:
 PDF only. Decks are 1440×810pt (16:9); the handbook is a 6.5×9.25in book.
 Run via the `make-pdf` skill, or directly:
 ```
-python3 scripts/build.py --in DOC.md --out DOC.pdf --template bgn-deck
+python3 scripts/build.py --in DOC.md --out DOC.pdf --template corporate-deck
 ```

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" font-family="sans-serif">
+  <defs>
+    <marker id="ra" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L11,5 L0,10 z" fill="#071e49"/>
+    </marker>
+  </defs>
+
+  <!-- baseline rail -->
+  <line x1="80" y1="210" x2="1200" y2="210" stroke="#071e49" stroke-width="3"/>
+  <polygon points="1200,202 1216,210 1200,218" fill="#071e49"/>
+
+  <!-- Q1 -->
+  <circle cx="200" cy="210" r="14" fill="#b5e0ea" stroke="#071e49" stroke-width="3"/>
+  <rect x="80" y="60" width="240" height="118" rx="14" fill="#faf8f3" stroke="#071e49" stroke-width="2.5"/>
+  <text x="200" y="92" text-anchor="middle" font-size="22" font-weight="bold" fill="#5a9438">Q1 · FOUNDATION</text>
+  <text x="200" y="124" text-anchor="middle" font-size="18" fill="#353530">Migrate to the new</text>
+  <text x="200" y="148" text-anchor="middle" font-size="18" fill="#353530">edge gateway</text>
+  <line x1="200" y1="178" x2="200" y2="196" stroke="#071e49" stroke-width="2.5" marker-end="url(#ra)"/>
+
+  <!-- Q2 -->
+  <circle cx="490" cy="210" r="14" fill="#92d05d" stroke="#071e49" stroke-width="3"/>
+  <rect x="370" y="242" width="240" height="118" rx="14" fill="#faf8f3" stroke="#071e49" stroke-width="2.5"/>
+  <text x="490" y="276" text-anchor="middle" font-size="22" font-weight="bold" fill="#5a9438">Q2 · EXPAND</text>
+  <text x="490" y="308" text-anchor="middle" font-size="18" fill="#353530">Launch self-serve</text>
+  <text x="490" y="332" text-anchor="middle" font-size="18" fill="#353530">onboarding</text>
+  <line x1="490" y1="242" x2="490" y2="224" stroke="#071e49" stroke-width="2.5" marker-end="url(#ra)"/>
+
+  <!-- Q3 -->
+  <circle cx="780" cy="210" r="14" fill="#d1b06c" stroke="#071e49" stroke-width="3"/>
+  <rect x="660" y="60" width="240" height="118" rx="14" fill="#faf8f3" stroke="#071e49" stroke-width="2.5"/>
+  <text x="780" y="92" text-anchor="middle" font-size="22" font-weight="bold" fill="#5a9438">Q3 · SCALE</text>
+  <text x="780" y="124" text-anchor="middle" font-size="18" fill="#353530">Open the EU region</text>
+  <text x="780" y="148" text-anchor="middle" font-size="18" fill="#353530">and partner API</text>
+  <line x1="780" y1="178" x2="780" y2="196" stroke="#071e49" stroke-width="2.5" marker-end="url(#ra)"/>
+
+  <!-- Q4 -->
+  <circle cx="1070" cy="210" r="14" fill="#071e49" stroke="#071e49" stroke-width="3"/>
+  <rect x="950" y="242" width="240" height="118" rx="14" fill="#071e49" stroke="#071e49" stroke-width="2.5"/>
+  <text x="1070" y="276" text-anchor="middle" font-size="22" font-weight="bold" fill="#92d05d">Q4 · OPTIMIZE</text>
+  <text x="1070" y="308" text-anchor="middle" font-size="18" fill="#ffffff">Margin program +</text>
+  <text x="1070" y="332" text-anchor="middle" font-size="18" fill="#ffffff">FY27 planning</text>
+  <line x1="1070" y1="242" x2="1070" y2="224" stroke="#071e49" stroke-width="2.5" marker-end="url(#ra)"/>
+</svg>

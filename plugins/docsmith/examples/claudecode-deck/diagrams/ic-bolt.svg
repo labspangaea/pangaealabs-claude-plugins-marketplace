@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- speed / latency — clay clay-stroke bolt, transparent ground -->
+  <circle cx="32" cy="32" r="28" fill="#F5E6DA" stroke="#B85838" stroke-width="2.5"/>
+  <path d="M35 13 L19 35 L30 35 L28 51 L45 28 L34 28 Z"
+        fill="none" stroke="#B85838" stroke-width="3.4"
+        stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

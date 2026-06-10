@@ -13,7 +13,7 @@ skill spawns several of you in parallel (one per selected template).
 ## Inputs (from the orchestrator)
 - `SOURCE` — absolute path to the source markdown.
 - `PLUGIN_DIR` — absolute path to the docsmith plugin.
-- `TEMPLATE` — one of: `handbook`, `bgn-deck`, `claudecode-deck`, `kawaii-storybook` (or any folder under `assets/templates/`).
+- `TEMPLATE` — one of: `handbook`, `corporate-deck`, `claudecode-deck`, `kawaii-storybook` (or any folder under `assets/templates/`).
 - `OUT` — absolute path for the output PDF.
 - optional `PROFILE` — absolute path to a profile.yaml (else the global `~/.docsmith/profile.yaml` is used).
 

@@ -1,8 +1,10 @@
-# `bgn-deck` design system
+# `corporate-deck` design system
 
-16:9 slides (marp-cli) for **Badan Gizi Nasional**. Tokens, fonts and logos are
-**copied verbatim** from `~/Documents/BGN Design System/` (`colors_and_type.css`
-→ `design-system.css`). Source of truth = that package; do not reinvent values.
+16:9 slides (marp-cli) for **formal corporate & civic decks**. The bundled default
+tokens, fonts and logos are **copied verbatim** from a government design system
+(`~/Documents/BGN Design System/`, `colors_and_type.css` → `design-system.css`) —
+treat that package as the source of truth for the defaults; rebrand per company via
+the docsmith profile rather than reinventing values.
 
 ## Palette
 Brand blue `#071e49` · green `#92d05d` (eyebrow `#5a9438`) · sky `#b5e0ea` ·
@@ -41,8 +43,8 @@ markdown image with an ABSOLUTE path: `![Caption](/abs/diagrams/flow.svg)`. Marp
 embeds the SVG via Chrome — no pre-render step. Validate with `rsvg-convert` first.
 
 ## Backend
-`template.yaml` → `backend: marp-cli`, `theme_name: docsmith-bgn-deck`,
+`template.yaml` → `backend: marp-cli`, `theme_name: docsmith-corporate-deck`,
 `theme_files: [theme.css]`. `build.py` composes `design-system.css` + `theme.css`
 (+ overrides) into one marp theme and renders at 1920×1080px (= 1440×810pt).
 Override tokens per-doc via front-matter `overrides.tokens`, or globally via
-`~/.docsmith/template/bgn-deck.yaml`.
+`~/.docsmith/template/corporate-deck.yaml`.

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="620" viewBox="0 0 560 620" font-family="sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 z" fill="#071e49"/>
+    </marker>
+  </defs>
+
+  <!-- Layer 1: Channels -->
+  <rect x="40" y="20" width="480" height="96" rx="16" fill="#faf8f3" stroke="#071e49" stroke-width="2.5"/>
+  <text x="280" y="50" text-anchor="middle" font-size="22" font-weight="bold" fill="#071e49">Customer Channels</text>
+  <rect x="64" y="64" width="130" height="38" rx="8" fill="#ffffff" stroke="#d1b06c" stroke-width="2"/>
+  <text x="129" y="89" text-anchor="middle" font-size="16" fill="#071e49">Web App</text>
+  <rect x="215" y="64" width="130" height="38" rx="8" fill="#ffffff" stroke="#d1b06c" stroke-width="2"/>
+  <text x="280" y="89" text-anchor="middle" font-size="16" fill="#071e49">Mobile</text>
+  <rect x="366" y="64" width="130" height="38" rx="8" fill="#ffffff" stroke="#d1b06c" stroke-width="2"/>
+  <text x="431" y="89" text-anchor="middle" font-size="16" fill="#071e49">Partner API</text>
+
+  <line x1="280" y1="116" x2="280" y2="152" stroke="#071e49" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Layer 2: Edge / Gateway -->
+  <rect x="40" y="156" width="480" height="72" rx="16" fill="#b5e0ea" stroke="#071e49" stroke-width="2.5"/>
+  <text x="280" y="190" text-anchor="middle" font-size="22" font-weight="bold" fill="#071e49">Edge Gateway</text>
+  <text x="280" y="214" text-anchor="middle" font-size="15" fill="#244b57">auth · rate-limit · routing</text>
+
+  <line x1="280" y1="228" x2="280" y2="264" stroke="#071e49" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Layer 3: Services -->
+  <rect x="40" y="268" width="480" height="120" rx="16" fill="#92d05d" stroke="#071e49" stroke-width="2.5"/>
+  <text x="280" y="298" text-anchor="middle" font-size="22" font-weight="bold" fill="#071e49">Core Services</text>
+  <rect x="64" y="316" width="138" height="54" rx="10" fill="#ffffff" stroke="#5a9438" stroke-width="2"/>
+  <text x="133" y="340" text-anchor="middle" font-size="15" font-weight="bold" fill="#071e49">Billing</text>
+  <text x="133" y="359" text-anchor="middle" font-size="13" fill="#5a6b7d">invoices</text>
+  <rect x="211" y="316" width="138" height="54" rx="10" fill="#ffffff" stroke="#5a9438" stroke-width="2"/>
+  <text x="280" y="340" text-anchor="middle" font-size="15" font-weight="bold" fill="#071e49">Identity</text>
+  <text x="280" y="359" text-anchor="middle" font-size="13" fill="#5a6b7d">accounts</text>
+  <rect x="358" y="316" width="138" height="54" rx="10" fill="#ffffff" stroke="#5a9438" stroke-width="2"/>
+  <text x="427" y="340" text-anchor="middle" font-size="15" font-weight="bold" fill="#071e49">Analytics</text>
+  <text x="427" y="359" text-anchor="middle" font-size="13" fill="#5a6b7d">events</text>
+
+  <line x1="280" y1="388" x2="280" y2="424" stroke="#071e49" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Layer 4: Data platform -->
+  <rect x="40" y="428" width="480" height="96" rx="16" fill="#d1b06c" stroke="#071e49" stroke-width="2.5"/>
+  <text x="280" y="458" text-anchor="middle" font-size="22" font-weight="bold" fill="#071e49">Data Platform</text>
+  <rect x="64" y="472" width="200" height="38" rx="8" fill="#ffffff" stroke="#a48751" stroke-width="2"/>
+  <text x="164" y="497" text-anchor="middle" font-size="15" fill="#071e49">Operational DB</text>
+  <rect x="296" y="472" width="200" height="38" rx="8" fill="#ffffff" stroke="#a48751" stroke-width="2"/>
+  <text x="396" y="497" text-anchor="middle" font-size="15" fill="#071e49">Lakehouse</text>
+
+  <line x1="280" y1="524" x2="280" y2="560" stroke="#071e49" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Layer 5: Observability -->
+  <rect x="40" y="564" width="480" height="48" rx="16" fill="#071e49" stroke="#071e49" stroke-width="2.5"/>
+  <text x="280" y="594" text-anchor="middle" font-size="18" font-weight="bold" fill="#ffffff">Observability &amp; Security Mesh</text>
+</svg>

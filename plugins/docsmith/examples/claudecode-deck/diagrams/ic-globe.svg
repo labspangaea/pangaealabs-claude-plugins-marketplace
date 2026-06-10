@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- reach / multi-region — clay-stroke globe, transparent ground -->
+  <circle cx="32" cy="32" r="28" fill="#F5E6DA" stroke="#B85838" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="17" fill="none" stroke="#B85838" stroke-width="3"/>
+  <ellipse cx="32" cy="32" rx="7" ry="17" fill="none" stroke="#B85838" stroke-width="2.6"/>
+  <line x1="15" y1="32" x2="49" y2="32" stroke="#B85838" stroke-width="2.6"/>
+  <path d="M18 24 Q32 30 46 24" fill="none" stroke="#B85838" stroke-width="2.6"/>
+  <path d="M18 40 Q32 34 46 40" fill="none" stroke="#B85838" stroke-width="2.6"/>
+</svg>

@@ -1,6 +1,6 @@
 ---
 name: make-pdf
-description: Generate professional, on-brand PDFs from markdown using docsmith's design-system templates. Use this whenever the user wants to turn markdown / notes / a report / an outline into a polished PDF, make a "handbook" or "slide deck", render to the BGN (Badan Gizi Nasional) or Claude/"claudecode" brand, produce a "professional PDF / good-looking PDF", or make a cute / kawaii / pastel / storybook / NotebookLM-style deck. Picks one template and one company per run. All visuals — diagrams, charts, and illustrative images alike — are hand-written raw SVG embedded as images (no d2, Mermaid, image generation, or external/R2 image hosting). Templates today: `handbook` (LaTeX book via pandoc+tectonic), `bgn-deck`, `claudecode-deck`, and `kawaii-storybook` (16:9 slides via marp-cli). Do NOT use for editing existing PDFs or for plain `pandoc file.md` with no styling need.
+description: Generate professional, on-brand PDFs from markdown using docsmith's design-system templates. Use this whenever the user wants to turn markdown / notes / a report / an outline into a polished PDF, make a "handbook" or "slide deck", render to the BGN (Badan Gizi Nasional) or Claude/"claudecode" brand, produce a "professional PDF / good-looking PDF", or make a cute / kawaii / pastel / storybook / NotebookLM-style deck. Picks one template and one company per run. All visuals — diagrams, charts, and illustrative images alike — are hand-written raw SVG embedded as images (no d2, Mermaid, image generation, or external/R2 image hosting). Templates today: `handbook` (LaTeX book via pandoc+tectonic), `corporate-deck`, `claudecode-deck`, and `kawaii-storybook` (16:9 slides via marp-cli). Do NOT use for editing existing PDFs or for plain `pandoc file.md` with no styling need.
 allowed-tools: [bash, read, write, edit, grep, glob, AskUserQuestion, Task]
 model: sonnet
 ---
@@ -23,7 +23,7 @@ guides, research, handbooks) — these seven checks are part of a finished PDF, 
 optional polish. A reader notices their absence immediately (a blank page, a
 title-less cover, a wall of unexplained jargon, dead citation text). Apply them by
 default; only skip one if the user opts out or it genuinely doesn't fit the
-content. (Slide decks — `bgn-deck`/`claudecode-deck`/`kawaii-storybook` — are
+content. (Slide decks — `corporate-deck`/`claudecode-deck`/`kawaii-storybook` — are
 exempt from blank-page stripping and the glossary; the rest still help.)
 
 1. **No blank pages.** The `book` class inserts filler pages (header + folio only)
@@ -203,7 +203,7 @@ SVG fails the build.
 
 **Match the active template's palette** so a diagram reads as part of the page, not
 a pasted foreign asset. The navy brand palette (navy `#003060`, amber `#E0821A`,
-violet `#5A3A8A`, green `#1A7A3A`) fits the handbook and `bgn-deck`;
+violet `#5A3A8A`, green `#1A7A3A`) fits the handbook and `corporate-deck`;
 `claudecode-deck` wants its warm editorial tones (clay `#B85838`, cream `#F0EEE6`,
 peach `#F5E6DA`, ink `#262620`); `kawaii-storybook` wants soft pastels. When unsure,
 read the chosen template's `assets/templates/<name>/design-system.md` for its exact
