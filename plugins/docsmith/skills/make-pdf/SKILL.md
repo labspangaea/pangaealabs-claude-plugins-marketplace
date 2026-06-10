@@ -271,6 +271,18 @@ empty/placeholder URLs like a bare `https://` — fix those too. If `pypdf` is
 missing offline the check skips with a warning and exits 0, never blocking a
 build.)
 
+**Optional — external 404 check (ask first).** The default check is network-free.
+After the internal check passes, OFFER the user a live external-link check — ask via
+**AskUserQuestion**: *"Also check external URLs for 404s? (needs network, may be
+slow)"* with options **Run it** / **Skip**. Only if they choose to run it:
+```
+python3 "$PLUGIN_DIR/scripts/check_links.py" "$OUT" --external
+```
+This HEAD/GET-probes every external URL: a **404/410 is a FAIL** (a genuinely dead
+link — fix or drop it); other 4xx/5xx and unreachable/offline URLs are WARNs (so a
+flaky network never blocks the build). Skipping is always fine — it is not part of
+the default gate.
+
 Then **report** the output PDF with its final page count and size. If the build
 failed, surface its error. Mention that the authoring conventions live in
 `references/authoring-guide.md`.

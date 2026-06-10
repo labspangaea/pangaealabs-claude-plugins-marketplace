@@ -24,7 +24,11 @@ prints a clear "link-check skipped" warning and exits 0 — a missing optional d
 never hard-breaks a build.
 
 Usage:
-    python3 check_links.py FILE.pdf
+    python3 check_links.py FILE.pdf [--external]
+
+  --external  ALSO HTTP-check each external URL for liveness (404 / dead links).
+              Needs network; opt-in (the make-pdf skill asks before running it).
+              A 404/410 is a FAIL; unreachable URLs (offline) are warnings only.
 """
 from __future__ import annotations
 
@@ -146,7 +150,7 @@ _SCHEME_OK = ("http://", "https://", "mailto:")
 _HOST_RE = re.compile(r"^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 
 
-def _check_uri(uri: str):
+def _check_uri(uri: str | None):
     """Validate an external URI by syntax only. Returns (ok, reason).
 
     ok=True  → well-formed.
@@ -184,6 +188,42 @@ def _check_uri(uri: str):
     if path in ("", "/") and not parsed.query and not parsed.fragment:
         return False, f"placeholder URL (bare origin, no path): {u!r}"
     return True, ""
+
+
+# ── external liveness (opt-in, network) ────────────────────────────────────────
+
+def _check_live(url: str, timeout: float = 8.0):
+    """HTTP-check one external URL. Returns (status, detail).
+
+    status ∈ {'ok', 'dead' (404/410), 'warn' (other 4xx/5xx), 'net' (unreachable)}.
+    Tries HEAD first; retries with GET when a server rejects HEAD (403/405/501).
+    """
+    import urllib.error
+    import urllib.request
+
+    def _status(method):
+        req = urllib.request.Request(
+            url, method=method, headers={"User-Agent": "docsmith-link-check"})
+        return urllib.request.urlopen(req, timeout=timeout).getcode()
+
+    try:
+        try:
+            code = _status("HEAD")
+        except urllib.error.HTTPError as e:
+            code = e.code
+            if code in (403, 405, 501):
+                try:
+                    code = _status("GET")
+                except urllib.error.HTTPError as e2:
+                    code = e2.code
+    except Exception as e:
+        return "net", f"unreachable ({type(e).__name__})"
+
+    if code in (404, 410):
+        return "dead", f"HTTP {code}"
+    if code >= 400:
+        return "warn", f"HTTP {code}"
+    return "ok", f"HTTP {code}"
 
 
 # ── annotation + outline walking ───────────────────────────────────────────────
@@ -227,7 +267,7 @@ def _walk_outline(reader):
         return
 
 
-def check(pdf_path: str) -> int:
+def check(pdf_path: str, external: bool = False) -> int:
     pypdf = _ensure_pypdf()
     if pypdf is None:
         print("link-check skipped: pypdf unavailable (offline, pip install failed)")
@@ -248,6 +288,7 @@ def check(pdf_path: str) -> int:
     external_ok = 0
     fails: list[str] = []   # force non-zero exit
     warns: list[str] = []   # surfaced but non-fatal
+    live_urls: dict[str, set] = {}   # http(s) URLs → {pages}, for --external liveness
 
     # 1) page link annotations
     for page_no, annot in _iter_link_annots(reader):
@@ -268,6 +309,8 @@ def check(pdf_path: str) -> int:
             ok, reason = _check_uri(uri)
             if ok:
                 external_ok += 1
+                if uri and uri.strip().lower().startswith(("http://", "https://")):
+                    live_urls.setdefault(uri.strip(), set()).add(page_no)
             else:
                 warns.append(f"[page {page_no}] external link: {reason}")
             continue
@@ -306,6 +349,26 @@ def check(pdf_path: str) -> int:
         else:
             internal_ok += 1
 
+    # 3) external liveness (opt-in, --external) — HTTP 404 / dead-link check
+    if external and live_urls:
+        print(f"\nexternal liveness check: {len(live_urls)} unique URL(s) (network)…")
+        net_errors = 0
+        for url in sorted(live_urls):
+            loc = f"page {min(live_urls[url])}"
+            status, detail = _check_live(url)
+            if status == "ok":
+                continue
+            if status == "dead":
+                fails.append(f"[{loc}] dead external link → {detail}: {url}")
+            elif status == "net":
+                net_errors += 1
+                warns.append(f"[{loc}] external link unreachable → {detail}: {url}")
+            else:
+                warns.append(f"[{loc}] external link → {detail}: {url}")
+        if net_errors and net_errors == len(live_urls):
+            print("  (every external URL was unreachable — likely offline; "
+                  "not failing on network errors)")
+
     # ── report ────────────────────────────────────────────────────────────────
     issues = len(fails) + len(warns)
     print(f"link-check: {internal_ok} internal OK, {external_ok} external OK, "
@@ -316,8 +379,8 @@ def check(pdf_path: str) -> int:
         print(f"  WARN  {w}")
 
     if fails:
-        print(f"\nlink-check FAILED: {len(fails)} broken internal link/bookmark(s).",
-              file=sys.stderr)
+        print(f"\nlink-check FAILED: {len(fails)} broken link(s) "
+              f"(internal dangling and/or external 404).", file=sys.stderr)
         return 1
     if warns:
         print("\nlink-check passed with warnings (external syntax only — review above).")
@@ -327,11 +390,16 @@ def check(pdf_path: str) -> int:
 
 
 def main(argv=None) -> int:
-    argv = argv if argv is not None else sys.argv[1:]
+    argv = list(argv if argv is not None else sys.argv[1:])
+    external = False
+    for flag in ("--external", "--check-404"):
+        if flag in argv:
+            external = True
+            argv.remove(flag)
     if len(argv) != 1:
-        print("usage: python3 check_links.py FILE.pdf", file=sys.stderr)
+        print("usage: python3 check_links.py FILE.pdf [--external]", file=sys.stderr)
         return 2
-    return check(argv[0])
+    return check(argv[0], external=external)
 
 
 if __name__ == "__main__":
