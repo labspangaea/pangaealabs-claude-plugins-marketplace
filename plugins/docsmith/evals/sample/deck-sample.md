@@ -31,7 +31,7 @@ One markdown source, every template. No copy-paste.
 
 # From one source to a polished deck.
 
-![From one markdown source through docsmith to a polished PDF deck.](/Users/harry/projects/claude-plugins/plugins/docsmith/evals/sample/diagrams/deck-flow.svg)
+![From one markdown source through docsmith to a polished PDF deck.](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/evals/sample/diagrams/deck-flow.svg)
 
 The same content flows through any template's design system — each diagram is a
 hand-written raw SVG embedded directly into every output.

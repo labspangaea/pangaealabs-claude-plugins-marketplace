@@ -27,7 +27,7 @@ explain. A good handbook closes that gap with structure, not heroics.
 instantly sound safer than most reviewers.
 :::
 
-![The review pipeline at a glance](/Users/harry/projects/claude-plugins/plugins/docsmith/evals/sample/diagrams/review-pipeline.svg){width=80%}
+![The review pipeline at a glance](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/evals/sample/diagrams/review-pipeline.svg){width=80%}
 
 ::: pullquote
 Good review is the bridge between someone's effort and the team's standards.
