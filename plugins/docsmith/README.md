@@ -51,13 +51,14 @@ made-up [`examples/profile.example.yaml`](examples/profile.example.yaml)).
 <td width="50%"><img src="examples/corporate-deck/pages/page-04.png" width="100%"><br><sub><b>kpi</b> — metric grid</sub></td>
 </tr>
 <tr>
-<td><img src="examples/corporate-deck/pages/page-08.png" width="100%"><br><sub><b>split</b> — content beside an SVG figure</sub></td>
+<td><img src="examples/corporate-deck/pages/page-08.png" width="100%"><br><sub><b>split</b> — SVG figure beside content (no box/card)</sub></td>
 <td><img src="examples/corporate-deck/pages/page-13.png" width="100%"><br><sub><b>iconcards</b> — SVG icons + titles</sub></td>
 </tr>
 </table>
 
 > **Try it:** `Make a corporate-deck from examples/corporate-deck/acme-qbr.md, brand Acme Corp`
 > 🔎 **For detail, check the example folder [`examples/corporate-deck/`](examples/corporate-deck/)** — the 17-slide PDF covers cover · agenda · bigstat · kpi · pillars · cards3 · compare2 · split · steps · timeline · versus · procon · iconcards · stack · quote · statement · closing.
+> 🅰️ This demo also shows a **footer logo** — a hand-written SVG ([`examples/logo/acme.svg`](examples/logo/acme.svg)); set your org's `logo:` in the profile to do the same (here passed via `--logo`).
 
 ### `claudecode-deck` — *Nimbus — Product Launch* (Nimbus Studio)
 <table>
@@ -115,7 +116,7 @@ copy [`examples/profile.example.yaml`](examples/profile.example.yaml) to
 - company: "Acme Corp"
   author: "Jane Rivera"
   email: "press@acme.example"
-  logo: ""                                  # optional: square SVG/PNG path; renders ~40px tall in footers
+  logo: ""                                  # optional: square SVG/PNG path (e.g. examples/logo/acme.svg); renders ~40px tall in footers
   wordmark: "ACME"                          # text fallback shown when no logo is set
   website: "https://acme.example"
   default_confidentiality: "Internal"       # Public / Internal / Confidential / Restricted; "" = none

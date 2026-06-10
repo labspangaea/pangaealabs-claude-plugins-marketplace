@@ -36,6 +36,17 @@
         "pdftotext contains 'Generasi Emas' and '15,2'",
         "no raw d2 leaks (no '```d2' or 'direction:' in the PDF text); the alur-operasional diagram is embedded — confirm via its embedded <text> labels (e.g. 'SPPG') in the PDF text layer, since marp embeds SVG as VECTOR, not a raster image (pdfimages will NOT list it)"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Render evals/sample/deck-sample.md to the claudecode-deck template branded as 'Acme Labs' using evals/sample/profile-with-logo.yaml, so the footer shows the brand logo.",
+      "expected_output": "One 16:9 claudecode-deck PDF whose footer shows the Acme Labs logo image (a raster PNG) next to the company name.",
+      "files": ["evals/sample/deck-sample.md", "evals/sample/profile-with-logo.yaml", "evals/sample/logo.png"],
+      "assertions": [
+        "the PDF page size is 1440 x 810 pts (16:9)",
+        "the footer logo rendered — pdfimages lists at least one raster image (the PNG logo embeds as a raster, unlike the vector SVG diagram), confirming the logo appears in the footer",
+        "the company name 'Acme Labs' appears in the PDF footer"
+      ]
     }
   ]
 }

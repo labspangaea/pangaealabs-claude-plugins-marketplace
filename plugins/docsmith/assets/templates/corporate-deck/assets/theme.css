@@ -108,8 +108,9 @@ section.quote blockquote { margin: 0; border: 0; font-family: var(--font-serif);
 section.quote blockquote strong, section.quote blockquote em { color: var(--bgn-gold-700, #a48751); }
 
 /* ===================== SPLIT (image floats, content flows) ===================== */
-section.split img { float: right; width: 44%; margin: 0 0 30px 80px;
-  border-radius: var(--r-card, 20px); border: 1px solid var(--bgn-gray-200, #e7e5df); }
+/* No box/card around split figures — hand-written SVG diagrams carry their own
+   framing; a CSS border just double-frames them (eval feedback). */
+section.split img { float: right; width: 44%; margin: 0 0 30px 80px; }
 /* keep the footer logo immune to the split image rule above */
 section.split footer img { float: none; width: auto; height: 40px;
   margin: 0; border-radius: 0; box-shadow: none; }
