@@ -1,0 +1,10 @@
+# Eval profile that exercises a footer LOGO (the default profile.yaml has none).
+# list-of-orgs form; pick with --company "Acme Labs".
+- company: "Acme Labs"
+  author: "Jane Rivera"
+  email: "press@acme.example"
+  logo: "/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/evals/sample/logo.png"
+  wordmark: "ACME"
+  website: "https://acme.example"
+  default_confidentiality: "Internal"
+  copyright: "© 2026 Acme Labs"
