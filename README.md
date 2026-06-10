@@ -51,7 +51,36 @@ Mermaid, or image generation).
 </table>
 
 Layered config lives under `~/.docsmith/` (global profile + per-template overrides
-+ per-doc front-matter), so the plugin location is portable.
++ per-doc front-matter), so the plugin location is portable. The one file to create
+first is `~/.docsmith/profile.yaml` — it drives identity + branding for every PDF:
+
+<details>
+<summary><b>Example <code>~/.docsmith/profile.yaml</code></b> (made-up values — one entry per org you brand documents as)</summary>
+
+```yaml
+# ~/.docsmith/profile.yaml — one entry per org; one is picked per run by company
+# name (or --company / front-matter). All values below are placeholders.
+- company: "Acme Corp"
+  author: "Jane Rivera"
+  email: "press@acme.example"
+  logo: ""                                  # optional: square SVG/PNG path; renders ~40px tall in footers
+  wordmark: "ACME"                          # text fallback shown when no logo is set
+  website: "https://acme.example"
+  default_confidentiality: "Internal"       # Public / Internal / Confidential / Restricted; "" = none
+  copyright: "© 2026 Acme Corp"
+
+- company: "Nimbus Studio"
+  author: "Lee Park"
+  email: "hello@nimbus.example"
+  logo: ""
+  wordmark: "nimbus"
+  website: "https://nimbus.example"
+  default_confidentiality: ""
+  copyright: "© 2026 Nimbus Studio"
+```
+
+Copy [`plugins/docsmith/examples/profile.example.yaml`](plugins/docsmith/examples/profile.example.yaml) to `~/.docsmith/profile.yaml` and edit.
+</details>
 
 ```bash
 /plugin install docsmith@pangaealabs-claude-plugins-marketplace
