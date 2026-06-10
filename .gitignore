@@ -1,3 +1,6 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+# dev/eval workspaces (kept locally, never shipped); bulky iteration outputs untracked
+dev/make-pdf-workspace/iteration-*/
