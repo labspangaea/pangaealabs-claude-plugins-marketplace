@@ -317,7 +317,13 @@ blockquote { margin: 26px 0 0; border: 0; background: var(--ks-accept-tint);
   font-weight: 700; font-size: 30px; box-shadow: var(--ks-shadow-sm); }
 blockquote strong { color: inherit; }
 section.path blockquote, section.scorecard blockquote { clear: both; }
-section.path blockquote { margin-top: 18px; }
+/* Vertically center the verdict text in its pill: flex-center the inner <p>,
+   drop its default top/bottom margins, and stop a trailing emoji from drooping
+   below the baseline (which lengthened the line box downward and made the text
+   sit high). */
+section.path blockquote { margin-top: 18px; display: flex; align-items: center; }
+section.path blockquote > p { margin: 0; width: 100%; }
+section.path blockquote img.emoji { vertical-align: middle; }
 section.accept blockquote { background: linear-gradient(135deg, var(--ks-accept-a), var(--ks-accept-b));
   color: #fff; border-radius: var(--ks-r-pill); box-shadow: var(--ks-shadow-md); }
 section.reject blockquote { background: linear-gradient(135deg, var(--ks-reject-a), var(--ks-reject-b));
