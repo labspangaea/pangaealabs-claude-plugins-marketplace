@@ -231,20 +231,27 @@ soft pastel palette instead of the navy brand colours. Decks also support
 styled fenced code blocks — see `references/authoring-guide.md`.
 
 ## Step 6 — build the template
-Build the one chosen template, passing the `--company` chosen in Step 4 (build.py
-resolves that org's logo/author/etc. from the profile). Spawn a
-**template-builder** subagent with `SOURCE`, `PLUGIN_DIR`, `TEMPLATE`, an `OUT`
-path (default `<source-dir>/<source-stem>.<template>.pdf`), the chosen
-`--company`, an optional `--logo` only if the user is overriding the org's logo,
-and `PROFILE` if the user supplied one.
-
-If subagents aren't available, run the build directly:
+Build the one chosen template **inline** — run `build.py` directly and verify the
+output. A single render is one deterministic command, so do NOT spawn a subagent
+for it: a subagent only adds latency and token cost for no benefit. Pass the
+`--company` chosen in Step 4 (build.py resolves that org's logo/author/etc. from
+the profile):
 ```
 python3 "$PLUGIN_DIR/scripts/build.py" --in "$SOURCE" --out "$OUT" \
   --template "$TEMPLATE" \
   --company "$COMPANY"
 ```
-(Add `--logo "$LOGO"` only to override the chosen org's own logo.)
+`OUT` defaults to `<source-dir>/<source-stem>.<template>.pdf`. Add `--logo "$LOGO"`
+only to override the chosen org's own logo, and `--profile "$PROFILE"` only if the
+user supplied one. The script prints `OK <path> (<pages> pages, <size>)`; confirm
+the PDF exists, has ≥1 page, and — for decks — is `1440 x 810 pts`.
+
+**Fan out to subagents ONLY for a genuine multi-template run.** If the user asked
+for several templates from one source in the same run, spawn one
+**template-builder** subagent per template so the renders run in parallel (each
+gets `SOURCE`, `PLUGIN_DIR`, its `TEMPLATE`, an `OUT`, the chosen `--company`, and
+optional `PROFILE`/`--logo`). For one template — the common case — build inline as
+above; never spawn a subagent just to run a single build.
 
 ## Step 7 — strip blank pages, check links, then report
 **First (checklist #1), strip blank/filler pages** from the freshly built PDF:
