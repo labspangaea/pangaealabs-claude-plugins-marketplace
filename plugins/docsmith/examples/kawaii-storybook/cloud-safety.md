@@ -16,6 +16,21 @@ A gentle tour of how three little friends — 🐻 🦊 🦉 — keep their thin
 
 ---
 
+<!-- _class: agenda -->
+
+###### TODAY'S LITTLE JOURNEY
+
+# What we'll *wander* through
+
+- **The why** Why small slips matter more than clever break-ins.
+- **The shape** What a safe cloud actually looks like. 🐻
+- **The habits** Good keys, careful sharing, and a spare copy.
+- **The choices** Three little forks, each with a verdict. 🦊
+- **The plan** A gentle first week, one calm step at a time.
+- **The promise** Cosy, careful, and kind to your future self. 🦉
+
+---
+
 <!-- _class: bigstat -->
 
 ###### WHY IT MATTERS
@@ -23,6 +38,18 @@ A gentle tour of how three little friends — 🐻 🦊 🦉 — keep their thin
 # 9 *in 10*
 
 Most mishaps in the cloud are not clever break-ins — they start with a small, *human* slip: a shared link left open, a forgotten password, a door nobody locked.
+
+---
+
+<!-- _class: kpi -->
+
+###### THE NUMBERS, GENTLY
+
+# Three little *figures*
+
+- **81%** of break-ins lean on a weak or borrowed password. 🦊
+- **5s** is all two-step login asks of you each morning. 🐻
+- **1** spare copy turns a very bad day into a small one. 🦉
 
 ---
 
@@ -35,6 +62,31 @@ Most mishaps in the cloud are not clever break-ins — they start with a small, 
 - **Confidentiality** Only the right friends can peek inside. 🐻 keeps the honey jar lidded.
 - **Integrity** Nothing changes without you knowing. 🦊 notices if even one acorn moves.
 - **Availability** Your things are there when you reach for them. 🦉 keeps the lights on at night.
+
+---
+
+<!-- _class: cards -->
+
+###### THE LITTLE TOOLKIT
+
+# Friends that *help* you stay safe
+
+- **Password manager** Invents and remembers a strong, unique key for every door, so your brain only carries one. 🦊
+- **Two-step login** A second little check after your password — a code that lives only on your phone.
+- **Encrypted backup** A spare copy, scrambled and kept apart, waiting quietly for the day you need it. 🦉
+- **Link expiry** A gentle timer on shared links, so a quick hand-off doesn't wander forever. 🐻
+
+---
+
+<!-- _class: cards3 -->
+
+###### WHO'S WHO IN THE VILLAGE
+
+# Three friends, three *jobs*
+
+- **🐻 The Keeper** Watches the honey jar — decides who may peek inside, and keeps the lid on tight.
+- **🦊 The Watcher** Notices when a single acorn shifts — the one who spots a strange email a beat early.
+- **🦉 The Night-light** Keeps the lamps lit and a spare copy ready, so nothing is ever truly lost.
 
 ---
 
@@ -82,6 +134,40 @@ Most mishaps in the cloud are not clever break-ins — they start with a small, 
 
 ---
 
+<!-- _class: compare2 -->
+
+###### TWO WAYS TO CARRY YOUR KEYS
+
+# A sticky note vs a *manager*
+
+- **The sticky note** Keys scribbled where you can see them — easy to read, and just as easy for anyone else to read too. 🐹
+- **The password manager** One locked vault that invents strong, unique keys and hands them over only to you. 🦊
+
+---
+
+<!-- _class: compare3 -->
+
+###### THREE WAYS TO SHARE A FILE
+
+# Pick the *gentlest* door
+
+- **Public link** Anyone who finds it walks right in. Lovely for posters, risky for secrets.
+- **Link with expiry** A door that politely locks itself after the moment has passed. 🦉
+- **Named invite** Only the friends you name may enter — the snuggest fit for tender things. 🐻
+
+---
+
+<!-- _class: versus -->
+
+###### BEFORE & AFTER A TINY HABIT
+
+# One change, two *mornings*
+
+- **Without two-step** A leaked password is a wide-open door, and you may never hear the hinge creak. 🦊
+- **With two-step** That same leak hits a second locked gate — the sneaky login simply stops. 🐻
+
+---
+
 <!-- _class: laws -->
 
 ###### FOUR GENTLE LAWS
@@ -92,6 +178,18 @@ Most mishaps in the cloud are not clever break-ins — they start with a small, 
 - **Trust, but verify** A friendly face is lovely; a quick check is wiser. 🦊
 - **Patch early** Tiny cracks let weather in. Fix the little ones before they grow.
 - **Back it up** A second copy, kept apart, turns a bad day into a small one. 🦉
+
+---
+
+<!-- _class: steps -->
+
+###### SETTING UP TWO-STEP LOGIN
+
+# Three small *taps* 🐻
+
+- **Open settings** Find "Security" in your account, then "Two-step verification".
+- **Add your phone** Scan the little square with an authenticator app — it starts ticking out codes.
+- **Save the spares** Tuck the backup codes somewhere safe, in case the phone wanders off.
 
 ---
 
@@ -135,6 +233,32 @@ Most mishaps in the cloud are not clever break-ins — they start with a small, 
 - **Strange email** → **Hover, don't click** → **Phishing dodged** 🦉
 - **New app wants access** → **Grant the least it needs** → **Nothing over-shared** 🐻
 - **Laptop left at the café** → **Remote-lock from your phone** → **Calm, not chaos** 🦊
+
+---
+
+<!-- _class: timeline -->
+
+###### HOW SAFETY GREW UP
+
+# A short *history* of keeping safe
+
+- **1960s** Passwords arrive — the first little key to a shared machine.
+- **1990s** Encryption goes everywhere, scrambling secrets in transit. 🦉
+- **2010s** Two-step login spreads, adding a second gentle gate.
+- **Today** Passkeys begin to retire the password altogether. 🐻
+
+---
+
+<!-- _class: people -->
+
+###### WHO KEEPS THE VILLAGE SAFE
+
+# It takes a few *friends* 🦊
+
+- **🐻 You** The keeper of your own keys — the most important guardian of all.
+- **🦊 Your helper** A trusted friend or IT pal for the moments that feel too big.
+- **🦉 The makers** The folks who patch the apps and keep the lamps lit behind the scenes.
+- **🐹 Future you** The one who'll thank today's you for the spare copy and the careful share.
 
 ---
 

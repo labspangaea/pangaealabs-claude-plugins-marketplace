@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="80" viewBox="0 0 280 80" fill="none" font-family="sans-serif">
+  <polygon points="34,18 52,58 16,58" fill="none" stroke="#5a9438" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="34" cy="40" r="5" fill="#d1b06c"/>
+  <text x="70" y="48" font-size="30" font-weight="700" fill="#071e49" letter-spacing="-0.5">Vertex</text>
+</svg>

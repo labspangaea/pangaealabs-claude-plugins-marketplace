@@ -87,6 +87,23 @@ link so readers can click straight through, for example the
 [team operating principles](https://example.com/handbook/principles) or the
 [decision log template](https://example.com/templates/decision-log).
 
+## A Reusable Template
+
+You should not invent the shape of a request from scratch every time. Copy the
+skeleton below into a new thread and fill in the four blanks — the structure does
+the remembering for you.
+
+```text
+[ASK]      One sentence. What do you need, from whom?
+[BY]       A real date/time, with a timezone. "EOD" is not a deadline.
+[CONTEXT]  Two lines max, plus one link to the source of truth.
+[DONE]     The observable outcome that lets us close the thread.
+```
+
+The tags are not decoration. A reader scanning ten threads can find the one that
+needs them by the `[BY]` line alone, and a future teammate can reconstruct the
+decision from the `[DONE]` line without asking a soul.
+
 ::: tip
 Keep one thread per topic. When a side question appears, start a fresh thread and
 link back. A thread that tries to hold three decisions will lose all three.
@@ -133,6 +150,15 @@ thread for everyone who was not there.
 ::: plain
 A call inside an async culture is a tool, not a defeat. You use it to unblock, and
 then you return to writing — the call is the exception that proves the rule.
+:::
+
+Some threads are not drifting — they are on fire. When something is genuinely
+blocking or time-critical, skip the etiquette and say so in one unmissable line.
+
+::: alert
+If a thread is blocking a release or a customer is affected, do not bury it in
+prose. Open with **BLOCKING** in the first line, name the one owner, and page them
+on the urgent channel. Async is the default; it is not a suicide pact.
 :::
 
 That is the entire practice: write clearly, reply reliably, and leave a trail.

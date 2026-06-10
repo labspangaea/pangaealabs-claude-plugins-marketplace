@@ -5,7 +5,7 @@
 - company: "Acme Corp"
   author: "Jane Rivera"
   email: "press@acme.example"
-  logo: ""                                  # optional: square SVG/PNG path; renders ~40px tall in footers
+  logo: "examples/logo/acme.png"            # square PNG (works in LaTeX footers too); source = hand-written examples/logo/acme.svg. Path is relative to the docsmith dir.
   wordmark: "ACME"                          # text fallback shown when no logo is set
   website: "https://acme.example"
   default_confidentiality: "Internal"       # Public / Internal / Confidential / Restricted; "" = none
@@ -14,7 +14,7 @@
 - company: "Nimbus Studio"
   author: "Lee Park"
   email: "hello@nimbus.example"
-  logo: ""
+  logo: "examples/logo/nimbus.png"          # source = examples/logo/nimbus.svg
   wordmark: "nimbus"
   website: "https://nimbus.example"
   default_confidentiality: ""

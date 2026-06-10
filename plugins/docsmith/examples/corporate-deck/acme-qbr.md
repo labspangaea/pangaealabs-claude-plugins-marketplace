@@ -113,16 +113,16 @@ wrapped in a shared observability and security mesh.
 
 ---
 
-<!-- _class: timeline -->
+<!-- _class: people -->
 
-###### Five-year arc
+###### Who's accountable
 
-# How we got here.
+# The team behind FY26.
 
-- **FY21** Seed launch
-- **FY22** $20M ARR
-- **FY23** First enterprise tier
-- **FY25** $128M ARR
+- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/avatar-ceo.svg) **Jane Rivera** Chief Executive — owns the durable-growth thesis and the board relationship.
+- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/avatar-cfo.svg) **Marcus Chen** Chief Financial — runs the margin program and the FY26 investment case.
+- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/avatar-cpo.svg) **Priya Nair** Chief Product — leads platform depth and the applied-AI roadmap.
+- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/avatar-cto.svg) **Diego Alvarez** Chief Technology — owns the edge migration and reliability SLAs.
 
 ---
 
@@ -137,39 +137,29 @@ wrapped in a shared observability and security mesh.
 
 ---
 
-<!-- _class: procon -->
+<!-- _class: timeline -->
 
-###### The pricing decision
+###### Five-year arc
 
-# Should we move fully usage-based?
+# How we got here.
 
-- **In favor** Revenue tracks value delivered, expansion is automatic, and customers never overpay for idle seats.
-- **Against** Revenue is harder to forecast quarter to quarter, and procurement teams prefer fixed, predictable line items.
-
----
-
-<!-- _class: iconcards -->
-
-###### FY26 priorities
-
-# Four investments, ranked.
-
-- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/ic-growth.svg) **Durable growth** Concentrate sales on multi-year enterprise commitments.
-- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/ic-shield.svg) **Trust & security** Achieve FedRAMP and ISO 27001 to unlock regulated buyers.
-- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/ic-globe.svg) **Geographic reach** Open the EU region and localize for three new markets.
-- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/ic-spark.svg) **Applied AI** Ship copilots that turn raw usage data into customer action.
+- **FY21** Seed launch
+- **FY22** $20M ARR
+- **FY23** First enterprise tier
+- **FY25** $128M ARR
 
 ---
 
-<!-- _class: stack -->
+<!-- _class: logowall -->
 
-###### FY26 roadmap
+###### Trusted by
 
-# Four quarters, one direction.
+# Four anchors of the ecosystem.
 
-![Acme FY26 roadmap: Q1 foundation migrates the edge gateway, Q2 expand launches self-serve onboarding, Q3 scale opens the EU region and partner API, Q4 optimize runs the margin program and FY27 planning.](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/roadmap.svg)
-
-> Each quarter compounds the last: foundation enables expansion, expansion funds scale, scale earns the room to optimize.
+- ![Northwind](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/logo-northwind.svg)
+- ![Vertex](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/logo-vertex.svg)
+- ![Meridian](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/logo-meridian.svg)
+- ![Helios](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/logo-helios.svg)
 
 ---
 
@@ -198,3 +188,39 @@ switching cost that make the next account easier to win.
 # Let's build *FY26* together.
 
 acme.example · press@acme.example
+
+---
+
+<!-- _class: stack -->
+
+###### FY26 roadmap
+
+# Four quarters, one direction.
+
+![Acme FY26 roadmap: Q1 foundation migrates the edge gateway, Q2 expand launches self-serve onboarding, Q3 scale opens the EU region and partner API, Q4 optimize runs the margin program and FY27 planning.](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/roadmap.svg)
+
+> Each quarter compounds the last: foundation enables expansion, expansion funds scale, scale earns the room to optimize.
+
+---
+
+<!-- _class: iconcards -->
+
+###### FY26 priorities
+
+# Four investments, ranked.
+
+- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/ic-growth.svg) **Durable growth** Concentrate sales on multi-year enterprise commitments.
+- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/ic-shield.svg) **Trust & security** Achieve FedRAMP and ISO 27001 to unlock regulated buyers.
+- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/ic-globe.svg) **Geographic reach** Open the EU region and localize for three new markets.
+- ![](/Users/harry/projects/pangaealabs-claude-plugins-marketplace/plugins/docsmith/examples/corporate-deck/diagrams/ic-spark.svg) **Applied AI** Ship copilots that turn raw usage data into customer action.
+
+---
+
+<!-- _class: procon -->
+
+###### The pricing decision
+
+# Should we move fully usage-based?
+
+- **In favor** Revenue tracks value delivered, expansion is automatic, and customers never overpay for idle seats.
+- **Against** Revenue is harder to forecast quarter to quarter, and procurement teams prefer fixed, predictable line items.
