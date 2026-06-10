@@ -1,6 +1,7 @@
 # Pangaea Labs — Claude Code Plugins Marketplace
 
-A [Claude Code](https://claude.com/claude-code) plugin marketplace by **Pangaea Labs**.
+A [Claude Code](https://claude.com/claude-code) plugin marketplace by
+**[Pangaea Digital Labs](https://www.pangaea.id/)**.
 Add it once, then install any plugin below.
 
 ## Add the marketplace
@@ -104,4 +105,4 @@ and **[`plugins/docsmith/examples/`](plugins/docsmith/examples/)**.
 
 ## License
 
-© Pangaea Labs.
+© [Pangaea Digital Labs](https://www.pangaea.id/) — [www.pangaea.id](https://www.pangaea.id/)
