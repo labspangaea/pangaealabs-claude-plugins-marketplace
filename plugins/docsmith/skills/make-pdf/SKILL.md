@@ -41,12 +41,14 @@ exempt from blank-page stripping and the glossary; the rest still help.)
    "how it works" flow lands far better as a picture. Author at least the key
    one(s) as hand-written raw SVG (Step 5). A timeline/roadmap and an architecture
    pipeline are the highest-leverage diagrams for most reports.
-4. **Make external citations clickable, colored like a link.** Author every
-   external source as a markdown link with descriptive text — `[Amazon Ads MCP
-   beta](https://…)`, not a bare URL or plain text. The handbook template renders
-   `urlcolor=NavyBlue` (external links blue + clickable) and `linkcolor=black`
-   (internal TOC stays clean), so a proper markdown link becomes an href-styled
-   citation automatically. Bare URLs do NOT auto-link in pandoc — they render as
+4. **Make every link clickable and uniformly light-blue.** Author every external
+   source as a markdown link with descriptive text — `[Amazon Ads MCP
+   beta](https://…)`, not a bare URL or plain text. The handbook template now
+   renders **all** hyperlinks — TOC entries, internal cross-refs, external URLs,
+   and citations — in one uniform light blue (`linkblue` `#2F80ED`, via
+   `linkcolor`/`toccolor`/`urlcolor`/`citecolor`), so a proper markdown link
+   becomes an href-styled citation and the TOC reads as clickable too (no more
+   black internal links). Bare URLs do NOT auto-link in pandoc — they render as
    dead text, so always use `[label](url)`.
 5. **Cover (page 1) must carry the title.** The cover is `[logo] → COMPANY → title
    → subtitle → author → date + version`, drawn by `titlepage.tex`. It pulls
@@ -244,7 +246,7 @@ python3 "$PLUGIN_DIR/scripts/build.py" --in "$SOURCE" --out "$OUT" \
 ```
 (Add `--logo "$LOGO"` only to override the chosen org's own logo.)
 
-## Step 7 — strip blank pages, then report
+## Step 7 — strip blank pages, check links, then report
 **First (checklist #1), strip blank/filler pages** from the freshly built PDF:
 ```
 python3 "$PLUGIN_DIR/scripts/strip_blank_pages.py" "$OUT"
@@ -253,16 +255,32 @@ It removes pages that carry only a running header + folio (keeps the cover, and
 refuses to drop >40% as a safety net), in place. This runs on every handbook
 build because the `book` class reliably inserts filler pages; decks don't need it.
 
+**Then (handbook builds), run the internal link-integrity check** on the finished
+PDF:
+```
+python3 "$PLUGIN_DIR/scripts/check_links.py" "$OUT"
+```
+It walks every page's link annotations plus the document outline/bookmarks (incl.
+the TOC), and verifies each internal link/cross-ref/bookmark resolves to a real
+in-range page; external URLs are validated for syntax only (no network). It exits
+non-zero on a broken/mismatched internal link. If it reports a FAIL, surface the
+listed links and **fix the source** (a bad `[text](#anchor)` ref, a renamed
+heading, a malformed citation) before calling the PDF done — don't ship a
+handbook with a dead internal link or TOC entry. (External-syntax WARNs flag
+empty/placeholder URLs like a bare `https://` — fix those too. If `pypdf` is
+missing offline the check skips with a warning and exits 0, never blocking a
+build.)
+
 Then **report** the output PDF with its final page count and size. If the build
 failed, surface its error. Mention that the authoring conventions live in
 `references/authoring-guide.md`.
 
 Before declaring done, sanity-check the document-style checklist held: cover has a
-title, citations are links (not dead text), key diagrams are present, and (for long
-docs) there's a glossary. If you can, render a couple of pages to PNG
-(`pdftoppm -png -r 90 -f N -l N "$OUT" /tmp/check`) and eyeball the cover + a
-content page — image review catches a title-less cover or uncolored links that
-text checks miss.
+title, citations and the TOC render as light-blue links (not dead text / not black),
+key diagrams are present, and (for long docs) there's a glossary. If you can, render
+a couple of pages to PNG (`pdftoppm -png -r 90 -f N -l N "$OUT" /tmp/check`) and
+eyeball the cover + a content page — image review catches a title-less cover or
+links that aren't the uniform light blue that text checks miss.
 
 **For an SVG-heavy deck, eyeball the actual SVG slides, not just the cover.**
 Because a size-less SVG collapses silently (Step 5), a deck can build with a
@@ -281,8 +299,8 @@ shows up as a blurry blob at footer size.
 - Output: co-locate the source `.md`, `diagrams/`, and built `.pdf` in one agreed folder up front — SVGs embed by absolute path, so relocating later means rewriting every path.
 - Visuals (diagrams, charts, images — all of them): hand-written raw SVG (plain XML — <rect>/<line>/<text>/<path>/<polygon>/<circle>, manual coordinates; no d2/Mermaid/image-gen/R2 host). Give each an explicit `width`+`height` (not just `viewBox`) or Chrome collapses it to nothing on decks. Embed via `![Caption](/abs/diagram.svg){width=80%}`; validate with `rsvg-convert` first, and match the active template's palette.
 - Handbook callouts: `::: note` / `::: tip` / `::: warning` / `::: plain` ("In Plain English") / `::: do` / `::: dont` / `::: cheatsheet` / `::: pullquote`.
-- Citations: write external sources as markdown links `[label](url)` so they render blue + clickable (bare URLs become dead text). Always put a blank line before a list.
-- Long docs: end with a `## Glossary` term/meaning table; after building, strip blank pages with `scripts/strip_blank_pages.py` (Step 7).
+- Citations & links: write external sources as markdown links `[label](url)` so they render in the uniform light blue (`linkblue` `#2F80ED`) + stay clickable; TOC entries and internal cross-refs are the same blue now (bare URLs become dead text). Always put a blank line before a list.
+- Long docs: end with a `## Glossary` term/meaning table; after building, strip blank pages with `scripts/strip_blank_pages.py`, then run the internal link-integrity check `scripts/check_links.py "$OUT"` (Step 7).
 - Decks: separate slides with `---`; pick a layout per slide with `<!-- _class: kpi -->` (cover, kpi, split, quote, versus, statement, closing, …). `kawaii-storybook` adds `path` (+ `accept`/`reject`/`caution`), `laws`, `scorecard`, `flow`, `scenarios`, `roadmap`, `figure` (+ `bare`), renders emoji 🐻🦊🦉🐹 as mascots, and — via the same hand-written SVG flow as the handbook — supports SVG hero/character art, full-bleed `![bg cover](/abs/scene.svg)` scenes, `<aside class="callout tip">` callouts, and styled fenced code blocks.
 See `references/authoring-guide.md` for the full contract and
 `references/adding-a-template.md` to add a new template.
