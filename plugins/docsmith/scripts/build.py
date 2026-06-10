@@ -34,6 +34,24 @@ def load_yaml(p: Path) -> dict:
     return {}
 
 
+def _render_log(line: str) -> None:
+    """Append one render result to ~/.docsmith/render.log (best-effort).
+
+    The docsmith plugin ships a background monitor (monitors/monitors.json) that
+    tails this file, so every build — including the parallel multi-template
+    fan-out and renders triggered by subagents — surfaces in the session as a
+    notification. Logging must never break a build, so all errors are swallowed.
+    """
+    try:
+        log_dir = Path(os.path.expanduser("~/.docsmith"))
+        log_dir.mkdir(parents=True, exist_ok=True)
+        ts = _dt.datetime.now().strftime("%H:%M:%S")
+        with open(log_dir / "render.log", "a") as fh:
+            fh.write(f"{ts} {line}\n")
+    except Exception:
+        pass
+
+
 def resolve_org(profile_raw, chosen_name: str | None):
     """Collapse a profile into the single effective org dict.
 
@@ -387,6 +405,7 @@ def main() -> int:
         return 2
 
     if rc != 0:
+        _render_log(f"FAIL {args.template} (rc={rc}) {out}")
         print(f"render failed (backend={backend}, rc={rc})", file=sys.stderr)
         return rc
 
@@ -395,8 +414,10 @@ def main() -> int:
         pages = next((l.split(":")[1].strip() for l in info.splitlines() if l.startswith("Pages")), "?")
         size = next((l.split(":", 1)[1].strip() for l in info.splitlines() if l.startswith("Page size")), "?")
         print(f"OK  {out}  ({pages} pages, {size})")
+        _render_log(f"OK {args.template} {pages}pp {out}")
     except Exception:
         print(f"OK  {out}")
+        _render_log(f"OK {args.template} {out}")
     return 0
 
 
