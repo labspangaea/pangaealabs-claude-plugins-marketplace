@@ -1,5 +1,5 @@
 ---
-template: bgn-deck
+template: corporate-deck
 title: "Docsmith Sample Deck"
 ---
 

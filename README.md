@@ -20,10 +20,12 @@ single source out to one or more PDFs via parallel subagents. Every visual —
 diagram, chart, or illustration — is hand-written raw SVG embedded inline (no d2,
 Mermaid, or image generation).
 
+![How docsmith works: source.md + an optional ~/.docsmith/profile.yaml go through the /make-pdf skill and are rendered by marp-cli or pandoc+tectonic into an on-brand PDF.](plugins/docsmith/assets/how-it-works.svg)
+
 **Templates**
 
 - `handbook` — long-form report/guide as a LaTeX `book` (pandoc + tectonic)
-- `bgn-deck` — 16:9 BGN-branded slides (marp-cli)
+- `corporate-deck` — 16:9 formal corporate / civic slides (marp-cli)
 - `claudecode-deck` — 16:9 Claude/"claudecode"-branded slides (marp-cli)
 - `kawaii-storybook` — 16:9 pastel storybook / NotebookLM-style deck (marp-cli)
 
@@ -39,6 +41,11 @@ Then, in any project:
 ```
 /make-pdf turn report.md into a handbook PDF for Pangaea Labs
 ```
+
+▸ **See every template's components rendered** — the flow diagram, a 4-template
+gallery, and runnable demos with example prompts live in
+**[the docsmith README](plugins/docsmith/README.md#gallery--every-templates-components-rendered)**
+and **[`plugins/docsmith/examples/`](plugins/docsmith/examples/)**.
 
 ## License
 

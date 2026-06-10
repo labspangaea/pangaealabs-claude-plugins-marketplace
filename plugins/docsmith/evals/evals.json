@@ -28,9 +28,9 @@
     },
     {
       "id": 3,
-      "prompt": "Render evals/sample/bgn-deck-sample.md to the bgn-deck template (the skill renders ONE template and ONE company per run).",
-      "expected_output": "A bgn-deck slide PDF matching the BGN brand (navy/green/gold, BGN Sans + Lora) with a cover, a big-stat, a KPI slide, the alur-operasional diagram on a split slide, and a closing.",
-      "files": ["evals/sample/bgn-deck-sample.md", "evals/sample/profile.yaml"],
+      "prompt": "Render evals/sample/corporate-deck-sample.md to the corporate-deck template (the skill renders ONE template and ONE company per run).",
+      "expected_output": "A corporate-deck slide PDF matching the BGN brand (navy/green/gold, BGN Sans + Lora) with a cover, a big-stat, a KPI slide, the alur-operasional diagram on a split slide, and a closing.",
+      "files": ["evals/sample/corporate-deck-sample.md", "evals/sample/profile.yaml"],
       "assertions": [
         "PDF page size is 1440 x 810 pts",
         "pdftotext contains 'Generasi Emas' and '15,2'",

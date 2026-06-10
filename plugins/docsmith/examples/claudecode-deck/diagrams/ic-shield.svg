@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- security / trust — clay-stroke shield with check, transparent ground -->
+  <circle cx="32" cy="32" r="28" fill="#F5E6DA" stroke="#B85838" stroke-width="2.5"/>
+  <path d="M32 14 L46 20 L46 33 C46 43 40 48 32 51 C24 48 18 43 18 33 L18 20 Z"
+        fill="none" stroke="#B85838" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M25 32 L30 38 L40 26"
+        fill="none" stroke="#B85838" stroke-width="3.4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

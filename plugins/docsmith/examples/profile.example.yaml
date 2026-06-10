@@ -1,0 +1,21 @@
+# ~/.docsmith/profile.yaml — one entry per org you brand documents as.
+# One org is picked per run by company name (or --company / --logo / front-matter).
+# Every value here is a MADE-UP placeholder — copy this to ~/.docsmith/profile.yaml
+# and replace it with your own. (This same file renders the demos in ./examples/.)
+- company: "Acme Corp"
+  author: "Jane Rivera"
+  email: "press@acme.example"
+  logo: ""                                  # optional: square SVG/PNG path; renders ~40px tall in footers
+  wordmark: "ACME"                          # text fallback shown when no logo is set
+  website: "https://acme.example"
+  default_confidentiality: "Internal"       # Public / Internal / Confidential / Restricted; "" = none
+  copyright: "© 2026 Acme Corp"
+
+- company: "Nimbus Studio"
+  author: "Lee Park"
+  email: "hello@nimbus.example"
+  logo: ""
+  wordmark: "nimbus"
+  website: "https://nimbus.example"
+  default_confidentiality: ""
+  copyright: "© 2026 Nimbus Studio"

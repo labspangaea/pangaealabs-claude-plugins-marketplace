@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#003060"/>
+    </marker>
+  </defs>
+
+  <!-- ===== INPUT ===== -->
+  <rect x="24" y="96" width="250" height="168" rx="16" fill="#ffffff" stroke="#003060" stroke-width="2"/>
+  <text x="44" y="128" fill="#C9A24A" font-size="13" font-weight="700" letter-spacing="2">INPUT</text>
+  <text x="44" y="166" fill="#003060" font-size="23" font-weight="700">source.md</text>
+  <text x="44" y="200" fill="#5f6b78" font-size="15">plus, optionally</text>
+  <text x="44" y="228" fill="#1a4a7a" font-size="15" font-family="ui-monospace, Menlo, monospace">~/.docsmith/</text>
+  <text x="44" y="250" fill="#1a4a7a" font-size="15" font-family="ui-monospace, Menlo, monospace">profile.yaml</text>
+
+  <line x1="278" y1="180" x2="316" y2="180" stroke="#003060" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== MAKE-PDF SKILL ===== -->
+  <rect x="320" y="56" width="520" height="248" rx="18" fill="#f5f9fd" stroke="#003060" stroke-width="2.5"/>
+  <text x="344" y="92" fill="#003060" font-size="21" font-weight="800">/make-pdf&#160;<tspan fill="#5a9438">skill</tspan></text>
+
+  <g>
+    <rect x="344" y="108" width="472" height="40" rx="10" fill="#eef3f8" stroke="#cdd9e6"/>
+    <circle cx="370" cy="128" r="13" fill="#003060"/><text x="370" y="133" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">1</text>
+    <text x="394" y="133" fill="#23303d" font-size="15.5">Check the toolchain (<tspan font-family="ui-monospace, Menlo, monospace" font-size="14">doctor</tspan>)</text>
+  </g>
+  <g>
+    <rect x="344" y="156" width="472" height="40" rx="10" fill="#eef3f8" stroke="#cdd9e6"/>
+    <circle cx="370" cy="176" r="13" fill="#003060"/><text x="370" y="181" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">2</text>
+    <text x="394" y="181" fill="#23303d" font-size="15.5">Pick ONE template + ONE company brand</text>
+  </g>
+  <g>
+    <rect x="344" y="204" width="472" height="40" rx="10" fill="#eef3f8" stroke="#cdd9e6"/>
+    <circle cx="370" cy="224" r="13" fill="#003060"/><text x="370" y="229" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">3</text>
+    <text x="394" y="229" fill="#23303d" font-size="15.5">Author hand-written raw-SVG visuals</text>
+  </g>
+  <g>
+    <rect x="344" y="252" width="472" height="40" rx="10" fill="#eef3f8" stroke="#cdd9e6"/>
+    <circle cx="370" cy="272" r="13" fill="#003060"/><text x="370" y="277" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">4</text>
+    <text x="394" y="277" fill="#23303d" font-size="15.5"><tspan font-family="ui-monospace, Menlo, monospace" font-size="14">build.py</tspan> composes the design-system theme</text>
+  </g>
+
+  <line x1="844" y1="180" x2="882" y2="180" stroke="#003060" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== RENDER ===== -->
+  <rect x="886" y="96" width="196" height="168" rx="16" fill="#ffffff" stroke="#003060" stroke-width="2"/>
+  <text x="906" y="128" fill="#C9A24A" font-size="13" font-weight="700" letter-spacing="2">RENDER</text>
+  <text x="906" y="166" fill="#003060" font-size="20" font-weight="700">marp-cli</text>
+  <text x="906" y="196" fill="#5f6b78" font-size="15">or</text>
+  <text x="906" y="226" fill="#003060" font-size="20" font-weight="700">pandoc +</text>
+  <text x="906" y="250" fill="#003060" font-size="20" font-weight="700">tectonic</text>
+
+  <line x1="1086" y1="180" x2="1124" y2="180" stroke="#003060" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== OUTPUT ===== -->
+  <rect x="1128" y="96" width="128" height="168" rx="16" fill="#003060"/>
+  <text x="1150" y="128" fill="#C9A24A" font-size="13" font-weight="700" letter-spacing="2">OUTPUT</text>
+  <text x="1192" y="190" fill="#ffffff" font-size="46" font-weight="800" text-anchor="middle">PDF</text>
+  <text x="1192" y="224" fill="#bcd0e6" font-size="15" text-anchor="middle">on-brand</text>
+</svg>

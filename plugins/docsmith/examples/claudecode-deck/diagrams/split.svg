@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="660" viewBox="0 0 760 660">
+  <!-- Nimbus request lifecycle — transparent cream ground, ink/clay strokes only.
+       No #fff fills: surface/peach/cream/clay tokens so it melts into the wash. -->
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#B85838"/>
+    </marker>
+  </defs>
+
+  <!-- column spine -->
+  <line x1="120" y1="70" x2="120" y2="590" stroke="#E2E0D6" stroke-width="3"/>
+
+  <!-- Node 1: Edge -->
+  <circle cx="120" cy="100" r="11" fill="#B85838"/>
+  <rect x="170" y="58" width="540" height="92" rx="18" fill="#F7F6EF" stroke="#262620" stroke-width="2.5"/>
+  <text x="200" y="98" font-family="Georgia, 'Times New Roman', serif" font-size="33" fill="#262620">Edge router</text>
+  <text x="200" y="130" font-family="'Helvetica Neue', Arial, sans-serif" font-size="22" fill="#54514A">TLS · auth · rate limit</text>
+
+  <!-- Node 2: Queue (peach highlight) -->
+  <circle cx="120" cy="260" r="11" fill="#B85838"/>
+  <rect x="170" y="218" width="540" height="92" rx="18" fill="#F5E6DA" stroke="#B85838" stroke-width="2.5"/>
+  <text x="200" y="258" font-family="Georgia, 'Times New Roman', serif" font-size="33" fill="#262620">Durable queue</text>
+  <text x="200" y="290" font-family="'Helvetica Neue', Arial, sans-serif" font-size="22" fill="#54514A">at-least-once · ordered</text>
+
+  <!-- Node 3: Workers -->
+  <circle cx="120" cy="420" r="11" fill="#B85838"/>
+  <rect x="170" y="378" width="540" height="92" rx="18" fill="#F7F6EF" stroke="#262620" stroke-width="2.5"/>
+  <text x="200" y="418" font-family="Georgia, 'Times New Roman', serif" font-size="33" fill="#262620">Worker pool</text>
+  <text x="200" y="450" font-family="'Helvetica Neue', Arial, sans-serif" font-size="22" fill="#54514A">autoscaled · isolated</text>
+
+  <!-- Node 4: Store -->
+  <circle cx="120" cy="560" r="11" fill="#B85838"/>
+  <rect x="170" y="518" width="540" height="92" rx="18" fill="#F7F6EF" stroke="#262620" stroke-width="2.5"/>
+  <text x="200" y="558" font-family="Georgia, 'Times New Roman', serif" font-size="33" fill="#262620">Result store</text>
+  <text x="200" y="590" font-family="'Helvetica Neue', Arial, sans-serif" font-size="22" fill="#54514A">replicated · queryable</text>
+
+  <!-- flow arrows between cards -->
+  <line x1="120" y1="150" x2="120" y2="206" stroke="#B85838" stroke-width="3" marker-end="url(#arr)"/>
+  <line x1="120" y1="310" x2="120" y2="366" stroke="#B85838" stroke-width="3" marker-end="url(#arr)"/>
+  <line x1="120" y1="470" x2="120" y2="506" stroke="#B85838" stroke-width="3" marker-end="url(#arr)"/>
+</svg>

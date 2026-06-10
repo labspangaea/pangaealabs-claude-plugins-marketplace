@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="500" viewBox="0 0 1560 500">
+  <!-- Nimbus rollout timeline — wide, full-bleed on the cream wash.
+       Transparent ground; surface/peach/clay fills, ink strokes. -->
+  <defs>
+    <marker id="tarr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#B85838"/>
+    </marker>
+  </defs>
+
+  <!-- baseline -->
+  <line x1="120" y1="250" x2="1440" y2="250" stroke="#E2E0D6" stroke-width="4"/>
+  <line x1="120" y1="250" x2="1440" y2="250" stroke="#B85838" stroke-width="4" stroke-dasharray="2 18" stroke-linecap="round"/>
+
+  <!-- Phase markers (4) -->
+  <!-- 1 Private alpha -->
+  <circle cx="270" cy="250" r="20" fill="#F7F6EF" stroke="#262620" stroke-width="3"/>
+  <text x="270" y="259" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="24" fill="#B85838">1</text>
+  <rect x="150" y="80" width="240" height="120" rx="16" fill="#F7F6EF" stroke="#262620" stroke-width="2.5"/>
+  <text x="270" y="128" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#262620">Private alpha</text>
+  <text x="270" y="166" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="21" fill="#54514A">12 design partners</text>
+  <line x1="270" y1="200" x2="270" y2="230" stroke="#B85838" stroke-width="3"/>
+
+  <!-- 2 Open beta (peach) -->
+  <circle cx="660" cy="250" r="20" fill="#F5E6DA" stroke="#B85838" stroke-width="3"/>
+  <text x="660" y="259" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="24" fill="#B85838">2</text>
+  <rect x="540" y="300" width="240" height="120" rx="16" fill="#F5E6DA" stroke="#B85838" stroke-width="2.5"/>
+  <text x="660" y="348" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#262620">Open beta</text>
+  <text x="660" y="386" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="21" fill="#54514A">self-serve signup</text>
+  <line x1="660" y1="270" x2="660" y2="300" stroke="#B85838" stroke-width="3"/>
+
+  <!-- 3 GA -->
+  <circle cx="1050" cy="250" r="20" fill="#F7F6EF" stroke="#262620" stroke-width="3"/>
+  <text x="1050" y="259" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="24" fill="#B85838">3</text>
+  <rect x="930" y="80" width="240" height="120" rx="16" fill="#F7F6EF" stroke="#262620" stroke-width="2.5"/>
+  <text x="1050" y="128" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#262620">General release</text>
+  <text x="1050" y="166" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="21" fill="#54514A">SLA + billing live</text>
+  <line x1="1050" y1="200" x2="1050" y2="230" stroke="#B85838" stroke-width="3"/>
+
+  <!-- 4 Scale -->
+  <circle cx="1380" cy="250" r="20" fill="#F7F6EF" stroke="#262620" stroke-width="3"/>
+  <text x="1380" y="259" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="24" fill="#B85838">4</text>
+  <rect x="1260" y="300" width="240" height="120" rx="16" fill="#F7F6EF" stroke="#262620" stroke-width="2.5"/>
+  <text x="1380" y="348" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#262620">Multi-region</text>
+  <text x="1380" y="386" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="21" fill="#54514A">EU + APAC edges</text>
+  <line x1="1380" y1="270" x2="1380" y2="300" stroke="#B85838" stroke-width="3"/>
+
+  <!-- direction arrow -->
+  <line x1="1410" y1="250" x2="1450" y2="250" stroke="#B85838" stroke-width="4" marker-end="url(#tarr)"/>
+</svg>

@@ -1,6 +1,0 @@
-description: "16:9 slides — Badan Gizi Nasional brand (navy/green/gold, BGN Sans + Lora). Formal, civic, government-deck feel."
-backend: marp-cli
-theme_name: docsmith-bgn-deck
-# design-system.css (copied colors_and_type.css) is composed first, then these:
-theme_files:
-  - theme.css   # relative to assets/
