@@ -19,17 +19,6 @@ by Pangaea Labs. Today it ships one plugin: **`docsmith`** (markdown → on-bran
 **Never put dev/eval scaffolding under `plugins/docsmith/`** — it would ship to every
 user. Keep it in `dev/`. `iteration-*` outputs are git-ignored.
 
-## Git / PR workflow
-
-- Repo is owned by the **`labspangaea`** GitHub org. The local `gh` active account is
-  usually `harryosmar`, which can't push here. For push/PR:
-  `gh auth switch --user labspangaea` → push + `gh pr create` → **restore**
-  `gh auth switch --user harryosmar`.
-- **Never commit directly to `main`** (this repo has a history of an unauthorized
-  direct push). Branch first, open a PR, merge via PR.
-- Stage explicit file lists; never `git add -A` (avoids sweeping in `dev/` artifacts).
-- **Don't hand-bump the plugin version** — that's `/release-pangaealabs-plugin`'s job.
-
 ## Monitors (`plugins/docsmith/monitors/monitors.json`)
 
 Both arm on `/make-pdf` and stream signal into the session:
