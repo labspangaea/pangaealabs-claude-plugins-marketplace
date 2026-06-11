@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="Poppins, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="22" markerHeight="22" refX="15" refY="11" orient="auto" markerUnits="userSpaceOnUse"><path d="M2,2 L20,11 L2,20 Z" fill="#0A0A0A"/></marker>
+  </defs>
+  <rect width="1920" height="1080" fill="#F4F6FD"/>
+  <text x="960" y="105" text-anchor="middle" font-size="100" font-weight="900" fill="#0A0A0A">The RAG lifecycle</text>
+
+  <!-- step badge + connector helpers are inlined per lane -->
+  <!-- ===================== LANE 1 · INGEST (offline) ===================== -->
+  <rect x="60" y="180" width="1800" height="260" rx="22" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="4"/>
+  <rect x="60" y="180" width="230" height="260" rx="22" fill="#A9F5D9" stroke="#0A0A0A" stroke-width="4"/>
+  <text x="175" y="325" text-anchor="middle" font-size="40" font-weight="800" fill="#0A0A0A">Ingest</text>
+  <text x="175" y="365" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="20" fill="#15604a">offline</text>
+  <!-- connectors -->
+  <g stroke="#0A0A0A" stroke-width="6" stroke-dasharray="2 11" stroke-linecap="round" fill="none">
+    <path d="M528 305 H772" marker-end="url(#ar)"/><path d="M888 305 H1132" marker-end="url(#ar)"/><path d="M1248 305 H1492" marker-end="url(#ar)"/>
+  </g>
+  <!-- steps: crawl · chunk · embed · store -->
+  <g font-family="JetBrains Mono, monospace" font-weight="700"><g fill="#3FA9F5" stroke="#0A0A0A" stroke-width="4"><circle cx="470" cy="232" r="24"/><circle cx="830" cy="232" r="24"/><circle cx="1190" cy="232" r="24"/><circle cx="1550" cy="232" r="24"/></g>
+    <g fill="#04121f" stroke="none" font-size="26" text-anchor="middle"><text x="470" y="242">1</text><text x="830" y="242">2</text><text x="1190" y="242">3</text><text x="1550" y="242">4</text></g></g>
+  <g transform="translate(428,266) scale(0.7)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round"><path d="M38 92 C20 92 18 66 38 62 C38 40 74 38 76 60 C98 56 102 92 80 92 Z" fill="#fff"/></g>
+  <g transform="translate(788,266) scale(0.7)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round"><path d="M34 16 H78 L96 36 V104 H34 Z" fill="#fff"/><path d="M78 16 V36 H96" fill="none"/><g stroke="#3FA9F5" stroke-width="5" stroke-linecap="round"><line x1="46" y1="56" x2="84" y2="56"/><line x1="46" y1="70" x2="84" y2="70"/><line x1="46" y1="84" x2="72" y2="84"/></g></g>
+  <g transform="translate(1148,266) scale(0.7)"><rect x="18" y="18" width="84" height="84" rx="12" fill="#fff" stroke="#0A0A0A" stroke-width="5"/><g fill="#3FA9F5"><circle cx="38" cy="38" r="7"/><circle cx="60" cy="38" r="7"/><circle cx="82" cy="38" r="7"/><circle cx="38" cy="60" r="7"/><circle cx="60" cy="60" r="7"/><circle cx="82" cy="60" r="7"/><circle cx="38" cy="82" r="7"/><circle cx="60" cy="82" r="7"/><circle cx="82" cy="82" r="7"/></g></g>
+  <g transform="translate(1508,266) scale(0.7)" fill="#fff" stroke="#0A0A0A" stroke-width="6"><path d="M28 32 V88 a32 14 0 0 0 64 0 V32 Z"/><ellipse cx="60" cy="32" rx="32" ry="14"/><path d="M28 56 a32 14 0 0 0 64 0" fill="none"/><ellipse cx="60" cy="32" rx="32" ry="14" fill="none" stroke="#3FA9F5" stroke-width="4"/></g>
+  <g font-family="JetBrains Mono, monospace" font-size="26" fill="#0A0A0A" text-anchor="middle"><text x="470" y="408">crawl</text><text x="830" y="408">chunk</text><text x="1190" y="408">embed</text><text x="1550" y="408">store</text></g>
+
+  <!-- ===================== LANE 2 · SERVE (online) ===================== -->
+  <rect x="60" y="480" width="1800" height="260" rx="22" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="4"/>
+  <rect x="60" y="480" width="230" height="260" rx="22" fill="#FFDEB6" stroke="#0A0A0A" stroke-width="4"/>
+  <text x="175" y="625" text-anchor="middle" font-size="40" font-weight="800" fill="#0A0A0A">Serve</text>
+  <text x="175" y="665" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="20" fill="#8a5a1e">online</text>
+  <g stroke="#0A0A0A" stroke-width="6" stroke-dasharray="2 11" stroke-linecap="round" fill="none">
+    <path d="M528 605 H772" marker-end="url(#ar)"/><path d="M888 605 H1132" marker-end="url(#ar)"/><path d="M1248 605 H1492" marker-end="url(#ar)"/>
+  </g>
+  <g font-family="JetBrains Mono, monospace" font-weight="700"><g fill="#3FA9F5" stroke="#0A0A0A" stroke-width="4"><circle cx="470" cy="532" r="24"/><circle cx="830" cy="532" r="24"/><circle cx="1190" cy="532" r="24"/><circle cx="1550" cy="532" r="24"/></g>
+    <g fill="#04121f" stroke="none" font-size="26" text-anchor="middle"><text x="470" y="542">5</text><text x="830" y="542">6</text><text x="1190" y="542">7</text><text x="1550" y="542">8</text></g></g>
+  <g transform="translate(428,566) scale(0.7)" stroke="#0A0A0A" stroke-width="6"><circle cx="48" cy="44" r="22" fill="#fff"/><path d="M20 100 C20 70 76 70 76 100 Z" fill="#fff"/><rect x="74" y="20" width="40" height="30" rx="8" fill="#fff"/><text x="94" y="43" font-size="22" font-weight="900" fill="#0A0A0A" text-anchor="middle" stroke="none">?</text></g>
+  <g transform="translate(788,566) scale(0.7)" fill="none" stroke="#0A0A0A" stroke-width="7" stroke-linecap="round"><circle cx="52" cy="50" r="30" fill="#E8FBF2"/><line x1="74" y1="72" x2="100" y2="98" stroke-width="14"/><line x1="40" y1="44" x2="66" y2="44" stroke="#3FA9F5" stroke-width="6"/><line x1="40" y1="56" x2="60" y2="56" stroke="#3FA9F5" stroke-width="6"/></g>
+  <g transform="translate(1148,566) scale(0.7)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round"><path d="M34 16 H78 L96 36 V104 H34 Z" fill="#fff"/><path d="M78 16 V36 H96" fill="none"/><g stroke="#3FA9F5" stroke-width="5" stroke-linecap="round"><line x1="46" y1="56" x2="84" y2="56"/><line x1="46" y1="70" x2="84" y2="70"/></g></g>
+  <g transform="translate(1508,566) scale(0.7)"><g transform="translate(-196,-148) scale(0.77)"><path d="M270 286 C258 252 286 218 318 226 C330 204 360 204 372 226 C406 220 430 252 414 284 C428 306 406 332 374 326 C362 344 320 344 310 326 C280 330 256 308 270 286 Z" fill="#fff" stroke="#0A0A0A" stroke-width="6"/><path d="M342 224 C350 252 334 270 344 294 C352 312 340 322 342 330" fill="none" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/><g fill="#3FA9F5"><circle cx="300" cy="252" r="7"/><circle cx="332" cy="238" r="7"/><circle cx="362" cy="252" r="7"/><circle cx="316" cy="296" r="7"/><circle cx="356" cy="296" r="7"/></g></g></g>
+  <g font-family="JetBrains Mono, monospace" font-size="26" fill="#0A0A0A" text-anchor="middle"><text x="470" y="708">query</text><text x="830" y="708">retrieve</text><text x="1190" y="708">augment</text><text x="1550" y="708">generate</text></g>
+
+  <!-- index feeds retrieval: lane1 store → lane2 retrieve -->
+  <path d="M1550 358 C1550 420 830 420 830 478" fill="none" stroke="#0A0A0A" stroke-width="5" stroke-dasharray="2 11" stroke-linecap="round" marker-end="url(#ar)"/>
+  <text x="1180" y="455" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" fill="#2A3550">index serves queries</text>
+
+  <!-- ===================== LANE 3 · EVALUATE ===================== -->
+  <rect x="60" y="780" width="1800" height="260" rx="22" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="4"/>
+  <rect x="60" y="780" width="230" height="260" rx="22" fill="#D8C8F5" stroke="#0A0A0A" stroke-width="4"/>
+  <text x="175" y="925" text-anchor="middle" font-size="38" font-weight="800" fill="#0A0A0A">Evaluate</text>
+  <g stroke="#0A0A0A" stroke-width="6" stroke-dasharray="2 11" stroke-linecap="round" fill="none">
+    <path d="M658 905 H1012" marker-end="url(#ar)"/><path d="M1138 905 H1492" marker-end="url(#ar)"/>
+  </g>
+  <g font-family="JetBrains Mono, monospace" font-weight="700"><g fill="#3FA9F5" stroke="#0A0A0A" stroke-width="4"><circle cx="600" cy="832" r="24"/><circle cx="1080" cy="832" r="24"/><circle cx="1560" cy="832" r="24"/></g>
+    <g fill="#04121f" stroke="none" font-size="24" text-anchor="middle"><text x="600" y="841">9</text><text x="1080" y="841">10</text><text x="1560" y="841">11</text></g></g>
+  <g transform="translate(558,866) scale(0.7)" stroke="#0A0A0A" stroke-width="6"><rect x="20" y="34" width="80" height="16" rx="8" fill="#fff"/><rect x="20" y="58" width="80" height="16" rx="8" fill="#fff"/><rect x="20" y="82" width="80" height="16" rx="8" fill="#fff"/><g fill="#3FA9F5" stroke="none"><circle cx="33" cy="42" r="3.5"/><circle cx="33" cy="66" r="3.5"/><circle cx="33" cy="90" r="3.5"/></g></g>
+  <g transform="translate(1038,866) scale(0.7)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"><circle cx="60" cy="60" r="40" fill="#fff"/><path d="M42 62 L56 76 L82 46" fill="none"/></g>
+  <g transform="translate(1518,866) scale(0.7)" stroke="#0A0A0A" stroke-width="5" stroke-linejoin="round"><g fill="#fff"><rect x="52" y="12" width="16" height="22" rx="3"/><rect x="52" y="86" width="16" height="22" rx="3"/><rect x="12" y="52" width="22" height="16" rx="3"/><rect x="86" y="52" width="22" height="16" rx="3"/><rect x="22" y="22" width="18" height="18" rx="3" transform="rotate(45 31 31)"/><rect x="80" y="22" width="18" height="18" rx="3" transform="rotate(45 89 31)"/><rect x="22" y="80" width="18" height="18" rx="3" transform="rotate(45 31 89)"/><rect x="80" y="80" width="18" height="18" rx="3" transform="rotate(45 89 89)"/></g><circle cx="60" cy="60" r="30" fill="#fff"/><circle cx="60" cy="60" r="13" fill="#3FA9F5"/></g>
+  <g font-family="JetBrains Mono, monospace" font-size="26" fill="#0A0A0A" text-anchor="middle"><text x="600" y="1008">log</text><text x="1080" y="1008">score</text><text x="1560" y="1008">tune</text></g>
+
+  <!-- feedback loop: tune → re-embed (lane3 → lane1) -->
+  <path d="M1560 788 C1560 470 1840 470 1840 250 C1840 150 1300 150 1190 196" fill="none" stroke="#3FA9F5" stroke-width="5" stroke-dasharray="2 11" stroke-linecap="round" marker-end="url(#ar)"/>
+  <text x="1700" y="360" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" fill="#1F6FB8">feedback → re-tune</text>
+</svg>

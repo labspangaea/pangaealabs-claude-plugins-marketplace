@@ -1,0 +1,64 @@
+/* docsmith — concept-deck tokens.
+   A ByteByteGo-style "concept card" deck: a near-WHITE field, bold BLACK-outlined
+   multi-pastel cards, BLACK orthogonal connectors, heavy Poppins black titles, flat
+   sticker icons — the true ByteByteGo "study-notes" look. Pangaea identity lives in
+   the electric-blue SIGNAL accent (eyebrow chips, em words, page number, icon nodes)
+   and in the single navy "statement" punctuation slide.
+   The multi-pastel card set is an intentional departure from Pangaea's strict two-hue
+   brand — chosen for diagram legibility.
+   Fonts via Google Fonts (OFL): Poppins (display+body), JetBrains Mono (code). */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* —— the field (near-white, a whisper of periwinkle) —— */
+  --cd-field:    #F4F6FD;
+  --cd-field-2:  #E9EEFB;   /* subtle wash / glow target */
+  --cd-surface:  #FFFFFF;   /* code cards · table · callouts */
+
+  /* —— ink (titles, card outlines, connectors, card text) —— */
+  --cd-ink:      #0A0A0A;   /* the ByteByteGo black */
+  --cd-ink-2:    #2A3550;   /* body text on the field */
+  --cd-ink-soft: rgba(26, 36, 64, 0.55);   /* captions / footer */
+
+  /* —— signal (Pangaea accent: eyebrow · em · page no · bullets · icon nodes) —— */
+  --cd-signal:      #3FA9F5;
+  --cd-signal-soft: rgba(63, 169, 245, 0.12);
+  --cd-signal-line: rgba(63, 169, 245, 0.45);
+
+  /* —— navy void: the one dark "statement" slide (Pangaea --void) —— */
+  --cd-void:   #0A1A2F;
+  --cd-void-2: #0E2540;
+
+  /* —— ByteByteGo multi-pastel card set (cycled across cards) —— */
+  --cd-card-blue:  #BCD8FF;
+  --cd-card-mint:  #A9F5D9;
+  --cd-card-peach: #FFDEB6;
+  --cd-card-pink:  #F5A9C2;
+  --cd-card-lilac: #D8C8F5;
+
+  /* —— darker tints for the "document content" line motif —— */
+  --cd-line-blue:  #8FB7F0;
+  --cd-line-mint:  #6FD9B0;
+  --cd-line-peach: #E0975F;
+  --cd-line-pink:  #EA799E;
+
+  /* —— verdict / status —— */
+  --cd-accept-a: #34C281; --cd-accept-b: #25A56B; --cd-accept-tint: #E6F8EF;
+  --cd-reject-a: #F2576B; --cd-reject-b: #D63E55; --cd-reject-tint: #FCE6EA;
+  --cd-caution:  #FFDEB6; --cd-caution-t: #8A5A1E; --cd-caution-tint: #FBF0DC;
+
+  /* —— shape —— */
+  --cd-r-card: 28px;
+  --cd-r-pill: 999px;
+  --cd-bw: 4px;            /* the signature bold black outline weight */
+  /* Bold black outlines carry the cards on the near-white field; blurred shadows
+     render as hard grey rectangles in many PDF viewers, so depth comes from the
+     outline + the pastel-on-white contrast instead. */
+  --cd-shadow-sm: none;
+  --cd-shadow-md: none;
+
+  /* —— type —— */
+  --font-display: "Poppins", "Montserrat", "Arial Black", system-ui, sans-serif;
+  --font-sans:    "Poppins", system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
