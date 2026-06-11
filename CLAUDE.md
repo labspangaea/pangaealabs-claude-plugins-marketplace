@@ -13,6 +13,7 @@ by Pangaea Labs. Today it ships one plugin: **`docsmith`** (markdown → on-bran
 | `plugins/docsmith/scripts/` | `build.py`, `doctor.py`, `check_links.py`, etc. |
 | `plugins/docsmith/monitors/monitors.json` | background monitors (see below) |
 | `plugins/docsmith/references/` | `authoring-guide.md`, `adding-a-template.md` |
+| `plugins/docsmith/assets/templates/` | design-system templates (`handbook`, `corporate-deck`, `claudecode-deck`, `kawaii-storybook`, `concept-deck`). **`concept-deck`** is **SVG-first / tech-doc** — one full-canvas SVG per concept; author its diagrams per `concept-deck/icons.md` (the SVG-DNA generation guide). |
 | `dev/` | **dev/eval workspaces — NOT shipped** (moved out of `plugins/` on purpose) |
 | `dev/docsmith-workspace/trigger-evals.json` | the skill-triggering eval set (20 queries) |
 
