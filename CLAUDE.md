@@ -78,18 +78,27 @@ and `--model`. `run_eval` spawns a real `claude -p` per query×run (live, costs 
      marketplace checkout** — otherwise the nested `claude -p` picks up docsmith as a
      *project-local* skill and shadowing returns even with a clean config.
 
-3. **Even with both, the harness still can't trigger in Claude Code 2.1.x.** `run_eval`
-   registers the candidate as a thin `.claude/commands/` **stub**; current CC invokes *real*
-   skills but won't invoke a command stub for a natural-language query. So every should-trigger
-   query false-negatives → all-negative, useless signal (likely why the prior run scored only
-   4/8). Verified: an obvious match returns `0/1` under **both haiku and sonnet**, fully isolated.
-   The optimizer is **not usable as-is** without modifying the skill-creator harness to register
-   a real skill instead of a command stub.
+3. **`run_eval`'s detector under-counts on Claude Code 2.1.x — the stub DOES trigger.**
+   The earlier "command stubs don't fire in 2.1.x" conclusion was **wrong** (verified with
+   `--include-partial-messages` traces): the `.claude/commands/make-pdf-skill-<id>` stub
+   registers fine and Claude *does* select it. The bug is in the harness's stream detector,
+   which calls a query a **miss** the instant it sees the first `message_stop` (or the first
+   tool that isn't `Skill`/`Read`). But on CC 2.1.x the model **inspects the input file in
+   turn 1 and selects the skill in turn 2** — so the detector bails *before* the selection and
+   reports an all-negative artifact. Fix: scan **all** turns and only conclude "not triggered"
+   at the top-level `result` event (don't terminate on `message_stop`; don't hard-fail on a
+   leading non-Skill tool). A corrected, drop-in harness lives at
+   **`dev/docsmith-workspace/run_trigger_eval.py`** (the minimal upstream diff for
+   `skill-creator/run_eval.py` is in `dev/docsmith-workspace/run_eval.py.patch`).
 
-**Bottom line:** the shipped `make-pdf` description is already strong, and the optimizer can't
-produce trustworthy signal in this CC version (gotcha 3) — **don't re-run it expecting a better
-description.** If you ever do, first fix the harness to register a real skill and confirm a
-known-good query actually triggers before believing any score.
+**Bottom line:** with the corrected harness the triggering eval **does** produce trustworthy
+signal here. Last run (shipped description, `sonnet`, 2 runs/query, fully isolated):
+**no-trigger specificity 10/10** (zero over-trigger) and **should-trigger recall 7/10 raw** —
+where all 3 raw misses are *underspecified* eval queries ("this content" / "these notes" with
+nothing attached) that flip to **6/6** the moment the referenced input file is present. The
+shipped `make-pdf` description is strong and needs no change; re-run via `run_trigger_eval.py`
+(not the stock `run_eval.py`) if you tune it, and seed the referenced input files first so
+recall isn't masked by the model pausing to ask for missing input.
 
 ## Checks worth knowing
 
