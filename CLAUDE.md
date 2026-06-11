@@ -75,10 +75,6 @@ and `--model`. `run_eval` spawns a real `claude -p` per query×run (live, costs 
    interactively, once: `CLAUDE_CONFIG_DIR=<dir> claude /login`. Only then can the eval run
    isolated + authed.
 
-3. **Do NOT apply the 2026-05-29 optimizer result** (`dev/docsmith-workspace/desc-opt/…/results.json`).
-   It is **stale** (describes `bgn-deck` + inline `d2`, both removed) and **low-scoring**
-   (4/8 test, never converged). Applying it would regress the current, hand-tuned 0.7.0 description.
-
 **Bottom line:** the shipped `make-pdf` description is already strong; only re-optimize from a
 freshly-authed, plugin-free isolated config, and re-baseline against the *current* description
 before trusting any "improvement."
