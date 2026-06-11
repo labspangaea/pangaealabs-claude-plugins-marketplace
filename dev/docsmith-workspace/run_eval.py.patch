@@ -1,0 +1,52 @@
+diff --git a/skills/skill-creator/scripts/run_eval.py b/skills/skill-creator/scripts/run_eval.py
+index e58c70b..08f7aa0
+--- a/skills/skill-creator/scripts/run_eval.py
++++ b/skills/skill-creator/scripts/run_eval.py
+@@ -138,7 +138,13 @@ def run_single_query(
+                                     pending_tool_name = tool_name
+                                     accumulated_json = ""
+                                 else:
+-                                    return False
++                                    # Not a Skill/Read tool: ignore it and keep
++                                    # scanning. Do NOT treat a leading Bash/Glob/etc.
++                                    # as a miss — on CC 2.1.x the model frequently
++                                    # inspects the input file first and selects the
++                                    # skill in a later turn.
++                                    pending_tool_name = None
++                                    accumulated_json = ""
+ 
+                         elif se_type == "content_block_delta" and pending_tool_name:
+                             delta = se.get("delta", {})
+@@ -148,10 +154,13 @@ def run_single_query(
+                                     return True
+ 
+                         elif se_type in ("content_block_stop", "message_stop"):
+-                            if pending_tool_name:
+-                                return clean_name in accumulated_json
+-                            if se_type == "message_stop":
+-                                return False
++                            # End of a content block / assistant turn: reset and keep
++                            # scanning. The run ends only at the top-level `result`
++                            # event below, NOT at the first message_stop -- the skill
++                            # may be selected in a later turn after the model reads the
++                            # input file. Concluding here is the 2.1.x false-negative bug.
++                            pending_tool_name = None
++                            accumulated_json = ""
+ 
+                     # Fallback: full assistant message
+                     elif event.get("type") == "assistant":
+@@ -162,10 +171,10 @@ def run_single_query(
+                             tool_name = content_item.get("name", "")
+                             tool_input = content_item.get("input", {})
+                             if tool_name == "Skill" and clean_name in tool_input.get("skill", ""):
+-                                triggered = True
+-                            elif tool_name == "Read" and clean_name in tool_input.get("file_path", ""):
+-                                triggered = True
+-                            return triggered
++                                return True
++                            if tool_name == "Read" and clean_name in tool_input.get("file_path", ""):
++                                return True
++                        # No selection in THIS message; keep scanning later turns.
+ 
+                     elif event.get("type") == "result":
+                         return triggered
