@@ -1,0 +1,6 @@
+description: "16:9 technical-doc, SVG-first slides in the ByteByteGo 'concept card' idiom — flat near-white field, bold black-outlined multi-pastel cards, black orthogonal connectors, heavy Poppins black titles, flat sticker icons; mono tech tags + electric-blue signal accent + one navy statement slide. Each concept is a hand-written SVG diagram. Best for system-design / architecture / how-it-works / pipeline explainers."
+backend: marp-cli
+theme_name: docsmith-concept-deck
+html: true   # raw-HTML passthrough for <aside class="callout …"> callouts
+theme_files:
+  - theme.css   # relative to assets/

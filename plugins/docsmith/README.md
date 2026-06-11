@@ -21,6 +21,7 @@ system into a finished PDF. The look is the template's; the brand is your profil
 | `corporate-deck` | marp-cli | 16:9 **slides**, formal corporate / civic deck (navy/green/gold, serif Lora accents). Brand per company via the docsmith profile; default look derived from a government design system. |
 | `claudecode-deck` | marp-cli | 16:9 **slides**, Claude editorial (cream/clay, Instrument Serif + Manrope + JetBrains Mono). |
 | `kawaii-storybook` | marp-cli | 16:9 **slides**, soft pastel storybook / NotebookLM (rotating washes, chip-cards, verdict pills, emoji + hand-drawn SVG heroes, full-bleed SVG scenes, callouts, code blocks; Baloo 2 + Nunito + Lora). From `The_Secure_Cloud_Village.pdf`. |
+| `concept-deck` | marp-cli | 16:9 **technical-doc, SVG-first** slides (ByteByteGo idiom) — each concept is one hand-written full-canvas SVG: flat near-white field, black-outlined multi-pastel cards, **black** orthogonal connectors, heavy Poppins titles, sticker icons; mono tech tags + signal accent + one navy statement slide. Minimal class set. Best for system-design / architecture / how-it-works explainers. |
 
 ## Gallery — every template's components, rendered
 
@@ -90,6 +91,22 @@ including its **footer logo** (hand-written SVG under [`examples/logo/`](example
 
 > **Try it:** `Make a cute kawaii-storybook from examples/kawaii-storybook/cloud-safety.md`
 > 📋 **All 24 classes →** [`examples/kawaii-storybook/CLASSES.md`](examples/kawaii-storybook/CLASSES.md) · folder [`examples/kawaii-storybook/`](examples/kawaii-storybook/)
+
+### `concept-deck` — *How RAG Works* (Pangaea Digital Labs) · 9 slides · **SVG-first**
+Each concept is one hand-written full-canvas `1920×1080` SVG (`figure full`) — including dense **multi-panel** and **swim-lane** composites. The chrome is a flat near-white field with mono tech tags.
+<table>
+<tr>
+<td width="50%"><img src="examples/concept-deck/pages/page-02.png" width="100%"><br><sub><b>figure full</b> — RAG end to end · 2×2 framed-panel composite</sub></td>
+<td width="50%"><img src="examples/concept-deck/pages/page-07.png" width="100%"><br><sub><b>figure full</b> — RAG lifecycle · 3-lane swim-lane pipeline</sub></td>
+</tr>
+<tr>
+<td><img src="examples/concept-deck/pages/page-04.png" width="100%"><br><sub><b>figure full</b> — RAG architecture, 5-node loop</sub></td>
+<td><img src="examples/concept-deck/pages/page-05.png" width="100%"><br><sub><b>figure full</b> — RAG pipeline, 4 numbered stages</sub></td>
+</tr>
+</table>
+
+> **Try it:** `Make a concept-deck from examples/concept-deck/rag-system-design.md, brand Pangaea Digital Labs`
+> 📋 **Slides + SVG-DNA guide →** [`examples/concept-deck/CLASSES.md`](examples/concept-deck/CLASSES.md) · [`icons.md`](assets/templates/concept-deck/icons.md) · folder [`examples/concept-deck/`](examples/concept-deck/)
 
 ## Use it
 Invoke the **`/docsmith:make-pdf`** skill (or just ask Claude to "make a PDF /

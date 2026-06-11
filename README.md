@@ -29,8 +29,9 @@ Mermaid, or image generation).
 - `corporate-deck` — 16:9 formal corporate / civic slides (marp-cli)
 - `claudecode-deck` — 16:9 Claude/"claudecode"-branded slides (marp-cli)
 - `kawaii-storybook` — 16:9 pastel storybook / NotebookLM-style deck (marp-cli)
+- `concept-deck` — 16:9 tech-doc, **SVG-first** concept cards (ByteByteGo idiom): one full-canvas SVG per concept, near-white field, black-outlined pastel cards, black connectors, signal accent (marp-cli)
 
-**Preview — one source, four looks** _(rendered demos from [`plugins/docsmith/examples/`](plugins/docsmith/examples/) — each a full per-class catalog with a footer logo; see each template's `CLASSES.md`)_
+**Preview — one source, five looks** _(rendered demos from [`plugins/docsmith/examples/`](plugins/docsmith/examples/) — each a full per-class catalog with a footer logo; see each template's `CLASSES.md`)_
 
 <table>
 <tr>
@@ -48,6 +49,10 @@ Mermaid, or image generation).
 <tr>
 <td><img src="plugins/docsmith/examples/kawaii-storybook/pages/page-01.png" width="100%"><br><sub><b>kawaii-storybook</b> — pastel storybook · cover</sub></td>
 <td><img src="plugins/docsmith/examples/kawaii-storybook/pages/page-08.png" width="100%"><br><sub>verdict path slide</sub></td>
+</tr>
+<tr>
+<td><img src="plugins/docsmith/examples/concept-deck/pages/page-02.png" width="100%"><br><sub><b>concept-deck</b> — tech-doc, SVG-first · RAG end to end (multi-panel SVG)</sub></td>
+<td><img src="plugins/docsmith/examples/concept-deck/pages/page-04.png" width="100%"><br><sub>RAG architecture · full-canvas SVG</sub></td>
 </tr>
 </table>
 

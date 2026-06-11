@@ -1,0 +1,151 @@
+/* docsmith — concept-deck marp theme (technical-doc, SVG-first; ByteByteGo idiom).
+   Tokens from design-system.css. Deliberately MINIMAL: the slide chrome is a flat
+   near-white field with mono tech tags and black ink, so the hand-written SVG diagram
+   IS the slide. The intended pattern is one full-canvas SVG per concept
+   (`<!-- _class: figure full -->`). Only a small, tech-doc-appropriate class set exists:
+   cover · (default content) · cards · figure (+ full / bare) · statement · closing,
+   plus code blocks and callouts. The decorative deck classes are intentionally absent.
+   SVG-DNA generation spec → icons.md. */
+
+/* ---- slide canvas: 1920x1080 px -> 1440x810 pt PDF (16:9) ---- */
+section {
+  width: 1920px; height: 1080px; box-sizing: border-box;
+  padding: 96px 128px;
+  color: var(--cd-ink-2, #2A3550);
+  font-family: var(--font-sans);
+  font-size: 30px; line-height: 1.5; position: relative;
+  background: var(--cd-field, #F4F6FD);   /* flat — no wash, no shadow */
+}
+
+/* ---- type ---- */
+h6 { /* eyebrow → mono tech-doc tag */
+  display: inline-block; font-family: var(--font-mono); font-weight: 700;
+  font-size: 21px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--cd-signal); margin: 0 0 22px; }
+h6::before { content: "// "; opacity: 0.6; }
+h1 { font-family: var(--font-display); font-weight: 900; font-size: 92px;
+     line-height: 1.02; letter-spacing: -0.015em; color: var(--cd-ink); margin: 0 0 24px; }
+h2 { font-family: var(--font-display); font-weight: 800; font-size: 60px;
+     line-height: 1.08; color: var(--cd-ink); margin: 0 0 18px; }
+h3 { font-family: var(--font-display); font-weight: 700; font-size: 36px;
+     color: var(--cd-ink); margin: 0 0 10px; }
+h1 em, h2 em, h3 em { font-style: normal; color: var(--cd-signal); }
+p { margin: 0 0 18px; max-width: none; }
+strong { color: var(--cd-ink); font-weight: 800; }
+em { font-style: italic; }
+a { color: var(--cd-signal); text-decoration: none; }
+
+/* default bullet list — signal dot */
+ul { list-style: none; padding: 0; margin: 14px 0; }
+li { position: relative; padding-left: 42px; margin: 16px 0; }
+li::before { content: ""; position: absolute; left: 4px; top: 14px;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--cd-signal); }
+code { font-family: var(--font-mono); background: var(--cd-signal-soft);
+  color: #1F6FB8; padding: .08em .4em; border-radius: 8px; }
+
+/* fenced ``` code block → a light card with a bold black spine */
+pre { font-family: var(--font-mono); font-size: 23px; line-height: 1.5;
+  background: #EDF1FA; color: var(--cd-ink);
+  border: var(--cd-bw) solid var(--cd-ink); border-left-width: 10px;
+  border-radius: var(--cd-r-card); padding: 24px 30px; margin: 22px 0;
+  white-space: pre-wrap; overflow-wrap: anywhere; }
+pre code { background: none; color: inherit; padding: 0; border-radius: 0;
+  font-family: inherit; font-size: inherit; }
+pre code .hljs-comment, pre code .hljs-quote { color: #8A93A6; font-style: italic; }
+pre code .hljs-keyword, pre code .hljs-selector-tag, pre code .hljs-built_in,
+pre code .hljs-meta, pre code .hljs-section { color: #2F6BD6; }
+pre code .hljs-string, pre code .hljs-attr, pre code .hljs-symbol,
+pre code .hljs-regexp, pre code .hljs-addition { color: #1A7A3A; }
+pre code .hljs-number, pre code .hljs-literal, pre code .hljs-bullet { color: #9A6700; }
+pre code .hljs-title, pre code .hljs-name, pre code .hljs-type,
+pre code .hljs-variable, pre code .hljs-template-variable, pre code .hljs-attribute { color: #1F4DB8; }
+pre code .hljs-params { color: var(--cd-ink); }
+pre code .hljs-deletion { color: var(--cd-reject-b); }
+pre code .hljs-emphasis { font-style: italic; }
+pre code .hljs-strong { font-weight: 700; }
+
+img.emoji { display: inline-block; height: 1.1em; width: auto; vertical-align: -0.18em;
+  margin: 0 .04em; background: none; box-shadow: none; border-radius: 0; float: none; }
+
+/* ---- footer + page number (mono, tech-doc) ---- */
+footer { position: absolute; left: 128px; bottom: 50px;
+  color: var(--cd-ink-soft); font-family: var(--font-mono); font-weight: 500; font-size: 21px; line-height: 1;
+  display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+footer img { height: 38px !important; width: auto !important; max-width: none !important;
+  margin: 0 !important; float: none !important; border-radius: 0 !important;
+  box-shadow: none !important; background: none !important; vertical-align: middle; }
+section::after { color: var(--cd-signal); font-family: var(--font-mono);
+  font-size: 22px; line-height: 1; right: 64px; bottom: 50px; transform: translateY(80px); }
+
+/* ===================== CARDS (the one prose layout: bold black outline + pastel fill) ===================== */
+section.cards ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 32px; margin-top: 26px; list-style: none; padding: 0; }
+section.cards li { background: var(--_fill, var(--cd-card-blue)); border: var(--cd-bw) solid var(--cd-ink);
+  border-radius: var(--cd-r-card); color: var(--cd-ink); padding: 32px 36px; margin: 0; }
+section.cards li::before { content: none; }
+section.cards li strong { display: inline-block; font-family: var(--font-display);
+  font-weight: 800; font-size: 30px; color: var(--cd-ink); margin: 0 0 10px; }
+section.cards li:nth-child(5n+1) { --_fill: var(--cd-card-blue); }
+section.cards li:nth-child(5n+2) { --_fill: var(--cd-card-mint); }
+section.cards li:nth-child(5n+3) { --_fill: var(--cd-card-peach); }
+section.cards li:nth-child(5n+4) { --_fill: var(--cd-card-pink); }
+section.cards li:nth-child(5n+5) { --_fill: var(--cd-card-lilac); }
+
+/* ===================== FIGURE — the primary class (SVG-first) ===================== */
+section.figure { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; padding-bottom: 112px; }
+section.figure h1 { font-size: 110px; line-height: 1.04; }
+section.figure h2 { font-size: 92px; }
+/* size from the SVG's own intrinsic width/height, capped to the slide — NO `vh`
+   (it resolves tiny in marp's PDF viewport). max-* + auto keep any aspect undistorted. */
+section.figure img:not(.emoji) { display: block; margin: 18px auto 0;
+  max-width: 94%; max-height: 600px; width: auto; height: auto; border-radius: var(--cd-r-card); }
+section.figure img.emoji { height: 200px; margin: 12px 0; }
+/* `figure full` = a 100%-SVG slide edge-to-edge (no title/padding) — author a 1920×1080
+   SVG that owns the whole canvas. This is the default concept-deck pattern. */
+section.figure.full { padding: 0; }
+section.figure.full img:not(.emoji) { max-width: 100%; max-height: 1080px; border-radius: 0; margin: 0; }
+/* a full-bleed SVG owns the whole canvas — drop the footer/page-number so they don't
+   overlap edge-to-edge content. Put any branding inside the SVG if you need it here. */
+section.figure.full footer, section.figure.full::after { display: none; }
+section.figure.bare img:not(.emoji) { border-radius: 0; }
+section.figure p { max-width: 42ch; color: var(--cd-ink-soft); }
+section.figure p:has(img) { max-width: none; }   /* don't let the caption cap pin the hero */
+
+/* ===================== CALLOUTS ( <aside class="callout tip"> … ) ===================== */
+.callout { background: var(--cd-surface); border: 1px solid rgba(10,10,10,0.12);
+  border-left: 10px solid var(--cd-signal); border-radius: var(--cd-r-card);
+  padding: 22px 30px; margin: 22px 0; font-size: 28px; color: var(--cd-ink-2); }
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child  { margin-bottom: 0; }
+.callout strong { color: var(--cd-ink); }
+.callout.tip     { background: var(--cd-caution-tint); border-left-color: var(--cd-caution-t); }
+.callout.note,
+.callout.anchor  { background: var(--cd-signal-soft); border-left-color: var(--cd-signal); }
+.callout.warning { background: var(--cd-reject-tint); border-left-color: var(--cd-reject-b); }
+.callout.plain   { background: #F1ECFB; border-left-color: #8B6FC0; }
+.callout.do      { background: var(--cd-accept-tint); border-left-color: var(--cd-accept-b); }
+.callout.dont    { background: var(--cd-reject-tint); border-left-color: var(--cd-reject-b); }
+
+/* ===================== COVER (light) ===================== */
+section.cover { text-align: center; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 130px; background: var(--cd-field); }
+section.cover h1 { font-size: 128px; margin: 12px 0; }
+section.cover p { max-width: 36ch; color: var(--cd-ink-2); font-size: 34px; }
+section.cover hr { width: 140px; height: 6px; border: 0; margin: 26px auto 0; border-radius: 999px; background: var(--cd-signal); }
+
+/* ===================== STATEMENT (the one navy slide — dark punctuation) ===================== */
+section.statement { background: var(--cd-void); color: rgba(234,244,255,0.92);
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+section.statement h1, section.statement h2, section.statement h3 { color: #FFFFFF; }
+section.statement h1 em, section.statement h2 em { color: var(--cd-signal); }
+section.statement strong { color: #FFFFFF; }
+section.statement footer { color: rgba(234,244,255,0.55); }
+section.statement::after { color: var(--cd-signal); }
+
+/* ===================== CLOSING (light) ===================== */
+section.closing { text-align: center; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; background: var(--cd-field); }
+section.closing h1 { font-size: 116px; }
+section.closing h1 em { color: var(--cd-signal); }
+section.closing p { max-width: 40ch; color: var(--cd-ink-2); }

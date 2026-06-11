@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 780" width="1700" height="829" font-family="Poppins, sans-serif">
+  <!-- 4x3 grid of the concept-deck starter icon kit. Each icon is authored in a
+       0..120 box, white/pastel fill + #0A0A0A bold outline + #3FA9F5 signal accent. -->
+
+  <!-- ===== row 1 ===== -->
+  <g transform="translate(60,40)">
+    <rect width="350" height="220" rx="28" fill="#BCD8FF" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,28)" stroke="#0A0A0A" stroke-width="6">
+      <circle cx="48" cy="44" r="22" fill="#fff"/>
+      <path d="M20 100 C20 70 76 70 76 100 Z" fill="#fff"/>
+      <rect x="74" y="20" width="40" height="30" rx="8" fill="#fff"/>
+      <text x="94" y="43" font-size="22" font-weight="900" fill="#0A0A0A" text-anchor="middle" stroke="none">?</text>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">User</text>
+  </g>
+  <g transform="translate(440,40)">
+    <rect width="350" height="220" rx="28" fill="#F5A9C2" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,28)"><g transform="translate(-196,-148) scale(0.77)">
+      <path d="M270 286 C258 252 286 218 318 226 C330 204 360 204 372 226 C406 220 430 252 414 284 C428 306 406 332 374 326 C362 344 320 344 310 326 C280 330 256 308 270 286 Z" fill="#fff" stroke="#0A0A0A" stroke-width="6"/>
+      <path d="M342 224 C350 252 334 270 344 294 C352 312 340 322 342 330" fill="none" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/>
+      <g fill="#3FA9F5"><circle cx="300" cy="252" r="7"/><circle cx="332" cy="238" r="7"/><circle cx="362" cy="252" r="7"/><circle cx="316" cy="296" r="7"/><circle cx="356" cy="296" r="7"/></g>
+    </g></g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">LLM / brain</text>
+  </g>
+  <g transform="translate(820,40)">
+    <rect width="350" height="220" rx="28" fill="#A9F5D9" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,28)" fill="none" stroke="#0A0A0A" stroke-width="7" stroke-linecap="round">
+      <circle cx="52" cy="50" r="30" fill="#E8FBF2"/>
+      <line x1="74" y1="72" x2="100" y2="98" stroke-width="14"/>
+      <line x1="40" y1="44" x2="66" y2="44" stroke="#3FA9F5" stroke-width="6"/>
+      <line x1="40" y1="56" x2="60" y2="56" stroke="#3FA9F5" stroke-width="6"/>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Search</text>
+  </g>
+  <g transform="translate(1200,40)">
+    <rect width="350" height="220" rx="28" fill="#FFDEB6" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,28)" fill="#fff" stroke="#0A0A0A" stroke-width="6">
+      <path d="M28 32 V88 a32 14 0 0 0 64 0 V32 Z"/>
+      <ellipse cx="60" cy="32" rx="32" ry="14"/>
+      <path d="M28 56 a32 14 0 0 0 64 0" fill="none"/>
+      <path d="M28 78 a32 14 0 0 0 64 0" fill="none"/>
+      <ellipse cx="60" cy="32" rx="32" ry="14" fill="none" stroke="#3FA9F5" stroke-width="4"/>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Database</text>
+  </g>
+
+  <!-- ===== row 2 ===== -->
+  <g transform="translate(60,290)">
+    <rect width="350" height="220" rx="28" fill="#D8C8F5" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,24)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round">
+      <path d="M34 16 H78 L96 36 V104 H34 Z" fill="#fff"/>
+      <path d="M78 16 V36 H96" fill="none"/>
+      <g stroke="#3FA9F5" stroke-width="5" stroke-linecap="round"><line x1="46" y1="56" x2="84" y2="56"/><line x1="46" y1="70" x2="84" y2="70"/><line x1="46" y1="84" x2="72" y2="84"/></g>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Document</text>
+  </g>
+  <g transform="translate(440,290)">
+    <rect width="350" height="220" rx="28" fill="#BCD8FF" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,28)" stroke="#0A0A0A" stroke-width="5" stroke-linejoin="round">
+      <g fill="#fff">
+        <rect x="52" y="12" width="16" height="22" rx="3"/>
+        <rect x="52" y="86" width="16" height="22" rx="3"/>
+        <rect x="12" y="52" width="22" height="16" rx="3"/>
+        <rect x="86" y="52" width="22" height="16" rx="3"/>
+        <rect x="22" y="22" width="18" height="18" rx="3" transform="rotate(45 31 31)"/>
+        <rect x="80" y="22" width="18" height="18" rx="3" transform="rotate(45 89 31)"/>
+        <rect x="22" y="80" width="18" height="18" rx="3" transform="rotate(45 31 89)"/>
+        <rect x="80" y="80" width="18" height="18" rx="3" transform="rotate(45 89 89)"/>
+      </g>
+      <circle cx="60" cy="60" r="30" fill="#fff"/>
+      <circle cx="60" cy="60" r="13" fill="#3FA9F5"/>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Process / gear</text>
+  </g>
+  <g transform="translate(820,290)">
+    <rect width="350" height="220" rx="28" fill="#A9F5D9" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,24)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round">
+      <path d="M66 12 L32 66 H56 L50 108 L88 50 H62 Z" fill="#3FA9F5"/>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Cache</text>
+  </g>
+  <g transform="translate(1200,290)">
+    <rect width="350" height="220" rx="28" fill="#FFDEB6" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,30)" stroke="#0A0A0A" stroke-width="6">
+      <rect x="20" y="34" width="80" height="16" rx="8" fill="#fff"/>
+      <rect x="20" y="58" width="80" height="16" rx="8" fill="#fff"/>
+      <rect x="20" y="82" width="80" height="16" rx="8" fill="#fff"/>
+      <circle cx="33" cy="42" r="3.5" fill="#3FA9F5" stroke="none"/>
+      <circle cx="33" cy="66" r="3.5" fill="#3FA9F5" stroke="none"/>
+      <circle cx="33" cy="90" r="3.5" fill="#3FA9F5" stroke="none"/>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Queue</text>
+  </g>
+
+  <!-- ===== row 3 ===== -->
+  <g transform="translate(60,540)">
+    <rect width="350" height="220" rx="28" fill="#F5A9C2" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,30)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round">
+      <path d="M38 92 C20 92 18 66 38 62 C38 40 74 38 76 60 C98 56 102 92 80 92 Z" fill="#fff"/>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">API / cloud</text>
+  </g>
+  <g transform="translate(440,540)">
+    <rect width="350" height="220" rx="28" fill="#BCD8FF" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,28)">
+      <rect x="18" y="18" width="84" height="84" rx="12" fill="#fff" stroke="#0A0A0A" stroke-width="5"/>
+      <g fill="#3FA9F5">
+        <circle cx="38" cy="38" r="7"/><circle cx="60" cy="38" r="7"/><circle cx="82" cy="38" r="7"/>
+        <circle cx="38" cy="60" r="7"/><circle cx="60" cy="60" r="7"/><circle cx="82" cy="60" r="7"/>
+        <circle cx="38" cy="82" r="7"/><circle cx="60" cy="82" r="7"/><circle cx="82" cy="82" r="7"/>
+      </g>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Embeddings</text>
+  </g>
+  <g transform="translate(820,540)">
+    <rect width="350" height="220" rx="28" fill="#D8C8F5" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,26)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round">
+      <rect x="28" y="50" width="64" height="54" rx="10" fill="#fff"/>
+      <path d="M40 50 V38 a20 20 0 0 1 40 0 V50" fill="none"/>
+      <circle cx="60" cy="74" r="7" fill="#3FA9F5"/>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Auth / lock</text>
+  </g>
+  <g transform="translate(1200,540)">
+    <rect width="350" height="220" rx="28" fill="#A9F5D9" stroke="#0A0A0A" stroke-width="4"/>
+    <g transform="translate(115,28)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="60" cy="60" r="40" fill="#fff"/>
+      <path d="M42 62 L56 76 L82 46" fill="none"/>
+    </g>
+    <text x="175" y="196" text-anchor="middle" font-size="30" font-weight="800" fill="#0A0A0A">Verdict</text>
+  </g>
+</svg>

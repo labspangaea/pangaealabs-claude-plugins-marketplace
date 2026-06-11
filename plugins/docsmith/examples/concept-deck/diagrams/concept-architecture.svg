@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="Poppins, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="26" markerHeight="26" refX="17" refY="13" orient="auto" markerUnits="userSpaceOnUse"><path d="M2,2 L24,13 L2,24 Z" fill="#0A0A0A"/></marker>
+  </defs>
+  <rect width="1920" height="1080" fill="#F4F6FD"/>
+  <text x="960" y="150" text-anchor="middle" font-size="118" font-weight="900" fill="#0A0A0A">The RAG architecture</text>
+
+  <g transform="translate(160,225)">
+    <!-- cards -->
+    <rect x="80"   y="110" width="300" height="150" rx="28" fill="#BCD8FF" stroke="#0A0A0A" stroke-width="4"/>
+    <rect x="650"  y="110" width="300" height="150" rx="28" fill="#A9F5D9" stroke="#0A0A0A" stroke-width="4"/>
+    <rect x="1220" y="110" width="300" height="150" rx="28" fill="#F5A9C2" stroke="#0A0A0A" stroke-width="4"/>
+    <rect x="650"  y="440" width="300" height="180" rx="28" fill="#FFDEB6" stroke="#0A0A0A" stroke-width="4"/>
+    <rect x="1220" y="440" width="300" height="150" rx="28" fill="#D8C8F5" stroke="#0A0A0A" stroke-width="4"/>
+    <!-- arrows -->
+    <path d="M380 185 H644"  fill="none" stroke="#0A0A0A" stroke-width="10" marker-end="url(#ar)"/>
+    <path d="M950 185 H1214" fill="none" stroke="#0A0A0A" stroke-width="10" marker-end="url(#ar)"/>
+    <path d="M800 438 V266"  fill="none" stroke="#0A0A0A" stroke-width="10" marker-end="url(#ar)"/>
+    <path d="M1370 266 V436" fill="none" stroke="#0A0A0A" stroke-width="10" marker-end="url(#ar)"/>
+    <path d="M1370 592 V662 H230 V268" fill="none" stroke="#0A0A0A" stroke-width="10" marker-end="url(#ar)"/>
+    <text x="512" y="162" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">query</text>
+    <text x="1082" y="162" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">top-K chunks</text>
+    <text x="868" y="360" text-anchor="start" font-size="28" font-weight="700" fill="#0A0A0A">index</text>
+    <text x="1452" y="362" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">generate</text>
+    <text x="760" y="648" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">grounded response</text>
+    <!-- USER -->
+    <g transform="translate(104,140) scale(0.74)" stroke="#0A0A0A" stroke-width="6">
+      <circle cx="48" cy="44" r="22" fill="#fff"/><path d="M20 100 C20 70 76 70 76 100 Z" fill="#fff"/>
+      <rect x="74" y="20" width="40" height="30" rx="8" fill="#fff"/>
+      <text x="94" y="43" font-size="22" font-weight="900" fill="#0A0A0A" text-anchor="middle" stroke="none">?</text>
+    </g>
+    <text x="300" y="198" text-anchor="middle" font-size="40" font-weight="800" fill="#0A0A0A">User</text>
+    <!-- RETRIEVER -->
+    <g transform="translate(668,142) scale(0.7)" fill="none" stroke="#0A0A0A" stroke-width="7" stroke-linecap="round">
+      <circle cx="52" cy="50" r="30" fill="#E8FBF2"/><line x1="74" y1="72" x2="100" y2="98" stroke-width="14"/>
+      <line x1="40" y1="44" x2="66" y2="44" stroke="#3FA9F5" stroke-width="6"/><line x1="40" y1="56" x2="60" y2="56" stroke="#3FA9F5" stroke-width="6"/>
+    </g>
+    <text x="868" y="195" text-anchor="middle" font-size="32" font-weight="800" fill="#0A0A0A">Retriever</text>
+    <!-- LLM -->
+    <g transform="translate(1235,120) scale(0.85)"><g transform="translate(-196,-148) scale(0.77)">
+      <path d="M270 286 C258 252 286 218 318 226 C330 204 360 204 372 226 C406 220 430 252 414 284 C428 306 406 332 374 326 C362 344 320 344 310 326 C280 330 256 308 270 286 Z" fill="#fff" stroke="#0A0A0A" stroke-width="6"/>
+      <path d="M342 224 C350 252 334 270 344 294 C352 312 340 322 342 330" fill="none" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/>
+      <g fill="#3FA9F5"><circle cx="300" cy="252" r="7"/><circle cx="332" cy="238" r="7"/><circle cx="362" cy="252" r="7"/><circle cx="316" cy="296" r="7"/><circle cx="356" cy="296" r="7"/></g>
+    </g></g>
+    <text x="1430" y="198" text-anchor="middle" font-size="40" font-weight="800" fill="#0A0A0A">LLM</text>
+    <!-- KB -->
+    <text x="690" y="498" font-size="32" font-weight="800" fill="#0A0A0A">Knowledge</text>
+    <text x="690" y="535" font-size="32" font-weight="800" fill="#0A0A0A">Base</text>
+    <g stroke="#E0975F" stroke-width="11" stroke-linecap="round"><line x1="692" y1="566" x2="908" y2="566"/><line x1="692" y1="590" x2="908" y2="590"/></g>
+    <!-- ANSWER -->
+    <g transform="translate(1238,462) scale(0.7)" stroke="#0A0A0A" stroke-width="6" stroke-linejoin="round">
+      <path d="M34 16 H78 L96 36 V104 H34 Z" fill="#fff"/><path d="M78 16 V36 H96" fill="none"/>
+      <g stroke="#3FA9F5" stroke-width="5" stroke-linecap="round"><line x1="46" y1="56" x2="84" y2="56"/><line x1="46" y1="70" x2="84" y2="70"/><line x1="46" y1="84" x2="72" y2="84"/></g>
+    </g>
+    <text x="1410" y="528" text-anchor="middle" font-size="38" font-weight="800" fill="#0A0A0A">Answer</text>
+  </g>
+</svg>
