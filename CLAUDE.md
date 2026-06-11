@@ -69,15 +69,27 @@ and `--model`. `run_eval` spawns a real `claude -p` per query×run (live, costs 
    is installed in the active env, Claude triggers the **real** `make-pdf` skill instead →
    every should-trigger query **false-negatives**. The in-place run is worthless signal.
 
-2. **Isolation requires a plugin-free config dir — which is NOT authenticated.** Pointing
-   `CLAUDE_CONFIG_DIR` at a fresh dir removes docsmith (good) but the nested `claude -p`
-   comes back **`Not logged in`** (the keychain token doesn't carry over). You must first run,
-   interactively, once: `CLAUDE_CONFIG_DIR=<dir> claude /login`. Only then can the eval run
-   isolated + authed.
+2. **Isolation needs BOTH a plugin-free config AND a cwd far from the repo** — there are two
+   separate shadowing vectors:
+   - **Config:** point `CLAUDE_CONFIG_DIR` at a fresh dir (no installed plugins). A fresh dir
+     is **not authed** (the keychain token doesn't carry over) — run, interactively, once:
+     `CLAUDE_CONFIG_DIR=<dir> claude /login`.
+   - **cwd:** run the eval from a throwaway dir (e.g. `/tmp/…`), **never from or under the
+     marketplace checkout** — otherwise the nested `claude -p` picks up docsmith as a
+     *project-local* skill and shadowing returns even with a clean config.
 
-**Bottom line:** the shipped `make-pdf` description is already strong; only re-optimize from a
-freshly-authed, plugin-free isolated config, and re-baseline against the *current* description
-before trusting any "improvement."
+3. **Even with both, the harness still can't trigger in Claude Code 2.1.x.** `run_eval`
+   registers the candidate as a thin `.claude/commands/` **stub**; current CC invokes *real*
+   skills but won't invoke a command stub for a natural-language query. So every should-trigger
+   query false-negatives → all-negative, useless signal (likely why the prior run scored only
+   4/8). Verified: an obvious match returns `0/1` under **both haiku and sonnet**, fully isolated.
+   The optimizer is **not usable as-is** without modifying the skill-creator harness to register
+   a real skill instead of a command stub.
+
+**Bottom line:** the shipped `make-pdf` description is already strong, and the optimizer can't
+produce trustworthy signal in this CC version (gotcha 3) — **don't re-run it expecting a better
+description.** If you ever do, first fix the harness to register a real skill and confirm a
+known-good query actually triggers before believing any score.
 
 ## Checks worth knowing
 
