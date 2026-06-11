@@ -121,6 +121,15 @@ On a render failure, two commands form a detect → fix self-healing loop:
 | `docsmith-render-triage` | Reads the captured stderr from a FAIL, decides content bug vs docsmith infra bug | A render fails |
 | `docsmith-fix-loop` | Fixes a confirmed skill/template/script finding, proves it with an eval + audit | Triage says it's an infra bug |
 
+**Two evals — different things, often confused.** One tests *invocation*, the other *output*:
+
+| Eval | Tests | Renders a PDF? | Eval set → harness |
+|---|---|---|---|
+| **Triggering** | does Claude *pick* `/make-pdf` for a prompt? | no | `dev/docsmith-workspace/trigger-evals.json` → skill-creator `run_loop.py` / `split_eval_set` (tunes the skill `description:`) |
+| **Output / render** | is the produced PDF *correct* — page size, ≥1 image, no `d2` leak, expected text? | yes | `dev/make-pdf-workspace/evals.json` → `grade.py` / `grade_run.py` (writes `grading.json`) |
+
+The **monitors** above are neither — they stream live build telemetry. See **[`CLAUDE.md`](CLAUDE.md)** for the full workflow and the optimizer gotchas (don't run the triggering eval in-place — the installed skill shadows it; it needs an isolated, authed, plugin-free config).
+
 ## License
 
 © [Pangaea Digital Labs](https://www.pangaea.id/) — [www.pangaea.id](https://www.pangaea.id/)
