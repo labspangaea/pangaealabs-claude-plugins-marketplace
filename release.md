@@ -6,6 +6,19 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## docsmith 0.9.0 — 2026-06-12
+- **concept-deck SVG-template design system** — concept-deck's SVG authoring is now a
+  reusable **two-mode** system in `icons.md`: **(A)** flat black-outlined pastel concept-card
+  diagrams and **(B)** a new **isometric illustration** mode for covers + hero scenes
+  (flat-shaded 3-tint cuboids — the ByteByteGo course-cover look, no gradients/shadows).
+  Ships drop-in `svg-templates/` assets (`iso-cover.svg`, `iso-objects.svg`) + worked iso
+  examples (`cover-rag.svg`, `vector-space.svg`); `make-pdf` now points authors at it.
+- **concept-deck accessibility + contrast pass** — the electric-blue signal accent was
+  illegible on the near-white field (2.37:1); text-on-field uses (eyebrow, *em*, links,
+  page number) now use a deepened signal-ink (≥4.5:1), the code-syntax palette + captions
+  clear WCAG AA, the side-stripe callout/code borders became full colour-coded borders, and
+  off-token hexes are tokenised. The bright signal stays on the navy `statement` slide.
+
 ## docsmith 0.8.0 — 2026-06-12
 - **New template: `concept-deck`** — a ByteByteGo-style, SVG-first technical-doc deck
   (flat near-white field, bold black-outlined multi-pastel cards, heavy Poppins titles,
