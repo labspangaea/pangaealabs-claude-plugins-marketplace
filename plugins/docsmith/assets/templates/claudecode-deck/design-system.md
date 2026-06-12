@@ -35,7 +35,7 @@ This theme adds four of its own:
   `- ![](/abs/ic-x.svg) **Title** description`. 3-up by default; add `cols2` for 2-up.
 - `procon` — a two-card pair tinted success-green (first) / error-red (last), for
   when the contrast (pros vs cons, do vs don't) IS the point.
-- A `> line` on any **non-`quote`** slide renders as a clay-spined peach callout pill
+- A `> line` on any **non-`quote`** slide renders as a clay-bordered peach callout pill
   — lift a takeaway out of the body without spending a whole quote slide.
 
 The footer is auto-composed by `build.py` from `logo · company · author · copyright`

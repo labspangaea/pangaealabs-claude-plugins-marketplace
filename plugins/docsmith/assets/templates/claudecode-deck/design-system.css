@@ -6,8 +6,9 @@
 :root {
   --cc-paper:     #F0EEE6;   /* warm cream page */
   --cc-surface:   #F7F6EF;   /* card fill */
-  --cc-clay:      #B85838;   /* PRIMARY accent */
+  --cc-clay:      #B85838;   /* PRIMARY accent (large text / headings) */
   --cc-clay-soft: #D8896B;
+  --cc-clay-deep: #9A4528;   /* deepened clay for normal-size text on cream — clears AA 4.5:1 */
   --cc-peach:     #F5E6DA;   /* highlighted card / pill fill */
   --cc-ink:       #262620;   /* warm near-black */
   --cc-ink-2:     #54514A;   /* secondary text */

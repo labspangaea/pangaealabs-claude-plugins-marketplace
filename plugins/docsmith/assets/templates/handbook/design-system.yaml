@@ -9,10 +9,10 @@ colors:
   amberdeep:     "#C0561A"   # Watch Out / deep accent
   violet:        "#5A3A8A"   # In Plain English
   greenok:       "#1A7A3A"   # Do / success
-  rulegrey:      "#8A8A8A"   # soft rules, captions
+  rulegrey:      "#6B6B6B"   # soft rules, captions, running head, footer, page no. (AA 4.5:1 on white)
   navytint:      "#EAF1F9"   # Interview Anchor fill
   cheatred:      "#CC0000"   # Cheatsheet banner
   cheatreddark:  "#900C18"
-  linkblue:      "#2F80ED"   # hyperlinks: TOC, internal refs, URLs, citations
+  linkblue:      "#1565C0"   # hyperlinks: TOC, internal refs, URLs, citations (deepened for AA 4.5:1 on white)
 type:
   base_size: "11pt"
