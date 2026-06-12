@@ -6,6 +6,13 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## docsmith 0.9.1 — 2026-06-12
+- **corporate-deck accessibility** — the gold page number on cream was 3.21:1 (below AA-normal)
+  → deepened to gold-900 (**6.60:1**); the default list-bullet dot was bright green at 1.74:1
+  (washed out) → green-700 (**3.45:1**); the `>` callout's 6px side-stripe became a full green
+  border (+ the existing green-50 wash); and a broken token (`--bgn-green-600`, missing `var()`)
+  was fixed. BGN brand identity preserved — all within the existing gold/green ramps.
+
 ## docsmith 0.9.0 — 2026-06-12
 - **concept-deck SVG-template design system** — concept-deck's SVG authoring is now a
   reusable **two-mode** system in `icons.md`: **(A)** flat black-outlined pastel concept-card
