@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="Poppins, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="26" markerHeight="26" refX="17" refY="13" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L24,13 L2,24 Z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#F4F6FD"/>
+  <polygon points="240,860 980,600 1700,860 980,1120" fill="#E9EEFB"/>
+
+  <!-- ===== title ===== -->
+  <text x="140" y="150" font-family="JetBrains Mono, monospace" font-size="30" font-weight="700" letter-spacing="6" fill="#1A6AAE">// SYSTEM DESIGN, ILLUSTRATED</text>
+  <text x="136" y="300" font-size="132" font-weight="900" fill="#0A0A0A">How <tspan fill="#1A6AAE">RAG</tspan> works</text>
+
+  <!-- ============ DOCS (peach) — top-rhombus centre (520,710), H=60 ============ -->
+  <g transform="translate(520,710)" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round">
+    <!-- two page sheets peeking up-back -->
+    <polygon points="0,-122 156,-32 0,58 -156,-32" fill="#FFEFD8"/>
+    <polygon points="0,-106 156,-16 0,74 -156,-16" fill="#FFE6C6"/>
+    <!-- solid box -->
+    <polygon points="-156,0 0,90 0,150 -156,60" fill="#EFC089"/>  <!-- left -->
+    <polygon points="0,90 156,0 156,60 0,150" fill="#E0A45F"/>    <!-- right -->
+    <polygon points="0,-90 156,0 0,90 -156,0" fill="#FFDEB6"/>    <!-- top -->
+    <g stroke="#1A6AAE" stroke-width="6" stroke-linecap="round">
+      <line x1="-70" y1="-8" x2="6" y2="36"/>
+      <line x1="-46" y1="-22" x2="30" y2="22"/>
+      <line x1="-22" y1="-36" x2="40" y2="0"/>
+    </g>
+  </g>
+  <text x="520" y="572" text-anchor="middle" font-size="42" font-weight="800" fill="#0A0A0A">Docs</text>
+
+  <!-- ============ VECTOR INDEX (blue) — centre (960,560), H=250 ============ -->
+  <g transform="translate(960,560)" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round">
+    <polygon points="-156,0 0,90 0,340 -156,250" fill="#95BAEE"/> <!-- left -->
+    <polygon points="0,90 156,0 156,250 0,340" fill="#6F97D4"/>   <!-- right -->
+    <polygon points="0,-90 156,0 0,90 -156,0" fill="#BCD8FF"/>    <!-- top -->
+    <!-- signal cells on the front-right face -->
+    <g fill="#3FA9F5" stroke="none">
+      <circle cx="54.6" cy="133.5" r="11"/><circle cx="101.4" cy="106.5" r="11"/>
+      <circle cx="54.6" cy="196" r="11"/><circle cx="101.4" cy="169" r="11"/>
+      <circle cx="54.6" cy="258.5" r="11"/><circle cx="101.4" cy="231.5" r="11"/>
+    </g>
+    <!-- rack slots on the front-left face -->
+    <g stroke="#0A0A0A" stroke-width="3" stroke-linecap="round">
+      <line x1="-132.6" y1="88.5" x2="-23.4" y2="151.5"/>
+      <line x1="-132.6" y1="138.5" x2="-23.4" y2="201.5"/>
+      <line x1="-132.6" y1="188.5" x2="-23.4" y2="251.5"/>
+    </g>
+  </g>
+  <text x="960" y="438" text-anchor="middle" font-size="42" font-weight="800" fill="#0A0A0A">Vector index</text>
+
+  <!-- ============ LLM (lilac) — centre (1380,700), H=170 ============ -->
+  <g transform="translate(1380,700)" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round">
+    <polygon points="-156,0 0,90 0,260 -156,170" fill="#BCA8E9"/> <!-- left -->
+    <polygon points="0,90 156,0 156,170 0,260" fill="#9E83D6"/>   <!-- right -->
+    <polygon points="0,-90 156,0 0,90 -156,0" fill="#D8C8F5"/>    <!-- top -->
+    <g>
+      <g stroke="#0A0A0A" stroke-width="3">
+        <line x1="70.2" y1="109" x2="78" y2="138.5"/><line x1="109.2" y1="103.5" x2="78" y2="138.5"/>
+        <line x1="78" y1="138.5" x2="62.4" y2="173"/><line x1="78" y1="138.5" x2="106" y2="151.2"/>
+      </g>
+      <g fill="#3FA9F5" stroke="#0A0A0A" stroke-width="2.5">
+        <circle cx="70.2" cy="109" r="9"/><circle cx="109.2" cy="103.5" r="9"/>
+        <circle cx="78" cy="138.5" r="10"/><circle cx="62.4" cy="173" r="9"/><circle cx="106" cy="151.2" r="9"/>
+      </g>
+    </g>
+  </g>
+  <text x="1380" y="578" text-anchor="middle" font-size="42" font-weight="800" fill="#0A0A0A">LLM</text>
+
+  <!-- ============ connectors ============ -->
+  <path d="M690 700 L796 642" fill="none" stroke="#0A0A0A" stroke-width="9" marker-end="url(#ar)"/>
+  <text x="742" y="640" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">embed</text>
+  <path d="M1126 626 L1232 690" fill="none" stroke="#0A0A0A" stroke-width="9" marker-end="url(#ar)"/>
+  <text x="1180" y="628" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">retrieve</text>
+</svg>

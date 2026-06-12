@@ -1,10 +1,24 @@
-# concept-deck — SVG-DNA generation guide (+ icon library)
+# concept-deck — SVG-template design system (SVG-DNA guide + libraries)
 
 concept-deck is a **technical-documentation, SVG-first** template — *not* a decorative
 deck. Think system-design notes, architecture diagrams, how-it-works flows. The slide
 chrome is deliberately plain (flat near-white field, mono tags, black ink); **the content
-is the hand-written SVG.** A slide is usually **one full-canvas SVG**
-(`<!-- _class: figure full -->`). Read this whole file before generating a diagram.
+is the hand-written SVG.** A slide is usually **one full-canvas SVG** (`figure full`).
+Read this whole file before generating a diagram.
+
+**Two modes, one identity** (flat `#F4F6FD` field · black `#0A0A0A` ink · 4px outlines ·
+signal `#3FA9F5` accent):
+
+- **Mode A — flat concept-card diagrams** (§1–8): the default body style — flat pastel
+  cards, black orthogonal connectors, sticker icons. Pipelines, loops, layered systems,
+  multi-panel composites.
+- **Mode B — isometric illustration** (§9): flat-shaded 3-tint iso solids for the **cover**
+  and hero scenes (the ByteByteGo course-cover look) — still flat (no gradients/shadows).
+
+**Drop-in assets** — `assets/templates/concept-deck/svg-templates/`: `iso-cover.svg`
+(fill-in cover) · `iso-objects.svg` (iso object library). Worked examples in
+`examples/concept-deck/diagrams/` — flat: `rag-architecture.svg` · `concept-pipeline.svg` ·
+`concept-overview.svg`; iso: `cover-rag.svg` · `vector-space.svg`. **Copy one and edit it.**
 
 ---
 
@@ -282,3 +296,78 @@ validate with `rsvg-convert -f pdf -o /tmp/x.pdf file.svg`.
 (<4px) outlines · light/grey text on the field (ink is `#0A0A0A`) · signal-blue as a fill
 or arrow colour (ink is black; signal is an *accent*) · pandoc `{width=}` (use `![w:NN]` or
 a `figure`/`figure full` slide) · emoji as icons (use the §5 kit).
+
+---
+
+## 9 · Isometric illustration — Mode B (covers & hero scenes)
+
+For the **cover** and the occasional hero "scene" — the ByteByteGo course-cover look. Same
+identity as the flat diagrams (flat field, black ink, 4px outlines, signal accent); the only
+addition is **iso depth from multi-tint faces — still flat-shaded, no gradients, no shadows.**
+
+### 9.1 The cuboid (everything is built from this)
+
+A solid is a `<g>` anchored at its **top-rhombus centre `(0,0)`**. For footprint unit
+**F=180** (half-diagonals `156,90`) and height `H`, the three visible faces are:
+
+```
+top   : "0,-90  156,0  0,90  -156,0"            <- near corner points DOWN
+left  : "-156,0  0,90  0,(90+H)  -156,H"
+right : "0,90  156,0  156,H  0,(90+H)"
+```
+
+Front vertical edge = `(0,90)->(0,90+H)`. **Flat-shade with 3 tints of ONE hue** (light reads
+from upper-left): top = base pastel · left ~15% darker · right ~30% darker. Outline every
+face `stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round"`.
+
+**Tint ramps** (top / left / right):
+
+| Hue | top | left | right |
+|---|---|---|---|
+| blue | `#BCD8FF` | `#95BAEE` | `#6F97D4` |
+| peach | `#FFDEB6` | `#EFC089` | `#E0A45F` |
+| mint | `#A9F5D9` | `#7FD9B6` | `#5BBF98` |
+| lilac | `#D8C8F5` | `#BCA8E9` | `#9E83D6` |
+| pink | `#F5A9C2` | `#E985AB` | `#D66493` |
+
+Generic cuboid (mint, H=160):
+```xml
+<g transform="translate(CX,CY)" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round">
+  <polygon points="-156,0 0,90 0,250 -156,160" fill="#7FD9B6"/>   <!-- left -->
+  <polygon points="0,90 156,0 156,160 0,250" fill="#5BBF98"/>     <!-- right -->
+  <polygon points="0,-90 156,0 0,90 -156,0" fill="#A9F5D9"/>      <!-- top -->
+</g>
+```
+
+### 9.2 Putting detail on a face (no guessing)
+
+A point at `(u,v)` in `[0,1]^2` on the **right** face is `(156*u, 90 - 90*u + H*v)`; on the
+**left** face it's `(-156 + 156*u, 90*u + H*v)`. Use this to drop **signal cells** (server),
+**rack slots** (short lines), or a **neural cluster** (llm) precisely onto a face.
+
+### 9.3 Object library
+
+Six ready solids live in **`svg-templates/iso-objects.svg`** — copy a `<g>`: **cuboid ·
+server/index · doc-stack · llm-block · db-cylinder · data-panel**. The flat **data panel**
+(bordered box + grey corpus dots + a `#1A6AAE` query dot + signal top-K) is the companion for
+"what's inside" a solid; mix it with iso objects freely (worked example: `vector-space.svg`).
+
+### 9.4 Composition
+
+- **Connectors:** black, `stroke-width="9"`, `marker-end="url(#ar)"` (the §3 marker), a
+  Poppins-700 black label above. Keep them short — let the iso row carry the flow.
+- **Ground:** optional faint tile, `<polygon points="240,840 980,600 1700,840 980,1120" fill="#E9EEFB"/>`.
+- **Title:** Poppins 900 black, ~130px, top-left; one word in **deep signal `#1A6AAE`**
+  (NOT bright `#3FA9F5` — that fails contrast on the light field). Mono `// EYEBROW` above it.
+- **Start from** `svg-templates/iso-cover.svg` (source -> process -> sink; grammar in its
+  header comment). Worked example: `diagrams/cover-rag.svg`.
+
+### 9.5 Iso fidelity (DO / DON'T)
+
+**DO** — 3-tint flat faces · 4px black outlines · signal only as accent dots · deep-signal
+`#1A6AAE` for the title word · anchor each solid at its top-rhombus centre · `width`+`height`
+on the `<svg>` · validate with `rsvg-convert`.
+
+**DON'T** — gradients or drop-shadows (depth IS the 3 tints) · bright `#3FA9F5` as a face
+fill or as title text on the field · more than ~4 hero objects on a cover (covers stay calm —
+put density into a Mode-A composite instead).

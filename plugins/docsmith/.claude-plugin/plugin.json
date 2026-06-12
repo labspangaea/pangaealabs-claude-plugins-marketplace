@@ -1,7 +1,7 @@
 {
   "name": "docsmith",
   "description": "Turn markdown into professional, on-brand PDFs across multiple design-system templates. Ships 5 templates — `handbook` (LaTeX book via pandoc+tectonic) plus `corporate-deck`, `claudecode-deck`, `kawaii-storybook`, and `concept-deck` (16:9 slides via marp-cli) — each driven by an extracted design system. Diagrams, charts, and icons are hand-written raw SVG embedded inline (no d2, Mermaid, or image generation); one template builds per run. Layered config (global profile + per-template overrides + per-doc front-matter) under ~/.docsmith/.",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "author": {
     "name": "Pangaea Labs"
   }
