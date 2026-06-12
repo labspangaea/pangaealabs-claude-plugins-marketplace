@@ -6,6 +6,17 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## docsmith 0.9.2 — 2026-06-13
+- **claudecode-deck accessibility** — the clay accent `#B85838` was normal-size on the
+  eyebrow + page number at 4.03:1 on cream → added `--cc-clay-deep #9A4528` (**5.55:1**) for
+  those uses (bright clay stays for large `*em*` + headlines); the `>` callout's 6px
+  side-stripe became a full clay border.
+- **handbook accessibility** — hyperlinks (`linkblue`) were 3.87:1 on white → `#1565C0`
+  (**5.75:1**); secondary text (`rulegrey` captions / running head / footer / page number)
+  3.45:1 → `#6B6B6B` (**5.33:1**); the Pro Tip callout title was white-on-amber 2.85:1 → a
+  dark title on the bright amber tab (**7.38:1**).
+- With this, **all five templates meet WCAG-AA contrast.**
+
 ## docsmith 0.9.1 — 2026-06-12
 - **corporate-deck accessibility** — the gold page number on cream was 3.21:1 (below AA-normal)
   → deepened to gold-900 (**6.60:1**); the default list-bullet dot was bright green at 1.74:1
