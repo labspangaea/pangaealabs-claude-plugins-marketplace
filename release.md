@@ -6,6 +6,22 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## docsmith 0.8.0 — 2026-06-12
+- **New template: `concept-deck`** — a ByteByteGo-style, SVG-first technical-doc deck
+  (flat near-white field, bold black-outlined multi-pastel cards, heavy Poppins titles,
+  electric-blue signal accent). One full-canvas SVG per concept; author diagrams per its
+  `icons.md` SVG-DNA guide.
+- **kawaii-storybook accessibility + polish pass** — WCAG-AA contrast across the rendered
+  PDF: accept verdict pills are now dark-ink-on-mint (were illegible white-on-green) and
+  stay distinct from reject in grayscale / for colour-blindness; flow step badges legible;
+  page number + soft ink deepened; the scorecard uses shape-distinct ✅/⚠️/❌ instead of
+  hue-only dots. Removed the Comic Sans fallback; long content now wraps instead of
+  overflowing the fixed canvas; dropped the side-stripe callout/code borders for full
+  colour-coded borders.
+- **`toolchain-doctor` monitor** — runs `scripts/doctor.py` at build start and tails
+  `~/.docsmith/toolchain.log`, flagging a missing/broken toolchain (pandoc/tectonic/rsvg/
+  marp/Chrome) — catches the environment failure class.
+
 ## docsmith 0.7.0 — 2026-06-10
 - Handbook: uniform **light-blue** hyperlinks (TOC + cross-refs + URLs + citations)
   and a post-build link-integrity check (`scripts/check_links.py`) — internal gate
