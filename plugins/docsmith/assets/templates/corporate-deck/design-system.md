@@ -35,7 +35,7 @@ The three shared with `claudecode-deck`:
 - `iconcards` — each item becomes a card with a small SVG icon pinned left, title +
   desc beside it: `- ![](/abs/ic-x.svg) **Title** description`. 3-up; `cols2` for 2-up.
 - `procon` — a two-card pair tinted success-green (first) / danger-red (last).
-- A `> line` on any **non-`quote`** slide renders as a green-spined callout pill.
+- A `> line` on any **non-`quote`** slide renders as a green-bordered callout pill.
 
 ## Diagrams
 Author **hand-written raw SVG** (no d2/Mermaid/image-gen) and embed it as a
