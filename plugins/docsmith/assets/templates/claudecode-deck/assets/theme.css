@@ -14,9 +14,9 @@ section {
 /* ---- type ---- */
 h6 { /* eyebrow: mono tracked caps with a clay dot */
   font-family: var(--font-mono); font-weight: 500; font-size: 21px;
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--cc-clay, #B85838);
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--cc-clay-deep, #9A4528);
   margin: 0 0 26px; }
-h6::before { content: "● "; color: var(--cc-clay, #B85838); font-size: 16px; }
+h6::before { content: "● "; color: var(--cc-clay-deep, #9A4528); font-size: 16px; }
 h1 { font-family: var(--font-serif); font-weight: 400; font-size: 100px; line-height: 1.02;
      color: var(--cc-ink, #262620); margin: 0 0 26px; letter-spacing: -0.005em; }
 h2 { font-family: var(--font-serif); font-weight: 400; font-size: 66px; line-height: 1.06;
@@ -44,7 +44,7 @@ footer img { height: 38px; width: auto; vertical-align: middle; text-transform: 
 /* page number sits in an identical bottom/height band to the footer, with Marp's
    default pagination padding+margin reset to 0 — otherwise that inset lifts the
    number above the footer line (the misalignment users see). */
-section::after { color: var(--cc-clay, #B85838); font-family: var(--font-mono);
+section::after { color: var(--cc-clay-deep, #9A4528); font-family: var(--font-mono);
   font-size: 21px; line-height: 40px; position: absolute; right: 70px; bottom: 60px;
   margin: 0; padding: 0; height: 40px; display: flex; align-items: center; }
 
@@ -152,8 +152,8 @@ section.versus li:last-child strong { color: var(--cc-clay); }
    key takeaway out of the body without spending a whole quote slide on it. The big
    centered treatment stays reserved for `section.quote`. */
 section:not(.quote) blockquote {
-  margin: 26px 0 0; padding: 22px 32px; border: 0; border-left: 6px solid var(--cc-clay);
-  background: var(--cc-peach); border-radius: 0 14px 14px 0;
+  margin: 26px 0 0; padding: 22px 32px; border: 2px solid var(--cc-clay);
+  background: var(--cc-peach); border-radius: 14px;
   font-family: var(--font-sans); font-style: normal; font-size: 30px; line-height: 1.4;
   color: var(--cc-ink); max-width: none; }
 section:not(.quote) blockquote strong, section:not(.quote) blockquote em { color: var(--cc-clay); }
