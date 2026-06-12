@@ -47,7 +47,7 @@
   --bgn-green-900:   #2b4a1a;
   --bgn-green-800:   #406d29;
   --bgn-green-700:   #5a9438;
-  --bgn-green-600:   --bgn-green;
+  --bgn-green-600:   var(--bgn-green);
   --bgn-green-500:   #92d05d;   /* = brand */
   --bgn-green-400:   #a8db7a;
   --bgn-green-300:   #bee698;
