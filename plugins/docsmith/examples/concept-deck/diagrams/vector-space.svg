@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="Poppins, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="26" markerHeight="26" refX="17" refY="13" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L24,13 L2,24 Z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+  <rect width="1920" height="1080" fill="#F4F6FD"/>
+
+  <text x="136" y="120" font-family="JetBrains Mono, monospace" font-size="28" font-weight="700" letter-spacing="6" fill="#1A6AAE">// RETRIEVAL</text>
+  <text x="136" y="232" font-size="96" font-weight="900" fill="#0A0A0A">Inside the <tspan fill="#1A6AAE">vector index</tspan></text>
+
+  <!-- iso vector-index server -->
+  <g transform="translate(540,560)" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round">
+    <polygon points="-156,0 0,90 0,340 -156,250" fill="#95BAEE"/>
+    <polygon points="0,90 156,0 156,250 0,340" fill="#6F97D4"/>
+    <polygon points="0,-90 156,0 0,90 -156,0" fill="#BCD8FF"/>
+    <g fill="#3FA9F5" stroke="none">
+      <circle cx="54.6" cy="133.5" r="11"/><circle cx="101.4" cy="106.5" r="11"/>
+      <circle cx="54.6" cy="196" r="11"/><circle cx="101.4" cy="169" r="11"/>
+      <circle cx="54.6" cy="258.5" r="11"/><circle cx="101.4" cy="231.5" r="11"/>
+    </g>
+    <g stroke="#0A0A0A" stroke-width="3" stroke-linecap="round">
+      <line x1="-132.6" y1="88.5" x2="-23.4" y2="151.5"/>
+      <line x1="-132.6" y1="138.5" x2="-23.4" y2="201.5"/>
+      <line x1="-132.6" y1="188.5" x2="-23.4" y2="251.5"/>
+    </g>
+  </g>
+  <text x="540" y="438" text-anchor="middle" font-size="40" font-weight="800" fill="#0A0A0A">Vector index</text>
+
+  <!-- search arrow -->
+  <path d="M720 560 H1000" fill="none" stroke="#0A0A0A" stroke-width="9" marker-end="url(#ar)"/>
+  <text x="860" y="538" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">search</text>
+
+  <!-- flat "vector space" scatter panel -->
+  <g transform="translate(1040,330)" stroke-linejoin="round">
+    <rect x="0" y="0" width="660" height="540" rx="24" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="4"/>
+    <rect x="200" y="-24" width="280" height="48" fill="#F4F6FD"/>
+    <text x="340" y="11" text-anchor="middle" font-size="38" font-weight="900" fill="#0A0A0A">Vector space</text>
+    <!-- corpus points -->
+    <g fill="#AEB6C7">
+      <circle cx="120" cy="150" r="11"/><circle cx="225" cy="110" r="11"/><circle cx="365" cy="150" r="11"/>
+      <circle cx="495" cy="120" r="11"/><circle cx="565" cy="205" r="11"/><circle cx="150" cy="265" r="11"/>
+      <circle cx="545" cy="330" r="11"/><circle cx="110" cy="395" r="11"/><circle cx="235" cy="430" r="11"/>
+      <circle cx="475" cy="440" r="11"/><circle cx="585" cy="470" r="11"/><circle cx="430" cy="350" r="11"/>
+    </g>
+    <!-- top-K hits (signal) + dashed links from query -->
+    <g stroke="#0A0A0A" stroke-width="2.5" stroke-dasharray="2 9" stroke-linecap="round" fill="none">
+      <line x1="330" y1="300" x2="250" y2="250"/><line x1="330" y1="300" x2="405" y2="262"/><line x1="330" y1="300" x2="335" y2="405"/>
+    </g>
+    <g fill="#3FA9F5" stroke="#0A0A0A" stroke-width="2.5">
+      <circle cx="250" cy="250" r="13"/><circle cx="405" cy="262" r="13"/><circle cx="335" cy="405" r="13"/>
+    </g>
+    <!-- query -->
+    <circle cx="330" cy="300" r="18" fill="#1A6AAE" stroke="#0A0A0A" stroke-width="3"/>
+    <text x="330" y="350" text-anchor="middle" font-size="26" font-weight="800" fill="#0A0A0A">query</text>
+    <text x="470" y="200" text-anchor="middle" font-size="26" font-weight="700" fill="#1A6AAE">top-K</text>
+  </g>
+</svg>

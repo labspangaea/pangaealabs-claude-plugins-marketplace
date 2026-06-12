@@ -1,6 +1,6 @@
 ---
 name: make-pdf
-description: Generate professional, on-brand PDFs from markdown using docsmith's design-system templates. Use this whenever the user wants to turn markdown / notes / a report / an outline into a polished PDF, make a "handbook" or "slide deck", render to the BGN (Badan Gizi Nasional) or Claude/"claudecode" brand, produce a "professional PDF / good-looking PDF", or make a cute / kawaii / pastel / storybook / NotebookLM-style deck. Picks one template and one company per run. All visuals — diagrams, charts, and illustrative images alike — are hand-written raw SVG embedded as images (no d2, Mermaid, image generation, or external/R2 image hosting). Templates today: `handbook` (LaTeX book via pandoc+tectonic), `corporate-deck`, `claudecode-deck`, and `kawaii-storybook` (16:9 slides via marp-cli). Do NOT use for editing existing PDFs or for plain `pandoc file.md` with no styling need.
+description: Generate professional, on-brand PDFs from markdown using docsmith's design-system templates. Use this whenever the user wants to turn markdown / notes / a report / an outline into a polished PDF, make a "handbook" or "slide deck", render to the BGN (Badan Gizi Nasional) or Claude/"claudecode" brand, produce a "professional PDF / good-looking PDF", or make a cute / kawaii / pastel / storybook / NotebookLM-style deck. Picks one template and one company per run. All visuals — diagrams, charts, and illustrative images alike — are hand-written raw SVG embedded as images (no d2, Mermaid, image generation, or external/R2 image hosting). Templates today: `handbook` (LaTeX book via pandoc+tectonic) plus `corporate-deck`, `claudecode-deck`, `kawaii-storybook`, and `concept-deck` (a ByteByteGo-style, SVG-first tech-doc deck with isometric illustrated covers; 16:9 slides via marp-cli). Do NOT use for editing existing PDFs or for plain `pandoc file.md` with no styling need.
 allowed-tools: [bash, read, write, edit, grep, glob, AskUserQuestion, Task]
 model: sonnet
 ---
@@ -229,6 +229,17 @@ hand-written SVG, validate with `rsvg-convert`, embed by ABSOLUTE path; here use
 soft pastel palette instead of the navy brand colours. Decks also support
 `<aside class="callout tip">` callouts (blank line around the inner content) and
 styled fenced code blocks — see `references/authoring-guide.md`.
+
+**concept-deck is the SVG-first tech-doc deck — author from its SVG-template design system.**
+Each concept is normally **one full-canvas SVG** (`figure full`), so the SVG *is* the slide.
+Before authoring, read `assets/templates/concept-deck/icons.md` — a **two-mode** system:
+**(A)** flat black-outlined pastel concept-card diagrams (pipelines, loops, layered systems,
+multi-panel composites) and **(B)** **isometric illustration** for the cover + hero scenes
+(flat-shaded 3-tint cuboids — the ByteByteGo course-cover look). Copy a starting point from
+`assets/templates/concept-deck/svg-templates/` (`iso-cover.svg`, `iso-objects.svg`) or the
+worked examples in `examples/concept-deck/diagrams/`, then edit. Ink is black `#0A0A0A`; the
+electric-blue signal `#3FA9F5` is an accent only — for **text on the near-white field**
+(eyebrow, *em*, title word, page number) use the deepened `#1A6AAE`, never the bright signal.
 
 ## Step 6 — build the template
 Build the one chosen template **inline** — run `build.py` directly and verify the

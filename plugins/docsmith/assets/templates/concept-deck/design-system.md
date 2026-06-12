@@ -17,11 +17,15 @@ two tones: bright `#3FA9F5` where it passes (the dark statement slide, SVG icon 
 decorative `hr`) and the deepened `#1A6AAE` for accent **text on the light field** (so it
 clears WCAG-AA instead of washing out).
 
-> ### ► The SVG-DNA generation guide is the heart of this template
-> Before authoring **any** diagram, read **[`icons.md`](icons.md)** — the precise SVG-DNA
-> spec (canvas grammar, exact palette/strokes, a fill-in full-slide template, the 12-icon
-> library, diagram recipes, and a fidelity DO/DON'T checklist). Generating faithful
-> ByteByteGo SVG is the main job on this template.
+> ### ► The SVG-template design system is the heart of this template
+> Before authoring **any** diagram, read **[`icons.md`](icons.md)** — the SVG-template
+> design system, in **two modes**: **(A) flat concept-card diagrams** (canvas grammar,
+> palette/strokes, a fill-in full-slide template, the 12-icon library, recipes, composites)
+> and **(B) isometric illustration** for the cover + hero scenes (the cuboid grammar, tint
+> ramps, and an iso object library — the ByteByteGo course-cover look, still flat-shaded).
+> Drop-in assets live in **[`svg-templates/`](svg-templates/)** (`iso-cover.svg`,
+> `iso-objects.svg`); worked examples in `../../../examples/concept-deck/diagrams/`. Copy
+> one and edit it — generating faithful SVG is the main job on this template.
 
 > **Brand note.** Pangaea's brand is strictly two hues (navy + signal). concept-deck
 > **intentionally departs** by using ByteByteGo's mint/peach/pink/blue card set — chosen

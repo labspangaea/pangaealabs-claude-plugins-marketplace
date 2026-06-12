@@ -1,0 +1,68 @@
+<!--
+  concept-deck · ISO COVER TEMPLATE  (flat-shaded isometric illustration)
+  ───────────────────────────────────────────────────────────────────────
+  A full-canvas 1920×1080 cover. Put it on a `figure full` slide (the marp
+  class directive: underscore-class figure full) and embed by absolute path:
+      ![How RAG works](/abs/diagrams/cover.svg)
+
+  ISO CUBOID GRAMMAR (the whole system is built from this one shape).
+  A cuboid's <g> is anchored at its TOP-RHOMBUS CENTRE (0,0). For footprint
+  unit F=180 (half-diagonals 156,90) and height H, the three visible faces are:
+      top   : "0,-90  156,0  0,90  -156,0"                 ← near corner points DOWN
+      left  : "-156,0  0,90  0,{90+H}  -156,{H}"
+      right : "0,90  156,0  156,{H}  0,{90+H}"
+  Front vertical edge = (0,90)→(0,90+H). FLAT-SHADE with 3 tints of one hue
+  (NO gradients): top = base pastel · left = ~15% darker · right = ~30% darker.
+  Outline every face `stroke="#0A0A0A" stroke-width="4"`. Accent = signal #3FA9F5
+  dots on a face; title word = deep signal #1A6AAE (legible on the field).
+  SWAP: change the title, the 3 object hues/heights, the face details, the labels.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="Poppins, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="26" markerHeight="26" refX="17" refY="13" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L24,13 L2,24 Z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#F4F6FD"/>                 <!-- flat field -->
+  <polygon points="240,840 980,600 1700,840 980,1120" fill="#E9EEFB"/>  <!-- ground tile (optional) -->
+
+  <!-- TITLE: eyebrow (mono, deep signal) + headline (Poppins 900; one word deep-signal) -->
+  <text x="140" y="150" font-family="JetBrains Mono, monospace" font-size="30" font-weight="700" letter-spacing="6" fill="#1A6AAE">// EYEBROW</text>
+  <text x="136" y="300" font-size="132" font-weight="900" fill="#0A0A0A">How <tspan fill="#1A6AAE">topic</tspan> works</text>
+
+  <!-- OBJECT A (source) — peach cuboid, centre (520,710), H=60 -->
+  <g transform="translate(520,710)" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round">
+    <polygon points="-156,0 0,90 0,150 -156,60" fill="#EFC089"/>
+    <polygon points="0,90 156,0 156,60 0,150" fill="#E0A45F"/>
+    <polygon points="0,-90 156,0 0,90 -156,0" fill="#FFDEB6"/>
+  </g>
+  <text x="520" y="588" text-anchor="middle" font-size="42" font-weight="800" fill="#0A0A0A">Source</text>
+
+  <!-- OBJECT B (process) — blue cuboid, centre (960,560), H=250 -->
+  <g transform="translate(960,560)" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round">
+    <polygon points="-156,0 0,90 0,340 -156,250" fill="#95BAEE"/>
+    <polygon points="0,90 156,0 156,250 0,340" fill="#6F97D4"/>
+    <polygon points="0,-90 156,0 0,90 -156,0" fill="#BCD8FF"/>
+    <g fill="#3FA9F5" stroke="none">
+      <circle cx="54.6" cy="133.5" r="11"/><circle cx="101.4" cy="106.5" r="11"/>
+      <circle cx="54.6" cy="196" r="11"/><circle cx="101.4" cy="169" r="11"/>
+      <circle cx="54.6" cy="258.5" r="11"/><circle cx="101.4" cy="231.5" r="11"/>
+    </g>
+  </g>
+  <text x="960" y="438" text-anchor="middle" font-size="42" font-weight="800" fill="#0A0A0A">Process</text>
+
+  <!-- OBJECT C (sink) — lilac cuboid, centre (1380,700), H=170 -->
+  <g transform="translate(1380,700)" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round">
+    <polygon points="-156,0 0,90 0,260 -156,170" fill="#BCA8E9"/>
+    <polygon points="0,90 156,0 156,170 0,260" fill="#9E83D6"/>
+    <polygon points="0,-90 156,0 0,90 -156,0" fill="#D8C8F5"/>
+  </g>
+  <text x="1380" y="578" text-anchor="middle" font-size="42" font-weight="800" fill="#0A0A0A">Sink</text>
+
+  <!-- CONNECTORS: black, with the #ar head + a Poppins-700 label -->
+  <path d="M690 700 L796 642" fill="none" stroke="#0A0A0A" stroke-width="9" marker-end="url(#ar)"/>
+  <text x="742" y="640" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">step</text>
+  <path d="M1126 626 L1232 690" fill="none" stroke="#0A0A0A" stroke-width="9" marker-end="url(#ar)"/>
+  <text x="1180" y="628" text-anchor="middle" font-size="28" font-weight="700" fill="#0A0A0A">step</text>
+</svg>
