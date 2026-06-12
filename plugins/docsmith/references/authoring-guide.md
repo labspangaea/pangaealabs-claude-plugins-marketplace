@@ -78,7 +78,8 @@ A soft pastel storybook theme. Beyond the shared vocabulary it adds:
   chip-cards, then a `> verdict` pill. Tint the verdict with a modifier class:
   `<!-- _class: path accept -->` (green), `path reject` (red), `path caution` (amber).
 - `laws` — a 2×2 titled card grid.
-- `scorecard` — a markdown table → clipboard matrix (use emoji cells 🟢🟡🔴), plus
+- `scorecard` — a markdown table → clipboard matrix (use shape-distinct cells ✅⚠️❌,
+  not hue-only 🟢🟡🔴 — the dots are indistinguishable for colour-blind readers / in grayscale), plus
   a `> conclusion` bar.
 - `flow` — a list → a row of numbered "stop" cards joined by connector chevrons.
 - `scenarios` — a list of rows; write `**Stage** → **Action** → **Result**` (each
@@ -99,8 +100,8 @@ A soft pastel storybook theme. Beyond the shared vocabulary it adds:
 - **Callouts** — `<aside class="callout tip">…</aside>` (HTML passthrough is on for
   kawaii). Variants mirror the handbook: `tip`/`note`/`anchor`/`warning`/`plain`/`do`/`dont`.
   Leave a **blank line around the inner content** so the markdown inside renders.
-- **Code blocks** — fenced ```` ``` ```` blocks become a soft rounded card (violet
-  spine, mono); inline `` `code` `` stays an amber chip. Keep on-slide snippets short.
+- **Code blocks** — fenced ```` ``` ```` blocks become a soft rounded card (full violet
+  outline, mono); inline `` `code` `` stays an amber chip. Keep on-slide snippets short.
 
 ## Output
 PDF only. Decks are 1440×810pt (16:9); the handbook is a 6.5×9.25in book.

@@ -201,12 +201,12 @@ Most mishaps in the cloud are not clever break-ins — they start with a small, 
 
 | Good habit | Doing it? | Why it helps |
 | :--- | :---: | :--- |
-| Unique passwords everywhere | 🟢 | One leak can't unlock the rest |
-| Two-step login switched on | 🟢 | A second key stops sneaky logins |
-| Old share links cleaned up | 🟡 | Wandering links quietly add up |
-| Regular backups, kept apart | 🔴 | Without it, one bad day is forever |
+| Unique passwords everywhere | ✅ | One leak can't unlock the rest |
+| Two-step login switched on | ✅ | A second key stops sneaky logins |
+| Old share links cleaned up | ⚠️ | Wandering links quietly add up |
+| Regular backups, kept apart | ❌ | Without it, one bad day is forever |
 
-> **Conclusion** — Two greens is a fine start. Tend the amber and the red this week, and the village sleeps easy. 🐻
+> **Conclusion** — Two done (✅) is a fine start. Tend the half-there (⚠️) and the missing (❌) this week, and the village sleeps easy. 🐻
 
 ---
 
