@@ -9,15 +9,24 @@ Google Fonts (OFL).
 ## Palette
 Per-slide gradient **washes** (cycled): butter `#FBF6E3` · mint `#DCEFE0` · rose
 `#F8E0E4` · lavender `#E7E1F1` · sky `#DDEAF6` · peach `#FBE8DA`. Ink (headline)
-`#3D3A37` · body `#4A4A4A` · soft `#7A746C` · **accent (clay)** `#C8623F`. Cards
+`#3D3A37` · body `#4A4A4A` · soft `#645D54` · **accent (clay)** `#C8623F` (deep
+`#9E3F1E` for small functional text). Cards
 white on hairline `#ECE7DC`. **Chips** (fill/text) blue · green · amber · pink ·
-violet (cycled across cards). **Verdicts**: accept green `#7FCB86→#6BBE73`, reject
-red `#E8604A→#D94A38`, caution amber `#F3D98A`. Sticky-note `#FBEF9E`.
+violet (cycled across cards). **Verdicts**: accept mint `#B7E4C1→#A3D9B2` w/ dark-green
+ink `#1E5832`, reject red `#E8604A→#D94A38` w/ white, caution amber `#F3D98A` w/ ink
+`#6F551F`. (Light accept vs dark reject stays distinct in grayscale + for colour-blind
+readers — not by hue alone.) Sticky-note `#FBEF9E`.
 
 ## Type
 Display/headlines = **Baloo 2** (rounded, super-bold) with clay `*accent*` words;
 body = **Nunito**; quotes/closing italic = **Lora** italic; code = **JetBrains
 Mono**. Soft "puffy" shadows + large card radius (28px) carry the storybook feel.
+
+**Script coverage.** These families cover Latin + Latin-Extended (English, Indonesian,
+most European languages — accents/diacritics included). **CJK, Arabic/Hebrew (RTL), Thai,
+etc. are not covered** and fall back to a system font, so they won't carry the kawaii type
+identity. For a non-Latin deck, override the font tokens with a script-appropriate family
+via `~/.docsmith/template/kawaii-storybook.yaml` (or front-matter `overrides.tokens`).
 
 ## Authoring (marp)
 - `###### CHIP` → pastel rounded chip eyebrow.
@@ -38,8 +47,10 @@ Signature additions:
   chip-cards (e.g. Concept / Appeal / Reality), and a `>` blockquote renders as the
   **verdict pill** (colour from the modifier, e.g. `<!-- _class: path reject -->`).
 - **`laws`** — a 2×2 titled card grid.
-- **`scorecard`** — a markdown table styled as a clipboard matrix (use emoji cells
-  🟢🟡🔴) + a `>` blockquote conclusion bar.
+- **`scorecard`** — a markdown table styled as a clipboard matrix + a `>` blockquote
+  conclusion bar. Use **shape-distinct** status cells ✅ / ⚠️ / ❌ — **not** hue-only
+  🟢🟡🔴 (identical circles that colour-blind readers and grayscale prints can't tell
+  apart; ✅/⚠️/❌ differ in shape, so the status survives both).
 - **`flow`** — a list → a row of numbered "stop" cards joined by connector chevrons.
 - **`scenarios`** — rows of `**Stage** → **Action** → **Result**` (last row tints green).
 - **`roadmap`** — zig-zag numbered signpost cards.
@@ -74,7 +85,7 @@ ABSOLUTE path. Marp embeds the SVG via Chrome (`--allow-local-files`), so the sa
   `plain` · `do` · `dont`. **Leave a blank line around the inner content** so marp
   parses the markdown inside the aside (a CommonMark HTML-block rule).
 - **Code blocks** — fenced ```` ``` ```` blocks render as a soft rounded card with a
-  violet spine in JetBrains Mono; inline `` `code` `` keeps its amber chip. Slides
+  full violet outline in JetBrains Mono; inline `` `code` `` keeps its amber chip. Slides
   clip overflow, so keep on-slide snippets short (long lines wrap).
 
 ## Backend

@@ -8,13 +8,20 @@
   /* --- ink --- */
   --ks-ink:       #3D3A37;   /* headline warm charcoal */
   --ks-ink-2:     #4A4A4A;   /* body */
-  --ks-ink-soft:  #7A746C;   /* captions / footnotes */
-  --ks-accent:    #C8623F;   /* clay/coral — *em* accent words */
+  --ks-ink-soft:  #645D54;   /* captions / footnotes — deepened to clear AA (4.5:1) on the washes */
+  --ks-accent:    #C8623F;   /* clay/coral — *em* accent words (large text) */
+  --ks-accent-deep: #9E3F1E; /* clay for normal-size functional text (page no.) — clears 4.5:1 on washes */
 
   /* --- surfaces --- */
   --ks-card:      #FFFFFF;   /* card fill */
   --ks-hairline:  #E2DBC9;   /* card borders (carry depth now that shadows are off) */
   --ks-note:      #FBEF9E;   /* sticky-note */
+  /* extended surfaces / on-dark — promoted from one-off literals so every value is a token */
+  --ks-code-bg:     #FFFDF6; /* fenced code-block card */
+  --ks-row-alt:     #FBFAF5; /* scorecard zebra row */
+  --ks-note-tint:   #EAF2FA; /* note / anchor callout wash */
+  --ks-plain-tint:  #F0EAFA; /* plain callout wash */
+  --ks-ink-on-dark: #FFF8EF; /* warm-white ink on the cocoa statement slide */
 
   /* --- per-slide pastel washes (cycled) --- */
   --ks-wash-1a: #FBF6E3; --ks-wash-1b: #F4EFDA;  /* butter  */
@@ -26,15 +33,18 @@
 
   /* --- chip palette (fill / text), cycled across cards --- */
   --ks-chip-blue:    #CFE4F2; --ks-chip-blue-t:    #2E5C7E;
-  --ks-chip-green:   #D4ECD6; --ks-chip-green-t:   #3E7A4E;
-  --ks-chip-amber:   #F6E7B8; --ks-chip-amber-t:   #8A6D2E;
+  --ks-chip-green:   #D4ECD6; --ks-chip-green-t:   #336E43;
+  --ks-chip-amber:   #F6E7B8; --ks-chip-amber-t:   #745A20;
   --ks-chip-pink:    #F6D9DE; --ks-chip-pink-t:    #9E4C5C;
   --ks-chip-violet:  #E2D9F0; --ks-chip-violet-t:  #6B5594;
 
   /* --- verdict / status --- */
-  --ks-accept-a:  #7FCB86; --ks-accept-b:  #6BBE73;
-  --ks-reject-a:  #E8604A; --ks-reject-b:  #D94A38;
-  --ks-caution:   #F3D98A; --ks-caution-t: #8A6D2E;
+  /* accept = dark-green ink on a LIGHT mint pill (mirrors caution's ink-on-tint).
+     Light accept vs dark reject => the success/fail pair stays distinct in
+     grayscale AND for red-green colour-blindness, not by hue alone. */
+  --ks-accept-a:  #B7E4C1; --ks-accept-b:  #A3D9B2; --ks-accept-t: #1E5832;
+  --ks-reject-a:  #E8604A; --ks-reject-b:  #D94A38;   /* white text (dark pill) */
+  --ks-caution:   #F3D98A; --ks-caution-t: #6F551F;
   --ks-accept-tint:  #E8F6E9;
   --ks-reject-tint:  #FBE3DD;
   --ks-caution-tint: #FBF1D5;
@@ -49,7 +59,7 @@
   --ks-shadow-lg: none;
 
   /* --- type --- */
-  --font-display: "Baloo 2", "Comic Sans MS", system-ui, sans-serif;
+  --font-display: "Baloo 2", "Trebuchet MS", "Verdana", system-ui, sans-serif; /* rounded fallbacks if Baloo 2 fails to load (offline build) — never Comic Sans */
   --font-sans:    "Nunito", system-ui, -apple-system, sans-serif;
   --font-serif:   "Lora", Georgia, "Times New Roman", serif;
   --font-mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;

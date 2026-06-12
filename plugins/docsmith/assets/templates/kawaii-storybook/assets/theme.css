@@ -57,8 +57,8 @@ code { font-family: var(--font-mono); background: var(--ks-chip-amber);
    `code` keeps its amber chip). A slide clips overflow rather than scrolling, so
    long lines WRAP instead of vanishing — keep on-slide snippets short. */
 pre { font-family: var(--font-mono); font-size: 23px; line-height: 1.5;
-  background: #FFFDF6; color: var(--ks-ink); border: 1px solid var(--ks-hairline);
-  border-left: 8px solid var(--ks-chip-violet); border-radius: var(--ks-r-card);
+  background: var(--ks-code-bg); color: var(--ks-ink);
+  border: 2px solid var(--ks-chip-violet-t); border-radius: var(--ks-r-card);
   padding: 24px 30px; margin: 22px 0; white-space: pre-wrap; overflow-wrap: anywhere;
   box-shadow: var(--ks-shadow-sm); }
 pre code { background: none; color: inherit; padding: 0; border-radius: 0;
@@ -101,7 +101,7 @@ footer img { height: 38px !important; width: auto !important; max-width: none !i
    `bottom` doesn't align them; translateY drops the number onto the footer line
    (a uniform post-layout shift, independent of each slide's padding). */
 section::after { /* marp pagination */
-  color: var(--ks-accent); font-family: var(--font-mono);
+  color: var(--ks-accent-deep); font-family: var(--font-mono);
   font-size: 22px; line-height: 1; right: 64px; bottom: 50px;
   transform: translateY(80px); }
 
@@ -185,8 +185,8 @@ section.agenda li::after { content: counter(ag, decimal-leading-zero);
 /* versus: before(muted) / after(accept) */
 section.versus li:first-child { border: 2px dashed var(--ks-hairline); box-shadow: var(--ks-shadow-sm); }
 section.versus li:first-child strong { background: var(--ks-reject-tint); color: var(--ks-reject-b); }
-section.versus li:last-child { border: 2px solid var(--ks-accept-a); background: var(--ks-accept-tint); }
-section.versus li:last-child strong { background: var(--ks-accept-a); color: #fff; }
+section.versus li:last-child { border: 2px solid var(--ks-accept-t); background: var(--ks-accept-tint); }
+section.versus li:last-child strong { background: var(--ks-accept-a); color: var(--ks-accept-t); }
 
 /* ===================== BIGSTAT ===================== */
 section.bigstat h1 { font-size: 220px; line-height: .9; color: var(--ks-accent); }
@@ -239,7 +239,7 @@ section.scorecard th, section.scorecard td { padding: 16px 20px; text-align: cen
   border-bottom: 1px solid var(--ks-hairline); }
 section.scorecard thead th { background: var(--ks-wash-4b); font-family: var(--font-display);
   font-weight: 700; color: var(--ks-ink); }
-section.scorecard tbody tr:nth-child(even) td { background: #FBFAF5; }
+section.scorecard tbody tr:nth-child(even) td { background: var(--ks-row-alt); }
 section.scorecard tbody tr:last-child td { border-bottom: 0; }
 section.scorecard th:first-child, section.scorecard td:first-child { text-align: left;
   font-weight: 800; color: var(--ks-ink); }
@@ -255,7 +255,7 @@ section.flow li:last-child { margin-right: 0; }
 section.flow li::before { content: counter(flw); position: absolute; top: -24px; left: 24px;
   width: 50px; height: 50px; border-radius: 50%;
   background: linear-gradient(135deg, var(--ks-chip-blue), var(--ks-chip-violet));
-  color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 26px;
+  color: var(--ks-ink); font-family: var(--font-display); font-weight: 800; font-size: 26px;
   display: flex; align-items: center; justify-content: center; box-shadow: var(--ks-shadow-sm); }
 section.flow li::after { content: "›"; position: absolute; right: -28px; top: 50%;
   transform: translateY(-50%); font-family: var(--font-display); font-weight: 800;
@@ -274,8 +274,8 @@ section.scenarios li::before { content: none; }
 section.scenarios li strong { display: inline-block; font-family: var(--font-display);
   font-weight: 700; font-size: 24px; padding: 0.14em 0.7em; border-radius: var(--ks-r-pill);
   background: var(--ks-chip-blue); color: var(--ks-chip-blue-t); }
-section.scenarios li:last-child { background: var(--ks-accept-tint); border-color: var(--ks-accept-a); }
-section.scenarios li:last-child strong { background: var(--ks-accept-a); color: #fff; }
+section.scenarios li:last-child { background: var(--ks-accept-tint); border-color: var(--ks-accept-t); }
+section.scenarios li:last-child strong { background: var(--ks-accept-a); color: var(--ks-accept-t); }
 
 /* ===================== ROADMAP (zig-zag signposts) ===================== */
 section.roadmap ul { list-style: none; padding: 0; margin: 28px 0 0;
@@ -325,7 +325,7 @@ section.path blockquote { margin-top: 18px; display: flex; align-items: center; 
 section.path blockquote > p { margin: 0; width: 100%; }
 section.path blockquote img.emoji { vertical-align: middle; }
 section.accept blockquote { background: linear-gradient(135deg, var(--ks-accept-a), var(--ks-accept-b));
-  color: #fff; border-radius: var(--ks-r-pill); box-shadow: var(--ks-shadow-md); }
+  color: var(--ks-accept-t); border-radius: var(--ks-r-pill); box-shadow: var(--ks-shadow-md); }
 section.reject blockquote { background: linear-gradient(135deg, var(--ks-reject-a), var(--ks-reject-b));
   color: #fff; border-radius: var(--ks-r-pill); box-shadow: var(--ks-shadow-md); }
 section.caution blockquote { background: var(--ks-caution); color: var(--ks-caution-t);
@@ -343,20 +343,21 @@ section.caution blockquote { background: var(--ks-caution); color: var(--ks-caut
        </aside>
    The colour vocabulary mirrors the handbook: tip · note/anchor · warning ·
    plain · do · dont — so the same idea reads the same across templates. */
-.callout { background: var(--ks-card); border: 1px solid var(--ks-hairline);
-  border-left: 10px solid var(--ks-accent); border-radius: var(--ks-r-card);
+.callout { background: var(--ks-card); border: 2px solid var(--ks-accent);
+  border-radius: var(--ks-r-card);
   padding: 22px 30px; margin: 22px 0; box-shadow: var(--ks-shadow-sm); font-size: 28px; }
 .callout > :first-child { margin-top: 0; }
 .callout > :last-child  { margin-bottom: 0; }
 .callout p, .callout li { max-width: none; }
 .callout strong { color: var(--ks-ink); }
-.callout.tip     { background: var(--ks-caution-tint); border-left-color: var(--ks-chip-amber-t); }
+/* each variant = a full colour-coded border + matching wash (no side-stripe). */
+.callout.tip     { background: var(--ks-caution-tint); border-color: var(--ks-chip-amber-t); }
 .callout.note,
-.callout.anchor  { background: #EAF2FA;               border-left-color: var(--ks-chip-blue-t); }
-.callout.warning { background: var(--ks-reject-tint); border-left-color: var(--ks-reject-b); }
-.callout.plain   { background: #F0EAFA;               border-left-color: var(--ks-chip-violet-t); }
-.callout.do      { background: var(--ks-accept-tint); border-left-color: var(--ks-accept-b); }
-.callout.dont    { background: var(--ks-reject-tint); border-left-color: var(--ks-reject-b); }
+.callout.anchor  { background: var(--ks-note-tint);    border-color: var(--ks-chip-blue-t); }
+.callout.warning { background: var(--ks-reject-tint);  border-color: var(--ks-reject-b); }
+.callout.plain   { background: var(--ks-plain-tint);   border-color: var(--ks-chip-violet-t); }
+.callout.do      { background: var(--ks-accept-tint);  border-color: var(--ks-accept-t); }
+.callout.dont    { background: var(--ks-reject-tint);  border-color: var(--ks-reject-b); }
 
 /* ===================== COVER ===================== */
 section.cover { text-align: center; display: flex; flex-direction: column;
@@ -366,15 +367,15 @@ section.cover h6 { background: var(--ks-card); color: var(--ks-accent); }
 section.cover h1 { font-size: 124px; margin: 12px 0; }
 section.cover p { max-width: 36ch; color: var(--ks-ink-soft); font-size: 34px; }
 section.cover hr { width: 130px; height: 6px; border: 0; margin: 26px auto 0; border-radius: 999px;
-  background: linear-gradient(90deg, var(--ks-reject-a), var(--ks-chip-amber-t), var(--ks-accept-a)); }
+  background: linear-gradient(90deg, var(--ks-reject-a), var(--ks-chip-amber-t), var(--ks-accept-t)); }
 
 /* ===================== STATEMENT (cocoa dark) ===================== */
 section.statement { background: var(--ks-ink); color: rgba(255,255,255,.82);
   display: flex; flex-direction: column; justify-content: center; }
-section.statement h1, section.statement h2, section.statement h3 { color: #FFF8EF; }
+section.statement h1, section.statement h2, section.statement h3 { color: var(--ks-ink-on-dark); }
 section.statement h1 em, section.statement h2 em { color: var(--ks-caution); }
-section.statement h6 { background: rgba(255,255,255,.14); color: #FFF8EF; }
-section.statement strong { color: #FFF8EF; }
+section.statement h6 { background: rgba(255,255,255,.14); color: var(--ks-ink-on-dark); }
+section.statement strong { color: var(--ks-ink-on-dark); }
 section.statement footer { color: rgba(255,255,255,.6); }
 
 /* ===================== QUOTE ===================== */
@@ -392,3 +393,20 @@ section.closing h6 { background: var(--ks-card); color: var(--ks-accent); }
 section.closing h1 { font-size: 116px; }
 section.closing h1 em { color: var(--ks-accent); }
 section.closing p { max-width: 40ch; color: var(--ks-ink-soft); }
+
+/* ===================== HARDENING: graceful overflow on a fixed 16:9 canvas =====================
+   A slide is 1920×1080 and clips overflow — so long unbroken words (URLs, compound
+   terms, technical IDs) must WRAP instead of running off the edge, and flex/grid cards
+   must be allowed to shrink below their content width. */
+/* max-width caps a flex-centered heading (cover/figure/closing) to its container so
+   overflow-wrap can actually break a long word, instead of the item growing past both edges. */
+h1, h2, h3 { overflow-wrap: break-word; text-wrap: balance; max-width: 100%; }
+p, li, td, th, blockquote, .callout { overflow-wrap: break-word; }
+section.cards li, section.pillars li, section.cards3 li, section.compare2 li,
+section.compare3 li, section.steps li, section.people li, section.versus li,
+section.timeline li, section.glossary li, section.models li, section.filegrid li,
+section.featurepair li, section.logowall li, section.laws li, section.path li,
+section.flow li, section.scenarios li { min-width: 0; }
+/* card-title chips are short labels by design; if an author gives one a very long
+   single word, wrap it within the card rather than clipping it at the edge. */
+section li strong { max-width: 100%; overflow-wrap: break-word; }
