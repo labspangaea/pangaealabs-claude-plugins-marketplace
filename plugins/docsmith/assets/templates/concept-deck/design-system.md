@@ -11,8 +11,11 @@ This is **not** a decorative deck like `kawaii-storybook`, nor a formal one like
 the slide.** The intended pattern is **one full-canvas SVG per concept**
 (`<!-- _class: figure full -->`); the CSS slide classes are a fallback for prose.
 
-Pangaea identity is just the **electric-blue signal accent** (`#3FA9F5` — `// eyebrow`
-tags, *em* words, page number, icon nodes) and the single **navy `statement`** slide.
+Pangaea identity is just the **electric-blue signal accent** (`// eyebrow` tags, *em* words,
+page number, icon nodes) and the single **navy `statement`** slide. The accent is one hue in
+two tones: bright `#3FA9F5` where it passes (the dark statement slide, SVG icon nodes, the
+decorative `hr`) and the deepened `#1A6AAE` for accent **text on the light field** (so it
+clears WCAG-AA instead of washing out).
 
 > ### ► The SVG-DNA generation guide is the heart of this template
 > Before authoring **any** diagram, read **[`icons.md`](icons.md)** — the precise SVG-DNA
@@ -33,15 +36,26 @@ tags, *em* words, page number, icon nodes) and the single **navy `statement`** s
 | `--cd-surface` | `#FFFFFF` | code cards · table · callouts |
 | `--cd-ink` | `#0A0A0A` | **titles · card outlines · connectors · card text** |
 | `--cd-ink-2` | `#2A3550` | body text on the field |
-| `--cd-signal` | `#3FA9F5` | accent — eyebrow · *em* · page no · bullets · icon nodes |
+| `--cd-ink-soft` | `rgba(26,36,64,.72)` | footer · figure captions — deepened to clear AA (5.89:1) on the field |
+| `--cd-signal` | `#3FA9F5` | **bright** accent — the `statement` slide, the decorative cover/closing `hr`, and SVG **icon nodes** (passes on the dark void / inside diagrams) |
+| `--cd-signal-ink` | `#1A6AAE` | **deepened** signal for accent *text on the light field* — eyebrow · *em* · links · page no · bullet dot · inline-code text. Clears AA: 5.23:1 on field, 4.74:1 on the signal-soft code bg. (Bright signal is only 2.37:1 on the field, so field-text accents never use it.) |
 | `--cd-void` | `#0A1A2F` | the one navy `statement` slide |
+| `--cd-ink-on-dark` | `#FFFFFF` | white headline/strong ink on the navy `statement` slide |
 | `--cd-card-blue/mint/peach/pink/lilac` | `#BCD8FF` `#A9F5D9` `#FFDEB6` `#F5A9C2` `#D8C8F5` | card fills (cycled) |
 | `--cd-line-peach/pink/...` | `#E0975F` `#EA799E` … | darker tints for the "document lines" motif |
+| `--cd-plain-tint` / `--cd-plain-ink` | `#F1ECFB` / `#6B4FA0` | lilac `plain` callout wash + its full border (5.58:1) |
+| `--cd-code-bg` | `#EDF1FA` | fenced code-block card fill |
+| `--cd-code-comment/keyword/string/number/title` | `#636B80` `#2156B5` `#1A7A3A` `#875900` `#1F4DB8` | syntax token tints, each tuned ≥4.5:1 on `--cd-code-bg` |
 | `--cd-bw` | `4px` | the signature bold black outline weight |
 
 **Type:** Poppins (display 800/900 + body), JetBrains Mono (code) — both `@import`ed
 (OFL). **Depth = bold black borders, not shadows** (blurred shadows render as hard grey
 rectangles in many PDF viewers).
+
+**Contrast.** Every accent/ink-on-field pair clears WCAG-AA (≥4.5:1) in the rendered PDF;
+the multi-pastel cards stay colorblind-safe via their black `4px` outlines, never hue alone.
+The bright `--cd-signal` is reserved for surfaces where it passes (the dark statement slide,
+SVG icon nodes, the decorative `hr`) — on the light field, accent text uses `--cd-signal-ink`.
 
 ## Slide classes (deliberately minimal)
 

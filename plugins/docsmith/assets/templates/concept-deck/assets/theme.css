@@ -21,7 +21,7 @@ section {
 h6 { /* eyebrow → mono tech-doc tag */
   display: inline-block; font-family: var(--font-mono); font-weight: 700;
   font-size: 21px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--cd-signal); margin: 0 0 22px; }
+  color: var(--cd-signal-ink); margin: 0 0 22px; }
 h6::before { content: "// "; opacity: 0.6; }
 h1 { font-family: var(--font-display); font-weight: 900; font-size: 92px;
      line-height: 1.02; letter-spacing: -0.015em; color: var(--cd-ink); margin: 0 0 24px; }
@@ -29,36 +29,38 @@ h2 { font-family: var(--font-display); font-weight: 800; font-size: 60px;
      line-height: 1.08; color: var(--cd-ink); margin: 0 0 18px; }
 h3 { font-family: var(--font-display); font-weight: 700; font-size: 36px;
      color: var(--cd-ink); margin: 0 0 10px; }
-h1 em, h2 em, h3 em { font-style: normal; color: var(--cd-signal); }
+h1 em, h2 em, h3 em { font-style: normal; color: var(--cd-signal-ink); }
 p { margin: 0 0 18px; max-width: none; }
 strong { color: var(--cd-ink); font-weight: 800; }
 em { font-style: italic; }
-a { color: var(--cd-signal); text-decoration: none; }
+a { color: var(--cd-signal-ink); text-decoration: none; }
 
 /* default bullet list — signal dot */
 ul { list-style: none; padding: 0; margin: 14px 0; }
 li { position: relative; padding-left: 42px; margin: 16px 0; }
 li::before { content: ""; position: absolute; left: 4px; top: 14px;
-  width: 16px; height: 16px; border-radius: 50%; background: var(--cd-signal); }
+  width: 16px; height: 16px; border-radius: 50%; background: var(--cd-signal-ink); }
 code { font-family: var(--font-mono); background: var(--cd-signal-soft);
-  color: #1F6FB8; padding: .08em .4em; border-radius: 8px; }
+  color: var(--cd-signal-ink); padding: .08em .4em; border-radius: 8px; }
 
-/* fenced ``` code block → a light card with a bold black spine */
+/* fenced ``` code block → a light card with the full bold black outline (4px on all
+   four sides — no asymmetric side-spine). */
 pre { font-family: var(--font-mono); font-size: 23px; line-height: 1.5;
-  background: #EDF1FA; color: var(--cd-ink);
-  border: var(--cd-bw) solid var(--cd-ink); border-left-width: 10px;
+  background: var(--cd-code-bg); color: var(--cd-ink);
+  border: var(--cd-bw) solid var(--cd-ink);
   border-radius: var(--cd-r-card); padding: 24px 30px; margin: 22px 0;
   white-space: pre-wrap; overflow-wrap: anywhere; }
 pre code { background: none; color: inherit; padding: 0; border-radius: 0;
   font-family: inherit; font-size: inherit; }
-pre code .hljs-comment, pre code .hljs-quote { color: #8A93A6; font-style: italic; }
+/* syntax token tints — all tuned in design-system.css to clear AA (≥4.5:1) on --cd-code-bg */
+pre code .hljs-comment, pre code .hljs-quote { color: var(--cd-code-comment); font-style: italic; }
 pre code .hljs-keyword, pre code .hljs-selector-tag, pre code .hljs-built_in,
-pre code .hljs-meta, pre code .hljs-section { color: #2F6BD6; }
+pre code .hljs-meta, pre code .hljs-section { color: var(--cd-code-keyword); }
 pre code .hljs-string, pre code .hljs-attr, pre code .hljs-symbol,
-pre code .hljs-regexp, pre code .hljs-addition { color: #1A7A3A; }
-pre code .hljs-number, pre code .hljs-literal, pre code .hljs-bullet { color: #9A6700; }
+pre code .hljs-regexp, pre code .hljs-addition { color: var(--cd-code-string); }
+pre code .hljs-number, pre code .hljs-literal, pre code .hljs-bullet { color: var(--cd-code-number); }
 pre code .hljs-title, pre code .hljs-name, pre code .hljs-type,
-pre code .hljs-variable, pre code .hljs-template-variable, pre code .hljs-attribute { color: #1F4DB8; }
+pre code .hljs-variable, pre code .hljs-template-variable, pre code .hljs-attribute { color: var(--cd-code-title); }
 pre code .hljs-params { color: var(--cd-ink); }
 pre code .hljs-deletion { color: var(--cd-reject-b); }
 pre code .hljs-emphasis { font-style: italic; }
@@ -74,7 +76,7 @@ footer { position: absolute; left: 128px; bottom: 50px;
 footer img { height: 38px !important; width: auto !important; max-width: none !important;
   margin: 0 !important; float: none !important; border-radius: 0 !important;
   box-shadow: none !important; background: none !important; vertical-align: middle; }
-section::after { color: var(--cd-signal); font-family: var(--font-mono);
+section::after { color: var(--cd-signal-ink); font-family: var(--font-mono);
   font-size: 22px; line-height: 1; right: 64px; bottom: 50px; transform: translateY(80px); }
 
 /* ===================== CARDS (the one prose layout: bold black outline + pastel fill) ===================== */
@@ -112,20 +114,23 @@ section.figure.bare img:not(.emoji) { border-radius: 0; }
 section.figure p { max-width: 42ch; color: var(--cd-ink-soft); }
 section.figure p:has(img) { max-width: none; }   /* don't let the caption cap pin the hero */
 
-/* ===================== CALLOUTS ( <aside class="callout tip"> … ) ===================== */
-.callout { background: var(--cd-surface); border: 1px solid rgba(10,10,10,0.12);
-  border-left: 10px solid var(--cd-signal); border-radius: var(--cd-r-card);
+/* ===================== CALLOUTS ( <aside class="callout tip"> … ) =====================
+   Each variant = a FULL colour-coded border + matching wash (no asymmetric side-stripe).
+   The tech-doc idiom keeps the border thinner than a card (2px, not the 4px card outline)
+   so a callout doesn't read as a pastel concept-card. */
+.callout { background: var(--cd-signal-soft); border: 2px solid var(--cd-signal-ink);
+  border-radius: var(--cd-r-card);
   padding: 22px 30px; margin: 22px 0; font-size: 28px; color: var(--cd-ink-2); }
 .callout > :first-child { margin-top: 0; }
 .callout > :last-child  { margin-bottom: 0; }
 .callout strong { color: var(--cd-ink); }
-.callout.tip     { background: var(--cd-caution-tint); border-left-color: var(--cd-caution-t); }
+.callout.tip     { background: var(--cd-caution-tint); border-color: var(--cd-caution-t); }
 .callout.note,
-.callout.anchor  { background: var(--cd-signal-soft); border-left-color: var(--cd-signal); }
-.callout.warning { background: var(--cd-reject-tint); border-left-color: var(--cd-reject-b); }
-.callout.plain   { background: #F1ECFB; border-left-color: #8B6FC0; }
-.callout.do      { background: var(--cd-accept-tint); border-left-color: var(--cd-accept-b); }
-.callout.dont    { background: var(--cd-reject-tint); border-left-color: var(--cd-reject-b); }
+.callout.anchor  { background: var(--cd-signal-soft); border-color: var(--cd-signal-ink); }
+.callout.warning { background: var(--cd-reject-tint); border-color: var(--cd-reject-b); }
+.callout.plain   { background: var(--cd-plain-tint); border-color: var(--cd-plain-ink); }
+.callout.do      { background: var(--cd-accept-tint); border-color: var(--cd-accept-b); }
+.callout.dont    { background: var(--cd-reject-tint); border-color: var(--cd-reject-b); }
 
 /* ===================== COVER (light) ===================== */
 section.cover { text-align: center; display: flex; flex-direction: column;
@@ -137,9 +142,9 @@ section.cover hr { width: 140px; height: 6px; border: 0; margin: 26px auto 0; bo
 /* ===================== STATEMENT (the one navy slide — dark punctuation) ===================== */
 section.statement { background: var(--cd-void); color: rgba(234,244,255,0.92);
   display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
-section.statement h1, section.statement h2, section.statement h3 { color: #FFFFFF; }
+section.statement h1, section.statement h2, section.statement h3 { color: var(--cd-ink-on-dark); }
 section.statement h1 em, section.statement h2 em { color: var(--cd-signal); }
-section.statement strong { color: #FFFFFF; }
+section.statement strong { color: var(--cd-ink-on-dark); }
 section.statement footer { color: rgba(234,244,255,0.55); }
 section.statement::after { color: var(--cd-signal); }
 
@@ -147,5 +152,15 @@ section.statement::after { color: var(--cd-signal); }
 section.closing { text-align: center; display: flex; flex-direction: column;
   align-items: center; justify-content: center; background: var(--cd-field); }
 section.closing h1 { font-size: 116px; }
-section.closing h1 em { color: var(--cd-signal); }
+section.closing h1 em { color: var(--cd-signal-ink); }   /* accent text on the light field → deepened */
 section.closing p { max-width: 40ch; color: var(--cd-ink-2); }
+
+/* ===================== HARDENING: graceful overflow on a fixed 16:9 canvas =====================
+   A slide is 1920×1080 and clips overflow — so long unbroken words (URLs, compound terms,
+   technical IDs) must WRAP instead of running off the edge, and flex/grid card children
+   must be allowed to shrink below their content width. (`pre` already wraps via
+   overflow-wrap:anywhere above.) */
+h1, h2, h3 { overflow-wrap: break-word; text-wrap: balance; max-width: 100%; }
+p, li, td, th { overflow-wrap: break-word; }
+section.cards li { min-width: 0; }
+section.cards li strong { max-width: 100%; overflow-wrap: break-word; }

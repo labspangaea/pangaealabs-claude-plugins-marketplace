@@ -2,8 +2,10 @@
    A ByteByteGo-style "concept card" deck: a near-WHITE field, bold BLACK-outlined
    multi-pastel cards, BLACK orthogonal connectors, heavy Poppins black titles, flat
    sticker icons — the true ByteByteGo "study-notes" look. Pangaea identity lives in
-   the electric-blue SIGNAL accent (eyebrow chips, em words, page number, icon nodes)
-   and in the single navy "statement" punctuation slide.
+   the electric-blue SIGNAL accent (eyebrow tags, em words, page number, icon nodes)
+   and in the single navy "statement" punctuation slide. On the light field the accent
+   text uses the deepened --cd-signal-ink (the bright --cd-signal is only legible on the
+   dark statement slide and in SVG icon nodes).
    The multi-pastel card set is an intentional departure from Pangaea's strict two-hue
    brand — chosen for diagram legibility.
    Fonts via Google Fonts (OFL): Poppins (display+body), JetBrains Mono (code). */
@@ -18,10 +20,17 @@
   /* —— ink (titles, card outlines, connectors, card text) —— */
   --cd-ink:      #0A0A0A;   /* the ByteByteGo black */
   --cd-ink-2:    #2A3550;   /* body text on the field */
-  --cd-ink-soft: rgba(26, 36, 64, 0.55);   /* captions / footer */
+  --cd-ink-soft: rgba(26, 36, 64, 0.72);   /* captions / footer — deepened to clear AA (5.89:1) on the field */
+  --cd-ink-on-dark: #FFFFFF;               /* white ink on the navy statement slide */
 
-  /* —— signal (Pangaea accent: eyebrow · em · page no · bullets · icon nodes) —— */
+  /* —— signal (Pangaea accent) —— */
+  /* --cd-signal stays bright for the statement slide, the decorative cover/closing hr,
+     and SVG icon nodes (all pass). On the LIGHT field bright signal is only 2.37:1, so
+     every small/normal text use of the accent goes through --cd-signal-ink instead. */
   --cd-signal:      #3FA9F5;
+  --cd-signal-ink:  #1A6AAE;               /* deepened signal for text on the field: eyebrow, *em*,
+                                              links, page no., bullet dot, inline-code text.
+                                              Clears AA — 5.23:1 on field, 4.74:1 on signal-soft. */
   --cd-signal-soft: rgba(63, 169, 245, 0.12);
   --cd-signal-line: rgba(63, 169, 245, 0.45);
 
@@ -46,6 +55,18 @@
   --cd-accept-a: #34C281; --cd-accept-b: #25A56B; --cd-accept-tint: #E6F8EF;
   --cd-reject-a: #F2576B; --cd-reject-b: #D63E55; --cd-reject-tint: #FCE6EA;
   --cd-caution:  #FFDEB6; --cd-caution-t: #8A5A1E; --cd-caution-tint: #FBF0DC;
+
+  /* —— plain callout (lilac) —— */
+  --cd-plain-tint: #F1ECFB;   /* plain-callout wash */
+  --cd-plain-ink:  #6B4FA0;   /* plain-callout border ink — clears AA (5.58:1) on the wash */
+
+  /* —— code card + syntax (hljs token tints, all tuned to ≥4.5:1 on --cd-code-bg) —— */
+  --cd-code-bg:      #EDF1FA;  /* fenced code-block card fill */
+  --cd-code-comment: #636B80;  /* was #8A93A6 (2.73) → 4.71:1 */
+  --cd-code-keyword: #2156B5;  /* was #2F6BD6 (4.43) → 6.06:1 */
+  --cd-code-string:  #1A7A3A;  /* 4.77:1 (already AA) */
+  --cd-code-number:  #875900;  /* was #9A6700 (4.30) → 5.37:1 */
+  --cd-code-title:   #1F4DB8;  /* 6.60:1 (already AA) */
 
   /* —— shape —— */
   --cd-r-card: 28px;
