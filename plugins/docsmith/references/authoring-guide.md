@@ -50,7 +50,7 @@ temp dir, so relative image paths won't resolve.
 - Inline emphasis: `*italic*`, `**bold**`.
 - Links/citations: write every source as `[label](url)`. All links — TOC,
   internal cross-refs, external URLs, citations — render in a uniform light blue
-  (`linkblue #2F80ED`) and stay clickable. Bare URLs do NOT auto-link —
+  (`linkblue #1565C0`) and stay clickable. Bare URLs do NOT auto-link —
   always wrap them. Put a blank line before any list (a tight bold-lead-in + list
   collapses into one paragraph).
 - Long docs: close with a `## Glossary` (term/meaning table). After building, run

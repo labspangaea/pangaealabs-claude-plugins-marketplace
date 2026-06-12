@@ -12,7 +12,7 @@ pandoc_args:
   - -V
   - classoption=openright
   # Every hyperlink — TOC entries, internal cross-refs, external URLs, and
-  # citations — renders in one uniform light blue (linkblue, #2F80ED, defined in
+  # citations — renders in one uniform link blue (linkblue, #1565C0, defined in
   # design-system.yaml and emitted into the generated _tokens.tex before this).
   # colorlinks keeps them text-coloured (no boxes) while staying clickable.
   - -V
