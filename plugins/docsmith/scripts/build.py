@@ -238,7 +238,7 @@ def build_handbook(tmpl_dir: Path, manifest: dict, merged: dict,
 
     date = merged.get("date") or "auto"
     if date == "auto":
-        date = _dt.date.today().isoformat()
+        date = _dt.date.today().strftime("%B %Y")   # book-style "June 2026", not ISO
 
     # config-driven cover + frontmatter/mainmatter injected as raw LaTeX before the body
     cov = {"dstitle": meta_value(merged, profile, "title"),

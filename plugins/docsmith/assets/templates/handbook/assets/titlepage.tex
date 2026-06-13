@@ -18,19 +18,23 @@
 \newcommand{\dscover}{%
   \thispagestyle{empty}%
   \raggedright
-  \vspace*{0.12\textheight}
-  {\def\dsnil{}\ifx\dslogo\dsnil\else\includegraphics[height=1.7cm]{\dslogo}\par\vspace{18pt}\fi}
+  % the whole identity block (logo → date) is one unit, floated to the optical
+  % centre via \fill above + 2×\fill below — no dead band, author/date grouped
+  % with the title rather than jammed at the page edge.
+  \vspace*{\fill}
+  {\def\dsnil{}\ifx\dslogo\dsnil\else\includegraphics[height=1.7cm]{\dslogo}\par\vspace{20pt}\fi}
   {\sffamily\bfseries\footnotesize\color{navy}\MakeUppercase{\dscompany}\par}
-  \vspace{6pt}
+  \vspace{8pt}
   {\color{navy}\rule{\textwidth}{1.2pt}\par}
-  \vspace{20pt}
+  \vspace{24pt}
   {\sffamily\bfseries\fontsize{34}{40}\selectfont\color{navy}\dstitle\par}
-  \vspace{12pt}
+  \vspace{14pt}
   {\rmfamily\itshape\Large\color{rulegrey}\dssubtitle\par}
-  \vfill
+  \vspace{52pt}
   {\sffamily\small\color{black}\dsauthor\par}
-  \vspace{2pt}
+  \vspace{3pt}
   {\sffamily\footnotesize\color{rulegrey}\dsdate\quad\dsversion\par}
+  \vspace*{\fill}\vspace*{\fill}
   \clearpage
 }
 

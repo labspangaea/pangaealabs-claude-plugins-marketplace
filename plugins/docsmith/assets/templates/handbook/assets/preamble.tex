@@ -2,6 +2,10 @@
 % book class, Latin Modern serif body, navy palette, fancyhdr running heads,
 % titlesec chapter/section styling, tcolorbox callout cards, lettrine, pullquote.
 
+% PDF outline/bookmarks for navigation (screen-reader + reader wayfinding). Passed as
+% options so they apply whenever pandoc's template loads hyperref, regardless of order.
+\PassOptionsToPackage{bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,pdfpagelabels=true}{hyperref}
+
 \usepackage[paperwidth=6.5in,paperheight=9.25in,
             inner=0.9in,outer=0.75in,top=0.95in,bottom=1in,
             headsep=14pt,footskip=26pt]{geometry}
@@ -144,9 +148,8 @@
 \definecolor{codebg}{HTML}{F5F7FA}
 \makeatletter
 \@ifundefined{Shaded}{\newenvironment}{\renewenvironment}{Shaded}
-  {\begin{tcolorbox}[breakable, enhanced, boxrule=0pt, arc=1.6mm,
-     colback=codebg, colframe=codebg,
-     borderline west={2.2pt}{0pt}{navysoft},
+  {\begin{tcolorbox}[breakable, enhanced, boxrule=0.6pt, arc=1.6mm,
+     colback=codebg, colframe=navysoft!45!white,
      left=3.5mm, right=3mm, top=2mm, bottom=2mm,
      before skip=9pt, after skip=9pt]}
   {\end{tcolorbox}}
