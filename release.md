@@ -6,6 +6,16 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## docsmith 0.9.3 — 2026-06-13
+- **handbook polish** (from an `/impeccable critique`): the title page now groups the whole
+  identity block at the optical centre (was author/date jammed to the bottom edge with a dead
+  band above); the auto cover date is book-style "June 2026" (not ISO — a shared `build.py`
+  change that improves every template's cover; explicit front-matter dates pass through
+  unchanged); the fenced code block uses a full thin navy border instead of a left-rule
+  side-stripe; and the rendered PDF now carries a **bookmark/outline** for navigation (a
+  screen-reader / reader-wayfinding aid). Per-figure alt text + full PDF tagging remain a
+  LaTeX/tectonic limitation (deferred).
+
 ## docsmith 0.9.2 — 2026-06-13
 - **claudecode-deck accessibility** — the clay accent `#B85838` was normal-size on the
   eyebrow + page number at 4.03:1 on cream → added `--cc-clay-deep #9A4528` (**5.55:1**) for
