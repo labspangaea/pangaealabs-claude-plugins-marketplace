@@ -4,3 +4,10 @@ __pycache__/
 
 # dev/eval workspaces (kept locally, never shipped); bulky iteration outputs untracked
 dev/make-pdf-workspace/iteration-*/
+
+# local tooling state — not repo content
+.claude/skills/
+# impeccable critique snapshots
+.impeccable/
+# ad-hoc rendered demo PDFs at repo root
+*-optimized.pdf
