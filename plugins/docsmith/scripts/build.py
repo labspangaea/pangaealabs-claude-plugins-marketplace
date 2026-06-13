@@ -263,13 +263,19 @@ def build_handbook(tmpl_dir: Path, manifest: dict, merged: dict,
         if lp.exists():
             logo_path = str(lp.resolve())
     prefix += f"\\def\\dslogo{{{logo_path}}}\n"
-    # honor per-document class options at runtime: geometry's inner/outer margins
-    # silently re-enable twoside, so passing `oneside` to the class isn't enough —
-    # flip the flags directly so \cleardoublepage stops emitting blank verso pages.
+    # Digital-first by default: a docsmith handbook is read on screen, where the
+    # book class's twoside+openright behaviour inserts a blank verso before every
+    # chapter (to land it on a physical right-hand page) plus a trailing blank —
+    # those read as broken "empty pages" in a PDF. The template default is now
+    # oneside+openany (template.yaml), but geometry's inner/outer margins silently
+    # re-enable twoside, so passing the class option isn't enough — flip the flags
+    # directly so \cleardoublepage stops emitting blank verso pages. A doc headed
+    # for print-and-bind opts back in with `overrides.classoptions: [twoside,
+    # openright]`: that keeps the flags AND wins at the class level (appended last).
     classopts = merged.get("overrides", {}).get("classoptions") or []
-    if "oneside" in classopts:
+    if "twoside" not in classopts:
         prefix += "\\makeatletter\\@twosidefalse\\@mparswitchfalse\\makeatother\n"
-    if "openany" in classopts:
+    if "openright" not in classopts:
         prefix += "\\makeatletter\\@openrightfalse\\makeatother\n"
     # \dscover ends with \clearpage; the TOC's own \chapter* handles clearing,
     # so no extra \cleardoublepage here — it would force a blank verso before the TOC.

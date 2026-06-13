@@ -24,12 +24,14 @@ optional polish. A reader notices their absence immediately (a blank page, a
 title-less cover, a wall of unexplained jargon, dead citation text). Apply them by
 default; only skip one if the user opts out or it genuinely doesn't fit the
 content. (Slide decks — `corporate-deck`/`claudecode-deck`/`kawaii-storybook` — are
-exempt from blank-page stripping and the glossary; the rest still help.)
+exempt from the glossary; the rest still help.)
 
-1. **No blank pages.** The `book` class inserts filler pages (header + folio only)
-   to open chapters on a recto, plus the odd trailing page. After every build, run
-   `scripts/strip_blank_pages.py` on the output (Step 7) so the reader never hits
-   an empty sheet.
+1. **No blank pages.** The handbook builds digital-first (`oneside`+`openany`), so
+   each chapter opens on the next available page and the `book` class never inserts
+   the filler pages (header + folio only) it would otherwise use to force chapters
+   onto a recto. There is nothing to strip — the reader never hits an empty sheet.
+   (A doc that will actually be printed-and-bound can opt back into recto openings
+   with `overrides.classoptions: [twoside, openright]` in its front-matter.)
 2. **Use callouts/quotes/plain-English where they help.** The handbook ships
    `::: note` · `::: tip` · `::: warning` · `::: plain` ("In Plain English") ·
    `::: pullquote` (a large navy quote) · `::: do`/`::: dont` · `::: cheatsheet`.
@@ -264,17 +266,10 @@ gets `SOURCE`, `PLUGIN_DIR`, its `TEMPLATE`, an `OUT`, the chosen `--company`, a
 optional `PROFILE`/`--logo`). For one template — the common case — build inline as
 above; never spawn a subagent just to run a single build.
 
-## Step 7 — strip blank pages, check links, then report
-**First (checklist #1), strip blank/filler pages** from the freshly built PDF:
-```
-python3 "$PLUGIN_DIR/scripts/strip_blank_pages.py" "$OUT"
-```
-It removes pages that carry only a running header + folio (keeps the cover, and
-refuses to drop >40% as a safety net), in place. This runs on every handbook
-build because the `book` class reliably inserts filler pages; decks don't need it.
-
-**Then (handbook builds), run the internal link-integrity check** on the finished
-PDF:
+## Step 7 — check links, then report
+**For handbook builds, run the internal link-integrity check** on the finished
+PDF (the handbook builds digital-first, so there are no blank/filler pages to
+strip — see checklist #1):
 ```
 python3 "$PLUGIN_DIR/scripts/check_links.py" "$OUT"
 ```
@@ -330,7 +325,7 @@ shows up as a blurry blob at footer size.
 - Visuals (diagrams, charts, images — all of them): hand-written raw SVG (plain XML — <rect>/<line>/<text>/<path>/<polygon>/<circle>, manual coordinates; no d2/Mermaid/image-gen/R2 host). Give each an explicit `width`+`height` (not just `viewBox`) or Chrome collapses it to nothing on decks. Embed via `![Caption](/abs/diagram.svg){width=80%}`; validate with `rsvg-convert` first, and match the active template's palette.
 - Handbook callouts: `::: note` / `::: tip` / `::: warning` / `::: plain` ("In Plain English") / `::: do` / `::: dont` / `::: cheatsheet` / `::: pullquote`.
 - Citations & links: write external sources as markdown links `[label](url)` so they render in the uniform light blue (`linkblue` `#2F80ED`) + stay clickable; TOC entries and internal cross-refs are the same blue now (bare URLs become dead text). Always put a blank line before a list.
-- Long docs: end with a `## Glossary` term/meaning table; after building, strip blank pages with `scripts/strip_blank_pages.py`, then run the internal link-integrity check `scripts/check_links.py "$OUT"` (Step 7).
+- Long docs: end with a `## Glossary` term/meaning table; after building, run the internal link-integrity check `scripts/check_links.py "$OUT"` (Step 7). The handbook builds digital-first (`oneside`+`openany`) so there are no `book`-class blank pages to strip.
 - Decks: separate slides with `---`; pick a layout per slide with `<!-- _class: kpi -->` (cover, kpi, split, quote, versus, statement, closing, …). `kawaii-storybook` adds `path` (+ `accept`/`reject`/`caution`), `laws`, `scorecard`, `flow`, `scenarios`, `roadmap`, `figure` (+ `bare`), renders emoji 🐻🦊🦉🐹 as mascots, and — via the same hand-written SVG flow as the handbook — supports SVG hero/character art, full-bleed `![bg cover](/abs/scene.svg)` scenes, `<aside class="callout tip">` callouts, and styled fenced code blocks.
 See `references/authoring-guide.md` for the full contract and
 `references/adding-a-template.md` to add a new template.

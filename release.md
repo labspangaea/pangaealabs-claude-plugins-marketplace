@@ -6,6 +6,22 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## docsmith 0.9.4 — 2026-06-13
+- **handbook: no more blank chapter-opener pages.** The template shipped the LaTeX
+  `book` class with `twoside`+`openright`, which insert a blank verso before every
+  chapter (to force it onto a right-hand page of a physical spread) plus a trailing
+  blank — read on screen those are just "empty pages" (a demo carried 3 of them).
+  The handbook now builds **digital-first** (`oneside`+`openany`): each chapter
+  opens on the next available page, no blanks (the 14-page demo drops to 11). A doc
+  headed for print-and-bind can opt back in with
+  `overrides.classoptions: [twoside, openright]`.
+- **Retired `strip_blank_pages.py`.** It was a post-build band-aid `make-pdf` ran as
+  Step 7 to delete the filler pages — but it rebuilt the PDF without the `/Outlines`
+  tree, silently destroying the **bookmarks added in 0.9.3** (verified: outline
+  `True → False`). With the blanks gone at the source there is nothing to strip, so
+  the script + its Step-7 call (in `make-pdf` SKILL.md and the authoring guide) are
+  removed and the bookmarks survive intact.
+
 ## docsmith 0.9.3 — 2026-06-13
 - **handbook polish** (from an `/impeccable critique`): the title page now groups the whole
   identity block at the optical centre (was author/date jammed to the bottom edge with a dead

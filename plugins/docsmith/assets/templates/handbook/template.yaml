@@ -7,10 +7,17 @@ pandoc_args:
   - documentclass=book
   - -V
   - classoption=11pt
+  # Digital-first: a docsmith handbook is read on screen, where the book class's
+  # `twoside`+`openright` defaults insert a blank verso before every chapter (to
+  # force it onto a right-hand page of a physical spread) plus a trailing blank —
+  # those read as broken "empty pages" in a PDF. `oneside`+`openany` lets each
+  # chapter open on the next available page, no blanks. A doc that will actually
+  # be printed-and-bound can opt back in with `overrides.classoptions:
+  # [twoside, openright]` (build.py re-enables the blank-verso flags for it).
   - -V
-  - classoption=twoside
+  - classoption=oneside
   - -V
-  - classoption=openright
+  - classoption=openany
   # Every hyperlink — TOC entries, internal cross-refs, external URLs, and
   # citations — renders in one uniform link blue (linkblue, #1565C0, defined in
   # design-system.yaml and emitted into the generated _tokens.tex before this).

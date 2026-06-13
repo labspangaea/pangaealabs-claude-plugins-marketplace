@@ -53,8 +53,11 @@ temp dir, so relative image paths won't resolve.
   (`linkblue #1565C0`) and stay clickable. Bare URLs do NOT auto-link —
   always wrap them. Put a blank line before any list (a tight bold-lead-in + list
   collapses into one paragraph).
-- Long docs: close with a `## Glossary` (term/meaning table). After building, run
-  `scripts/strip_blank_pages.py OUT.pdf` to drop the `book`-class filler pages.
+- Long docs: close with a `## Glossary` (term/meaning table). The handbook builds
+  digital-first (`oneside`+`openany`), so chapters open on the next page and there
+  are **no `book`-class blank/filler pages** — nothing to strip. For a doc that
+  will be printed-and-bound, add `overrides.classoptions: [twoside, openright]` to
+  restore recto-only chapter openings (LaTeX then inserts blank versos by design).
 
 ## decks (corporate-deck, claudecode-deck, kawaii-storybook) — marp
 - Separate slides with `---`.
