@@ -7,10 +7,13 @@ by Pangaea Labs. Today it ships one plugin: **`docsmith`** (markdown → on-bran
 
 | Path | What |
 |---|---|
-| `.claude-plugin/marketplace.json` | marketplace manifest (owner + plugin list) |
+| `.claude-plugin/marketplace.json` | marketplace manifest (owner + plugin list; each plugin may declare a `skills:` array) |
+| `installer/` | **`npx` installer CLI** (`index/marketplace/agents/install/profile.mjs`) — the `npx github:…` entry; installs skills into **any** agent. **NOT** part of the Claude plugin payload. See "The `npx` installer" below. |
+| `package.json` / `package-lock.json` | declares the installer `bin` so `npx github:…` runs (no npm publish needed); dep `@clack/prompts` |
+| `docs/install.md` | end-user install docs (native `/plugin` path **and** the `npx` cross-agent path) |
 | `plugins/docsmith/` | the shipped plugin — **everything under here installs to users** |
 | `plugins/docsmith/skills/make-pdf/` | the only user-facing skill |
-| `plugins/docsmith/scripts/` | `build.py`, `doctor.py`, `check_links.py`, etc. |
+| `plugins/docsmith/scripts/` | `build.py`, `doctor.py`, `check_links.py`, `marp_prep.py`, `setup_profile.py` (canonical `profile.yaml` writer — interactive + `--json`) |
 | `plugins/docsmith/monitors/monitors.json` | background monitors (see below) |
 | `plugins/docsmith/references/` | `authoring-guide.md`, `adding-a-template.md` |
 | `plugins/docsmith/assets/templates/` | design-system templates (`handbook`, `corporate-deck`, `claudecode-deck`, `kawaii-storybook`, `concept-deck`). **`concept-deck`** is **SVG-first / tech-doc** — one full-canvas SVG per concept; author its diagrams per `concept-deck/icons.md` (the SVG-DNA generation guide). |
@@ -19,6 +22,48 @@ by Pangaea Labs. Today it ships one plugin: **`docsmith`** (markdown → on-bran
 
 **Never put dev/eval scaffolding under `plugins/docsmith/`** — it would ship to every
 user. Keep it in `dev/`. `iteration-*` outputs are git-ignored.
+
+## The `npx` installer (`installer/` — cross-agent install, NOT the Claude plugin)
+
+Beyond `/plugin marketplace add …`, the repo ships an interactive `npx` installer so
+docsmith's skills run in **any** agent (Claude Code, OpenClaw, Hermes, Cursor, Codex,
+OpenCode, Gemini CLI, …), not just Claude Code:
+
+```
+npx github:labspangaea/pangaealabs-claude-plugins-marketplace
+```
+
+- **Entry:** root `package.json` `bin` → `installer/index.mjs` (so `npx github:…` works
+  with **no npm publish**). Only dep is `@clack/prompts` (the skills.sh TUI look).
+- **Flow:** plugins (`marketplace.json`) → skills (`SKILL.md` frontmatter) → agents
+  (`installer/agents.mjs` registry) → scope → method → summary/confirm → install →
+  docsmith profile wizard.
+- **Universal-store model** (`installer/install.mjs` + `agents.mjs`): the skill is written
+  ONCE to `~/.agents/skills/<skill>` (global) or `./.agents/skills/<skill>` (project), then
+  symlinked (or copied) into each agent's own dir. Agents that already read `~/.agents/skills`
+  (Codex, OpenCode, Gemini CLI, Copilot, Amp, Warp, Zed, Cline) need no extra link.
+- **Relocatable bundle:** the installer copies `scripts/`, `assets/`, `references/` (+
+  `examples/profile.example.yaml`) INTO the skill dir so it's self-contained. `build.py`
+  resolves its plugin root as `__file__/../..`, so it runs unchanged from the relocated
+  location. Plugin-only bits (`monitors/`, `agents/`) are deliberately **not** bundled —
+  they're Claude-Code machinery, inert in a bare skill. (Hence `SKILL.md`'s `PLUGIN_DIR`
+  note now resolves both the plugin layout and the standalone `~/.agents/skills` layout.)
+- **One canonical profile writer:** `scripts/setup_profile.py` (pure-stdlib to write; PyYAML
+  only for append). The installer's clack wizard (`installer/profile.mjs`) collects fields then
+  pipes JSON to `setup_profile.py --json`; the **same** script is `make-pdf` **Step 0**. So
+  install-time and in-agent setup are byte-identical, and non-Claude agents (no
+  `AskUserQuestion`) still get a working `~/.docsmith/profile.yaml`. The 8 org fields:
+  `company, author, email, logo, wordmark, website, default_confidentiality, copyright`.
+  - **Gotcha (already bitten):** `profile.mjs` MUST spawn the writer with
+    `env: { ...process.env, ...env }`. If it inherits the bare process env, the writer
+    resolves a different `$DOCSMITH_HOME` than the wizard reported and writes to the wrong
+    place — e.g. clobbering the real `~/.docsmith/profile.yaml` during a sandboxed test.
+- **`installer/`, `package.json`, `package-lock.json`, `docs/` are repo tooling — NOT the
+  Claude plugin payload.** They never install via `/plugin`; only `plugins/docsmith/` does.
+  `node_modules/` is git-ignored.
+- **Verify non-interactively:** `node installer/index.mjs add docsmith -g --symlink
+  -a claude-code,codex --no-profile --dry-run`. Flags: `add <plugin>`, `-a/--agent`,
+  `-g/--global`, `--project`, `--copy/--symlink`, `--no-profile`, `--dry-run`, `-y`.
 
 ## Monitors (`plugins/docsmith/monitors/monitors.json`)
 

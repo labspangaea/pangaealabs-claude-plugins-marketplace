@@ -12,9 +12,14 @@ template branded as one company; every visual — diagram, chart, or image — i
 hand-written raw SVG embedded into that output (no diagramming library, no image
 generation, no external image host).
 
-`PLUGIN_DIR` below is this plugin's root (the folder containing `scripts/` and
-`assets/`). Resolve it once at the start (the directory two levels up from this
-SKILL.md).
+`PLUGIN_DIR` below is the folder that contains `scripts/build.py` and
+`assets/templates/`. Resolve it once at the start by locating `scripts/build.py`:
+- In Claude Code, `${CLAUDE_PLUGIN_ROOT}` is authoritative (the plugin root, two
+  levels up from this SKILL.md).
+- When this skill was installed standalone via `npx` (the universal
+  `~/.agents/skills/make-pdf/` bundle, e.g. on OpenClaw/Hermes/Codex), `scripts/`
+  and `assets/` sit **right beside this SKILL.md** — so `PLUGIN_DIR` is this
+  file's own directory.
 
 ## Always-apply quality checklist (document-style PDFs)
 
@@ -71,15 +76,25 @@ blank line. A bold lead-in immediately followed by `- item` (no blank line)
 collapses into one run-on paragraph. Ensure a blank line before every list.
 
 ## Step 0 — first-run config
-If `~/.docsmith/profile.yaml` does not exist, create it (this drives identity +
-branding for every document) and tell the user where it is:
+The profile lives at `$DOCSMITH_HOME/profile.yaml` (default `~/.docsmith/profile.yaml`)
+and drives identity + branding for every document. If it does not exist, create it
+with the **portable, dependency-free setup script** (works in any agent — it does
+not rely on `AskUserQuestion`, and it also makes the `~/.docsmith/{template,cache,logo}`
+dirs):
 ```
-mkdir -p ~/.docsmith/template ~/.docsmith/cache/diagrams
+python3 PLUGIN_DIR/scripts/setup_profile.py        # interactive: prompts each field, loops over orgs
 ```
+The script is the **canonical writer** — the same one the `npx` installer runs at
+install time, so the YAML shape stays identical everywhere. (If you already know
+the org details, you may instead gather `company`/`author`/… up front — in Claude
+Code via `AskUserQuestion` — and pipe them in non-interactively:
+`echo '[{"company":"Acme Corp","author":"Docs Team"}]' | python3 PLUGIN_DIR/scripts/setup_profile.py --json --mode overwrite`.)
+Tell the user where the profile landed.
+
 The profile is a **YAML list of self-contained org objects** — each entry is one
-organization the make-pdf skill can brand a document as, and one is picked per
-run by `company`. Every entry carries its own `company`, `author`, `email`,
-`logo`, `wordmark`, `website`, `default_confidentiality`, and `copyright`, e.g.:
+organization make-pdf can brand a document as, picked per run by `company`. Every
+entry carries `company`, `author`, `email`, `logo`, `wordmark`, `website`,
+`default_confidentiality`, and `copyright`, e.g.:
 ```yaml
 - company: "Acme Corp"
   author: "Docs Team"
@@ -90,9 +105,8 @@ run by `company`. Every entry carries its own `company`, `author`, `email`,
   default_confidentiality: "Confidential"  # Public/Internal/Confidential/Restricted; "" = none
   copyright: "© 2026"
 ```
-Ask the user for `company`/`author` if you don't know them; leave the rest blank
-otherwise. A per-document front-matter or `--profile`/`--company`/`--logo`
-always overrides these.
+A per-document front-matter or `--profile`/`--company`/`--logo` always overrides
+these.
 
 **The `logo` has to read at footer size.** A deck footer renders it ~40px tall
 (the handbook cover/colophon small too), so prefer a square-ish **SVG** or a crisp

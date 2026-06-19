@@ -11,6 +11,22 @@ Add it once, then install any plugin below.
 /plugin marketplace add labspangaea/pangaealabs-claude-plugins-marketplace
 ```
 
+## Install into any agent (`npx`)
+
+Use the interactive installer to install skills into **any** agent — Claude Code,
+OpenClaw, Hermes, Cursor, Codex, OpenCode, Gemini CLI, GitHub Copilot, Warp, Zed, …
+(the `skills.sh`-style flow):
+
+```bash
+npx github:labspangaea/pangaealabs-claude-plugins-marketplace
+```
+
+Pick plugins → skills → agents → scope → method, confirm, then set up docsmith's
+`~/.docsmith/profile.yaml` in the same run. It uses the universal `~/.agents/skills`
+store and symlinks into each agent, so one update reaches them all. See
+**[docs/install.md](docs/install.md)** for flags, the portability model, and the
+toolchain it needs.
+
 ## Plugins
 
 ### `docsmith` — markdown → professional, on-brand PDFs
