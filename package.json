@@ -1,0 +1,29 @@
+{
+  "name": "@pangaealabs/marketplace-installer",
+  "version": "0.1.0",
+  "description": "Interactive npx installer for the Pangaea Labs Claude Code plugin marketplace. Installs skills into any agent (Claude Code, OpenClaw, Hermes, Cursor, Codex, …) using the universal ~/.agents/skills model, and sets up docsmith's ~/.docsmith/profile.yaml.",
+  "type": "module",
+  "bin": {
+    "pangaealabs-skills": "installer/index.mjs"
+  },
+  "files": [
+    "installer",
+    "plugins",
+    ".claude-plugin"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node installer/index.mjs",
+    "check": "node --check installer/index.mjs && node --check installer/install.mjs && node --check installer/agents.mjs && node --check installer/marketplace.mjs && node --check installer/profile.mjs"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Pangaea Labs"
+  },
+  "homepage": "https://github.com/labspangaea/pangaealabs-claude-plugins-marketplace"
+}
