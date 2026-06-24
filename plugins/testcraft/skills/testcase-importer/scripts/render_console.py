@@ -17,9 +17,7 @@ A = ap.parse_args()
 csv_path = pathlib.Path(A.csv)
 out_path = pathlib.Path(A.out) if A.out else csv_path.with_suffix(".html")
 
-CANON = ["ID", "Group", "Type", "Outcome", "Priority", "Severity_Reasoning",
-         "Transition", "Title", "Steps / Test Data",
-         "Expected Result + Downstream Impact / Fix"]
+from _schema import CANON  # canonical 10-column contract (shared with normalize_testcases.py)
 rows = list(csv.DictReader(open(csv_path, encoding="utf-8")))
 if not rows:
     raise SystemExit("No rows in %s" % csv_path)
