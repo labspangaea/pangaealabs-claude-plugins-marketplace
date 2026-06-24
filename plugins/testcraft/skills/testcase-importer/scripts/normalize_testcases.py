@@ -20,9 +20,7 @@ Usage:
 """
 import csv, json, re, sys, argparse, pathlib
 
-CANON = ["ID", "Group", "Type", "Outcome", "Priority", "Severity_Reasoning",
-         "Transition", "Title", "Steps / Test Data",
-         "Expected Result + Downstream Impact / Fix"]
+from _schema import CANON  # canonical 10-column contract (shared with render_console.py)
 
 # canonical column -> normalized header phrases that should map to it
 SYN = {

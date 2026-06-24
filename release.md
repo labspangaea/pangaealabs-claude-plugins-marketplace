@@ -6,6 +6,13 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## testcraft 0.1.1 — 2026-06-24
+Dedupe the canonical schema within the testcase-importer skill.
+- `normalize_testcases.py` and `render_console.py` both hard-coded the 10-column CANON list;
+  extracted to a shared `scripts/_schema.py` imported by both (single source within the bundle).
+- Internal refactor only — no behavior change. The sibling `userflow-to-testcases` skill keeps
+  its own copy by design (each skill ships as a self-contained install bundle).
+
 ## testcraft 0.1.0 — 2026-06-24
 Add testcraft: user flows → test cases → offline console.
 - Initial release. Two chained skills — `userflow-to-testcases` (author cases from a flow doc by
