@@ -11,6 +11,12 @@
       "source": "./plugins/docsmith",
       "skills": ["./skills/make-pdf"],
       "description": "Turn markdown into professional, on-brand PDFs across design-system templates. Ships handbook (LaTeX book via pandoc+tectonic) plus corporate-deck, claudecode-deck, kawaii-storybook, and concept-deck (ByteByteGo-style SVG-first tech-doc) (16:9 slides via marp-cli). The make-pdf skill fans one source out to several PDFs via parallel subagents; every visual is hand-written raw SVG embedded inline (no d2, Mermaid, or image generation). Layered config (global profile + per-template overrides + per-doc front-matter) under ~/.docsmith/."
+    },
+    {
+      "name": "testcraft",
+      "source": "./plugins/testcraft",
+      "skills": ["./skills/testcase-importer", "./skills/userflow-to-testcases"],
+      "description": "Turn an app's user flows into a complete, importer-ready test-case suite and an offline HTML console. Two chained skills: userflow-to-testcases authors cases FROM a flow doc (PDF/markdown/spec/screenshots) by modeling actor+resource state machines — per-transition cases with cross-flow downstream impact, an actor x resource matrix, end-to-end journeys, and a security/abuse (VAPT) pass — and testcase-importer normalizes any existing case data (xls/xlsx, CSV/TSV, PDF tables, pasted/markdown) into the canonical CSV and renders a single-file, filterable, offline console. Adds two subagents (testcase-architect, testcase-vapt-auditor) for heavy/parallel authoring and the adversarial pass. Every case is tagged Type (POS/NEG/VAPT) x Outcome (TN/TP/FP/FN!) with a dual-scale priority and one-line severity reasoning."
     }
   ]
 }

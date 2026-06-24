@@ -6,6 +6,16 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## testcraft 0.1.0 — 2026-06-24
+Add testcraft: user flows → test cases → offline console.
+- Initial release. Two chained skills — `userflow-to-testcases` (author cases from a flow doc by
+  modeling actor+resource state machines: per-transition cases with downstream impact, matrix,
+  E2E journeys, VAPT pass) and `testcase-importer` (normalize any case data → canonical CSV →
+  single-file offline HTML console).
+- Two subagents: `testcase-architect`, `testcase-vapt-auditor`.
+- Installer: added `-s/--skill` so multi-skill plugins install non-interactively; documented the
+  skill-local support-dir layout alongside docsmith's plugin-level one.
+
 ## docsmith 0.9.4 — 2026-06-13
 - **handbook: no more blank chapter-opener pages.** The template shipped the LaTeX
   `book` class with `twoside`+`openright`, which insert a blank verso before every
