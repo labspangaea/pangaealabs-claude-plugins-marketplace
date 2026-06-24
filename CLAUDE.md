@@ -1,7 +1,8 @@
 # CLAUDE.md — pangaealabs-claude-plugins-marketplace
 
 Maintainer/agent guidance for this repo. This is a **Claude Code plugin marketplace**
-by Pangaea Labs. Today it ships one plugin: **`docsmith`** (markdown → on-brand PDFs).
+by Pangaea Labs. Today it ships two plugins: **`docsmith`** (markdown → on-brand PDFs)
+and **`testcraft`** (user flows → test-case suite + offline HTML console).
 
 ## Layout
 
@@ -17,11 +18,34 @@ by Pangaea Labs. Today it ships one plugin: **`docsmith`** (markdown → on-bran
 | `plugins/docsmith/monitors/monitors.json` | background monitors (see below) |
 | `plugins/docsmith/references/` | `authoring-guide.md`, `adding-a-template.md` |
 | `plugins/docsmith/assets/templates/` | design-system templates (`handbook`, `corporate-deck`, `claudecode-deck`, `kawaii-storybook`, `concept-deck`). **`concept-deck`** is **SVG-first / tech-doc** — one full-canvas SVG per concept; author its diagrams per `concept-deck/icons.md` (the SVG-DNA generation guide). |
+| `plugins/testcraft/` | second plugin — **user flows → test cases**; everything under here installs to users |
+| `plugins/testcraft/skills/{testcase-importer,userflow-to-testcases}/` | the two user-facing skills (each `SKILL.md` + `scripts/` + `references/`) |
+| `plugins/testcraft/agents/` | `testcase-architect`, `testcase-vapt-auditor` subagents (self-contained — no project-`CLAUDE.md` dependency) |
 | `dev/` | **dev/eval workspaces — NOT shipped** (moved out of `plugins/` on purpose) |
 | `dev/docsmith-workspace/trigger-evals.json` | the skill-triggering eval set (20 queries) |
 
 **Never put dev/eval scaffolding under `plugins/docsmith/`** — it would ship to every
 user. Keep it in `dev/`. `iteration-*` outputs are git-ignored.
+
+## `testcraft` (second plugin — user flows → test cases)
+
+`plugins/testcraft/` ships two chained skills + two subagents that turn a user-flow doc into an
+importer-ready test-case CSV and an offline HTML console:
+
+- **`userflow-to-testcases`** — authors cases *from* a flow (state machines → per-transition
+  cases with downstream impact → actor×resource matrix → E2E → VAPT). Stops at the CSV.
+- **`testcase-importer`** — normalizes *existing* case data (xls/xlsx, CSV/TSV, PDF, pasted/md)
+  into the canonical CSV, then renders the console (`scripts/render_console.py`).
+- agents **`testcase-architect`** / **`testcase-vapt-auditor`** for heavy authoring + the
+  security pass.
+
+Self-contained, unlike docsmith: each skill bundles its own `scripts/` + `references/`, and the
+agents carry the full method inline (no project-`CLAUDE.md` dependency), so the plugin is
+portable. The **canonical CSV (10 cols)** — `ID, Group, Type, Outcome, Priority,
+Severity_Reasoning, Transition, Title, Steps / Test Data, Expected Result + Downstream Impact /
+Fix` — is the interchange format between both skills and the console; the bundled
+`validate_cases.py` is the importer-ready gate. No monitors/evals ship here — testcraft's eval
+workspaces live in its originating project, not this repo.
 
 ## The `npx` installer (`installer/` — cross-agent install, NOT the Claude plugin)
 
@@ -62,8 +86,12 @@ npx github:labspangaea/pangaealabs-claude-plugins-marketplace
   Claude plugin payload.** They never install via `/plugin`; only `plugins/docsmith/` does.
   `node_modules/` is git-ignored.
 - **Verify non-interactively:** `node installer/index.mjs add docsmith -g --symlink
-  -a claude-code,codex --no-profile --dry-run`. Flags: `add <plugin>`, `-a/--agent`,
-  `-g/--global`, `--project`, `--copy/--symlink`, `--no-profile`, `--dry-run`, `-y`.
+  -a claude-code,codex --no-profile --dry-run`. For a **multi-skill** plugin, pre-select skills
+  with `-s` so it doesn't block on the skill multiselect:
+  `node installer/index.mjs add testcraft -s testcase-importer,userflow-to-testcases -g --symlink
+  -a claude-code,codex --dry-run`. Flags: `add <plugin>`, `-s/--skill` (names, comma-sep;
+  required to install a multi-skill plugin headlessly), `-a/--agent`, `-g/--global`, `--project`,
+  `--copy/--symlink`, `--no-profile`, `--dry-run`, `-y`.
 
 ## Monitors (`plugins/docsmith/monitors/monitors.json`)
 

@@ -9,6 +9,14 @@
 // UNCHANGED from the relocated location. We copy exactly those support dirs plus
 // the skill's own files; plugin-only bits (monitors/, agents/, evals/) are left
 // behind because they're Claude-Code-plugin machinery, inert in a bare skill.
+//
+// Two support-dir layouts are handled, both yielding the same self-contained bundle:
+//   • plugin-level (docsmith): scripts/ assets/ references/ sit at the PLUGIN root, shared
+//     by its one skill — copied in first.
+//   • skill-local (testcraft): each skill carries its own scripts/ + references/ INSIDE the
+//     skill folder — they ride along when the skill's own files are copied on top.
+// The plugin-level copy no-ops when those dirs are absent at the plugin root, so a plugin
+// may use either (or both) layout with no installer change.
 
 import fs from "node:fs";
 import os from "node:os";

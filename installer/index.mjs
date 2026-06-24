@@ -4,8 +4,10 @@
 //   npx github:labspangaea/pangaealabs-claude-plugins-marketplace
 //   npx github:labspangaea/pangaealabs-claude-plugins-marketplace add docsmith -g
 //
-// Flow (mirrors the skills.sh TUI, plus docsmith's profile wizard):
-//   plugins → skills → agents → scope → method → summary/confirm → install → profile.
+// Flow (mirrors the skills.sh TUI, plus a per-plugin post-install step):
+//   plugins → skills → agents → scope → method → summary/confirm → install → [docsmith profile].
+// Multi-skill plugins (e.g. testcraft) prompt a skill multiselect; pre-select with -s/--skill
+// to run non-interactively.
 
 import { spawnSync } from "node:child_process";
 import os from "node:os";
@@ -19,7 +21,7 @@ import { buildPlan, execute, summaryLines, displayPath } from "./install.mjs";
 import { runProfileWizard } from "./profile.mjs";
 
 function parseArgs(argv) {
-  const args = { plugins: [], agents: [], scope: null, method: null, dryRun: false, yes: false, noProfile: false, help: false };
+  const args = { plugins: [], skills: [], agents: [], scope: null, method: null, dryRun: false, yes: false, noProfile: false, help: false };
   const rest = argv.slice(2);
   const pushList = (target, val) => {
     for (const v of String(val).split(",").map((s) => s.trim()).filter(Boolean)) target.push(v);
@@ -30,6 +32,8 @@ function parseArgs(argv) {
       while (rest[i + 1] && !rest[i + 1].startsWith("-")) args.plugins.push(rest[++i]);
     } else if (a === "-a" || a === "--agent") pushList(args.agents, rest[++i] || "");
     else if (a.startsWith("--agent=")) pushList(args.agents, a.slice("--agent=".length));
+    else if (a === "-s" || a === "--skill") pushList(args.skills, rest[++i] || "");
+    else if (a.startsWith("--skill=")) pushList(args.skills, a.slice("--skill=".length));
     else if (a === "-g" || a === "--global") args.scope = "global";
     else if (a === "--project") args.scope = "project";
     else if (a === "--copy") args.method = "copy";
@@ -57,6 +61,8 @@ Usage:
 
 Options:
   add <plugin>     Pre-select plugins (e.g. "add docsmith")
+  -s, --skill <id> Pre-select skills by name (repeatable or comma-separated;
+                   needed to install a multi-skill plugin like testcraft non-interactively)
   -a, --agent <id> Pre-select agents (repeatable or comma-separated)
   -g, --global     Install for all projects (home dir)   [default: ask]
       --project    Install into the current project
@@ -129,7 +135,16 @@ async function main() {
     process.exit(1);
   }
   let chosenSkillIds;
-  if (allSkills.length === 1) {
+  if (args.skills.length) {
+    const want = new Set(args.skills);
+    const matched = allSkills.filter((s) => want.has(s.id) || want.has(s.name));
+    if (!matched.length) {
+      p.cancel(`No matching skills for: ${args.skills.join(", ")}. Available: ${allSkills.map((s) => s.name).join(", ")}`);
+      process.exit(1);
+    }
+    chosenSkillIds = matched.map((s) => s.id);
+    p.log.info(`Skills: ${matched.map((s) => s.name).join(", ")}`);
+  } else if (allSkills.length === 1) {
     chosenSkillIds = [allSkills[0].id];
     p.log.info(`Skill: ${allSkills[0].name}`);
   } else {

@@ -124,6 +124,45 @@ gallery, and runnable demos with example prompts live in
 **[the docsmith README](plugins/docsmith/README.md#gallery--every-templates-components-rendered)**
 and **[`plugins/docsmith/examples/`](plugins/docsmith/examples/)**.
 
+### `testcraft` — user flows → test cases → offline console
+
+Turn an app's **user flows** into a complete, importer-ready **test-case suite** and a
+single-file, offline **HTML console**. Two chained skills, plus two subagents for the deep work.
+
+```
+flow doc (PDF / markdown / spec / screenshots)
+    │  /userflow-to-testcases   — model state machines → author cases → CSV
+canonical test-case CSV
+    │  /testcase-importer       — normalize any case data → render
+offline HTML console (filter / search by severity; ? opens a legend)
+```
+
+- **`/userflow-to-testcases`** — authors cases *from* a flow document: models actor + resource
+  state machines, then writes per-transition cases with cross-flow **downstream impact**, an
+  actor×resource matrix, end-to-end journeys, and a security/abuse (VAPT) pass. Stops at the CSV.
+- **`/testcase-importer`** — imports/normalizes *existing* case data (xls/xlsx, CSV/TSV, PDF
+  tables, pasted/markdown) into the canonical CSV and renders the offline console.
+- Subagents **`testcase-architect`** (heavy/parallel authoring) and **`testcase-vapt-auditor`**
+  (adversarial security pass — defensive use only) handle the large jobs.
+
+Every case is tagged **Type** (`POS`/`NEG`/`VAPT`) × **Outcome** (`TN`/`TP`/`FP`/`FN!`) with a
+dual-scale priority and a one-line severity rationale. The canonical CSV (10 columns) is the
+interchange format between both skills and the console.
+
+```bash
+# install
+/plugin install testcraft@pangaealabs-claude-plugins-marketplace
+```
+
+Then, in any project:
+
+```
+/userflow-to-testcases generate a test suite from onboarding-flow.pdf
+/testcase-importer load that CSV into the console
+```
+
+▸ The pipeline, schema, and bundled scripts are detailed in **[the testcraft README](plugins/testcraft/README.md)**.
+
 ## Maintaining docsmith
 
 _Repo-internal commands for maintainers — **not shipped to docsmith users** (end users get inline error help from `/make-pdf` while it builds)._
