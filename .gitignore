@@ -5,8 +5,9 @@ __pycache__/
 # installer deps (the npx installer's package.json deps are restored on demand)
 node_modules/
 
-# dev/eval workspaces (kept locally, never shipped); bulky iteration outputs untracked
-dev/make-pdf-workspace/iteration-*/
+# dev/eval workspaces (kept locally, never shipped); bulky iteration run-outputs
+# (rendered PDFs, grading/timing JSON, review HTML) are regenerable — never tracked.
+dev/*/iteration-*/
 
 # local tooling state — not repo content
 .claude/skills/
