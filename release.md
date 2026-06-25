@@ -6,6 +6,13 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## docsmith 0.9.5 — 2026-06-25
+Dedupe `docsmith_home()` into a shared `scripts/_common.py`.
+- `build.py` and `setup_profile.py` each defined an identical `docsmith_home()`; extracted to
+  `scripts/_common.py`, imported by both (the file ships with the relocatable make-pdf bundle,
+  so the sibling import resolves in both the plugin and the standalone `~/.agents/skills` layout).
+- Dropped the now-unused `os` import from `setup_profile.py`. Internal refactor — no behavior change.
+
 ## testcraft 0.1.1 — 2026-06-24
 Dedupe the canonical schema within the testcase-importer skill.
 - `normalize_testcases.py` and `render_console.py` both hard-coded the 10-column CANON list;
