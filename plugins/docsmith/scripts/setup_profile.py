@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -60,8 +59,7 @@ FIELD_HELP = {
 }
 
 
-def docsmith_home() -> Path:
-    return Path(os.environ.get("DOCSMITH_HOME", str(Path.home() / ".docsmith")))
+from _common import docsmith_home  # shared with build.py
 
 
 def profile_path() -> Path:

@@ -122,8 +122,7 @@ def deep_merge(base: dict, over: dict) -> dict:
     return out
 
 
-def docsmith_home() -> Path:
-    return Path(os.environ.get("DOCSMITH_HOME", Path.home() / ".docsmith"))
+from _common import docsmith_home  # shared with setup_profile.py
 
 
 def chosen_company(value, override: str | None = None) -> str:
