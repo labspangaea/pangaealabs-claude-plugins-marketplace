@@ -1,8 +1,7 @@
 # Pangaea Labs — Claude Code Plugins Marketplace
 
 A [Claude Code](https://claude.com/claude-code) plugin marketplace by
-**[Pangaea Digital Labs](https://www.pangaea.id/)**.
-Add it once, then install any plugin below.
+**[Pangaea Digital Labs](https://www.pangaea.id/)**. Add it once, then install any plugin below.
 
 ## Add the marketplace
 
@@ -11,184 +10,52 @@ Add it once, then install any plugin below.
 /plugin marketplace add labspangaea/pangaealabs-claude-plugins-marketplace
 ```
 
-## Install into any agent (`npx`)
-
-Use the interactive installer to install skills into **any** agent — Claude Code,
-OpenClaw, Hermes, Cursor, Codex, OpenCode, Gemini CLI, GitHub Copilot, Warp, Zed, …
-(the `skills.sh`-style flow):
+Prefer another agent? An interactive `npx` installer puts these skills into **any** agent
+(Claude Code, OpenClaw, Hermes, Cursor, Codex, OpenCode, Gemini CLI, Copilot, Warp, Zed, …):
 
 ```bash
 npx github:labspangaea/pangaealabs-claude-plugins-marketplace
 ```
 
-Pick plugins → skills → agents → scope → method, confirm, then set up docsmith's
-`~/.docsmith/profile.yaml` in the same run. It uses the universal `~/.agents/skills`
-store and symlinks into each agent, so one update reaches them all. See
-**[docs/install.md](docs/install.md)** for flags, the portability model, and the
-toolchain it needs.
+See **[docs/install.md](docs/install.md)** for the cross-agent flow, flags, and portability model.
 
 ## Plugins
 
 ### `docsmith` — markdown → professional, on-brand PDFs
 
-Generate polished, on-brand PDFs from markdown using design-system templates.
-The `/make-pdf` skill picks one template and one company brand per run and fans a
-single source out to one or more PDFs via parallel subagents. Every visual —
-diagram, chart, or illustration — is hand-written raw SVG embedded inline (no d2,
-Mermaid, or image generation).
+<img src="plugins/docsmith/examples/corporate-deck/pages/page-01.png" width="640" alt="A docsmith-rendered corporate-deck cover slide — one of five on-brand PDF templates.">
 
-![How docsmith works: source.md + an optional ~/.docsmith/profile.yaml go through the /make-pdf skill and are rendered by marp-cli or pandoc+tectonic into an on-brand PDF.](plugins/docsmith/assets/how-it-works.svg)
-
-**Templates**
-
-- `handbook` — long-form report/guide as a LaTeX `book` (pandoc + tectonic)
-- `corporate-deck` — 16:9 formal corporate / civic slides (marp-cli)
-- `claudecode-deck` — 16:9 Claude/"claudecode"-branded slides (marp-cli)
-- `kawaii-storybook` — 16:9 pastel storybook / NotebookLM-style deck (marp-cli)
-- `concept-deck` — 16:9 tech-doc, **SVG-first** concept cards (ByteByteGo idiom): one full-canvas SVG per concept, near-white field, black-outlined pastel cards, black connectors, signal accent (marp-cli)
-
-**Preview — one source, five looks** _(rendered demos from [`plugins/docsmith/examples/`](plugins/docsmith/examples/) — each a full per-class catalog with a footer logo; see each template's `CLASSES.md`)_
-
-<table>
-<tr>
-<td width="50%"><img src="plugins/docsmith/examples/handbook/pages/page-01.png" width="100%"><br><sub><b>handbook</b> — LaTeX book · cover</sub></td>
-<td width="50%"><img src="plugins/docsmith/examples/handbook/pages/page-08.png" width="100%"><br><sub>callouts + clickable links</sub></td>
-</tr>
-<tr>
-<td><img src="plugins/docsmith/examples/corporate-deck/pages/page-01.png" width="100%"><br><sub><b>corporate-deck</b> — formal slides · cover</sub></td>
-<td><img src="plugins/docsmith/examples/corporate-deck/pages/page-04.png" width="100%"><br><sub>KPI grid</sub></td>
-</tr>
-<tr>
-<td><img src="plugins/docsmith/examples/claudecode-deck/pages/page-01.png" width="100%"><br><sub><b>claudecode-deck</b> — editorial · cover</sub></td>
-<td><img src="plugins/docsmith/examples/claudecode-deck/pages/page-21.png" width="100%"><br><sub>dark statement slide</sub></td>
-</tr>
-<tr>
-<td><img src="plugins/docsmith/examples/kawaii-storybook/pages/page-01.png" width="100%"><br><sub><b>kawaii-storybook</b> — pastel storybook · cover</sub></td>
-<td><img src="plugins/docsmith/examples/kawaii-storybook/pages/page-08.png" width="100%"><br><sub>verdict path slide</sub></td>
-</tr>
-<tr>
-<td><img src="plugins/docsmith/examples/concept-deck/pages/page-02.png" width="100%"><br><sub><b>concept-deck</b> — tech-doc, SVG-first · RAG end to end (multi-panel SVG)</sub></td>
-<td><img src="plugins/docsmith/examples/concept-deck/pages/page-04.png" width="100%"><br><sub>RAG architecture · full-canvas SVG</sub></td>
-</tr>
-</table>
-
-Layered config lives under `~/.docsmith/` (global profile + per-template overrides
-+ per-doc front-matter), so the plugin location is portable. The one file to create
-first is `~/.docsmith/profile.yaml` — it drives identity + branding for every PDF:
-
-<details>
-<summary><b>Example <code>~/.docsmith/profile.yaml</code></b> (made-up values — one entry per org you brand documents as)</summary>
-
-```yaml
-# ~/.docsmith/profile.yaml — one entry per org; one is picked per run by company
-# name (or --company / front-matter). All values below are placeholders.
-- company: "Acme Corp"
-  author: "Jane Rivera"
-  email: "press@acme.example"
-  logo: ""                                  # optional: square SVG/PNG path; renders ~40px tall in footers
-  wordmark: "ACME"                          # text fallback shown when no logo is set
-  website: "https://acme.example"
-  default_confidentiality: "Internal"       # Public / Internal / Confidential / Restricted; "" = none
-  copyright: "© 2026 Acme Corp"
-
-- company: "Nimbus Studio"
-  author: "Lee Park"
-  email: "hello@nimbus.example"
-  logo: ""
-  wordmark: "nimbus"
-  website: "https://nimbus.example"
-  default_confidentiality: ""
-  copyright: "© 2026 Nimbus Studio"
-```
-
-Copy [`plugins/docsmith/examples/profile.example.yaml`](plugins/docsmith/examples/profile.example.yaml) to `~/.docsmith/profile.yaml` and edit.
-</details>
+Turn markdown into polished, on-brand PDFs across **5 design-system templates** — a LaTeX
+`handbook` plus four 16:9 deck styles (`corporate-deck`, `claudecode-deck`, `kawaii-storybook`,
+`concept-deck`). `/make-pdf` picks one template and one company brand per run; every diagram,
+chart, and icon is hand-written raw SVG embedded inline (no d2, Mermaid, or image generation).
 
 ```bash
-# install
 /plugin install docsmith@pangaealabs-claude-plugins-marketplace
-
-# update later — refresh the catalog, then the plugin, then restart Claude Code
-/plugin marketplace update pangaealabs-claude-plugins-marketplace
-/plugin update docsmith@pangaealabs-claude-plugins-marketplace
 ```
 
-Then, in any project:
-
-```
-/make-pdf turn report.md into a handbook PDF for Pangaea Labs
-```
-
-▸ **See every template's components rendered** — the flow diagram, a 4-template
-gallery, and runnable demos with example prompts live in
-**[the docsmith README](plugins/docsmith/README.md#gallery--every-templates-components-rendered)**
-and **[`plugins/docsmith/examples/`](plugins/docsmith/examples/)**.
+▸ **Templates, the full rendered gallery, config & profile setup → [docsmith README](plugins/docsmith/README.md)**
 
 ### `testcraft` — user flows → test cases → offline console
 
-Turn an app's **user flows** into a complete, importer-ready **test-case suite** and a
-single-file, offline **HTML console**. Two chained skills, plus two subagents for the deep work.
+<img src="plugins/testcraft/assets/console-preview.png" width="640" alt="The testcase-importer console — a single-file offline test matrix with severity-colored rows, faceted filters (section / outcome / severity / type), and a legend.">
 
-```
-flow doc (PDF / markdown / spec / screenshots)
-    │  /userflow-to-testcases   — model state machines → author cases → CSV
-canonical test-case CSV
-    │  /testcase-importer       — normalize any case data → render
-offline HTML console (filter / search by severity; ? opens a legend)
-```
-
-- **`/userflow-to-testcases`** — authors cases *from* a flow document: models actor + resource
-  state machines, then writes per-transition cases with cross-flow **downstream impact**, an
-  actor×resource matrix, end-to-end journeys, and a security/abuse (VAPT) pass. Stops at the CSV.
-- **`/testcase-importer`** — imports/normalizes *existing* case data (xls/xlsx, CSV/TSV, PDF
-  tables, pasted/markdown) into the canonical CSV and renders the offline console.
-- Subagents **`testcase-architect`** (heavy/parallel authoring) and **`testcase-vapt-auditor`**
-  (adversarial security pass — defensive use only) handle the large jobs.
-
-Every case is tagged **Type** (`POS`/`NEG`/`VAPT`) × **Outcome** (`TN`/`TP`/`FP`/`FN!`) with a
-dual-scale priority and a one-line severity rationale. The canonical CSV (10 columns) is the
-interchange format between both skills and the console.
+Turn an app's **user flows** into a complete, importer-ready **test-case suite** and a single-file,
+offline **HTML console**. Two chained skills — `/userflow-to-testcases` authors cases from a flow
+doc (state machines → per-transition cases with downstream impact → matrix → E2E → VAPT), and
+`/testcase-importer` normalizes any case data and renders the console — plus two subagents
+(`testcase-architect`, `testcase-vapt-auditor`) for the heavy authoring and the security pass.
 
 ```bash
-# install
 /plugin install testcraft@pangaealabs-claude-plugins-marketplace
 ```
 
-Then, in any project:
+▸ **The pipeline, canonical schema & bundled scripts → [testcraft README](plugins/testcraft/README.md)**
 
-```
-/userflow-to-testcases generate a test suite from onboarding-flow.pdf
-/testcase-importer load that CSV into the console
-```
+---
 
-▸ The pipeline, schema, and bundled scripts are detailed in **[the testcraft README](plugins/testcraft/README.md)**.
-
-## Maintaining docsmith
-
-_Repo-internal commands for maintainers — **not shipped to docsmith users** (end users get inline error help from `/make-pdf` while it builds)._
-
-Two monitors in `plugins/docsmith/monitors/monitors.json` arm on `/make-pdf` and stream signal into the session:
-
-| Monitor | Streams |
-|---|---|
-| `render-log` | tails `~/.docsmith/render.log` — one OK/FAIL line per build (`build.py` writes it) |
-| `toolchain-doctor` | runs `doctor.py` at build start to flag a missing/broken toolchain (pandoc/tectonic/rsvg/marp/Chrome) — the **environment** failure class, caught before a render fails — then tails `~/.docsmith/toolchain.log` |
-
-On a render failure, two commands form a detect → fix self-healing loop:
-
-| Skill | Role | Triggered when |
-|---|---|---|
-| `docsmith-render-triage` | Reads the captured stderr from a FAIL, decides content bug vs docsmith infra bug | A render fails |
-| `docsmith-fix-loop` | Fixes a confirmed skill/template/script finding, proves it with an eval + audit | Triage says it's an infra bug |
-
-**Two evals — different things, often confused.** One tests *invocation*, the other *output*:
-
-| Eval | Tests | Renders a PDF? | Eval set → harness |
-|---|---|---|---|
-| **Triggering** | does Claude *pick* `/make-pdf` for a prompt? | no | `dev/docsmith-workspace/trigger-evals.json` → skill-creator `run_loop.py` / `split_eval_set` (tunes the skill `description:`) |
-| **Output / render** | is the produced PDF *correct* — page size, ≥1 image, no `d2` leak, expected text? | yes | `dev/make-pdf-workspace/evals.json` → `grade.py` / `grade_run.py` (writes `grading.json`) |
-
-The **monitors** above are neither — they stream live build telemetry. See **[`CLAUDE.md`](CLAUDE.md)** for the full workflow and the optimizer gotchas (don't run the triggering eval in-place — the installed skill shadows it; it needs an isolated, authed, plugin-free config).
+_Maintaining a plugin in this repo? See **[CLAUDE.md](CLAUDE.md)** (monitors, evals, the release
+command, and the optimizer gotchas)._
 
 ## License
 
