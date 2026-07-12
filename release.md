@@ -6,6 +6,13 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## docsmith 0.9.6 — 2026-07-12
+Platform-aware install hints in `doctor.py`.
+- `doctor.py` always printed `brew install …` hints; on Linux (no Homebrew) those are dead ends.
+  Missing-tool hints now pick by `sys.platform`: apt commands on Linux (`poppler-utils`,
+  `librsvg2-bin`, …) and a pointer to the prebuilt release binary for tectonic, which apt
+  doesn't package. macOS output unchanged.
+
 ## docsmith 0.9.5 — 2026-06-25
 Dedupe `docsmith_home()` into a shared `scripts/_common.py`.
 - `build.py` and `setup_profile.py` each defined an identical `docsmith_home()`; extracted to
