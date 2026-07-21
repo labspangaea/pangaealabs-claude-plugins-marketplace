@@ -1,0 +1,27 @@
+/**
+ * Outbound adapter: publishes <%= Entity %> events to the broker. Serializes the
+ * domain entity to the snake_case wire shape (timestamps as ISO strings) and
+ * publishes it keyed by id.
+ */
+import type { Publisher } from '@peruri/ts-lib/pubsub';
+import type { <%= Entity %> } from '../../../domain/<%= EntityLower %>.ts';
+
+export class <%= Entity %>Publisher {
+  constructor(private readonly pub: Publisher) {}
+
+  async publish<%= Entity %>(topic: string, entity: <%= Entity %>): Promise<void> {
+    await this.pub.publish(topic, {
+      key: entity.id,
+      payload: JSON.stringify(to<%= Entity %>Event(entity)),
+    });
+  }
+}
+
+function to<%= Entity %>Event(o: <%= Entity %>): Record<string, unknown> {
+  return {
+    id: o.id,
+<% for (const f of Fields) { %>    <%= f.JSONName %>: <% if (baseType(f.GoType) === 'Date') { %>o.<%= f.Name %>.toISOString()<% } else { %>o.<%= f.Name %><% } %>,
+<% } %>    created_at: o.createdAt.toISOString(),
+    updated_at: o.updatedAt.toISOString(),
+  };
+}

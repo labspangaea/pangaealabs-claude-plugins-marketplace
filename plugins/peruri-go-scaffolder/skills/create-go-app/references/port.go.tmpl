@@ -1,0 +1,45 @@
+// Package port defines the interfaces (ports) that the domain declares.
+// Adapters implement these; services depend on them.
+//
+// ISP: Each interface is small (1-3 methods). Split by capability, not entity.
+//
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=repository.go -destination=../../../mocks/mock_repository.go -package=mocks
+package port
+
+import (
+	"context"
+
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/db/repo"
+
+	"{{.Module}}/internal/domain"
+)
+
+// {{.Entity}}Reader reads {{.EntityLower}}s from the data store.
+//
+// Three list variants on purpose: List{{.Entity}}s for cursor (keyset) pagination
+// — the default, scales to large datasets — List{{.Entity}}sOffset for raw
+// offset/limit when the API contract genuinely needs total-count or random-access
+// positioning, and List{{.Entity}}IDs for lightweight batch lookups that do not
+// need full entity payloads. Implementations should not silently delegate one to
+// another.
+type {{.Entity}}Reader interface {
+	Find{{.Entity}}(ctx context.Context, id string) (*domain.{{.Entity}}, error)
+	List{{.Entity}}s(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, *repo.CursorPage, error)
+	List{{.Entity}}sOffset(ctx context.Context, p repo.OffsetParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, int64, error)
+	List{{.Entity}}IDs(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]string, *repo.CursorPage, error)
+}
+
+// {{.Entity}}Writer persists {{.EntityLower}}s to the data store.
+type {{.Entity}}Writer interface {
+	Create{{.Entity}}(ctx context.Context, entity *domain.{{.Entity}}) error
+	Update{{.Entity}}(ctx context.Context, entity *domain.{{.Entity}}) error
+	Delete{{.Entity}}(ctx context.Context, id string) error
+}
+
+// {{.Entity}}Repository combines read and write access to {{.EntityLower}}s.
+// Use the narrower Reader/Writer interfaces in function signatures when
+// full access is not needed (ISP).
+type {{.Entity}}Repository interface {
+	{{.Entity}}Reader
+	{{.Entity}}Writer
+}

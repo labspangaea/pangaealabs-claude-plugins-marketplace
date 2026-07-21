@@ -1,0 +1,46 @@
+/**
+ * Dev seed: create the <%= EntityLower %>s table (idempotent) and insert 25
+ * deterministic rows for pagination testing. Run with `bun run src/cmd/seed.ts`.
+ */
+import { sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { openPostgres, closeDb } from '@peruri/ts-lib/db';
+import { loadConfig } from '../../config/config.ts';
+
+async function main(): Promise<void> {
+  const cfg = loadConfig();
+  const db = openPostgres(cfg.databaseDsn, { logLevel: 'silent' });
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS <%= EntityLower %>s (
+      id varchar(36) PRIMARY KEY,
+<% for (const f of Fields) { var bt = baseType(f.GoType); var ml = parseMaxLength(f.Validate); %>      <%= f.DBColumn %> <% if (bt === 'string') { %><%= ml > 0 ? `varchar(${ml})` : 'text' %><% } else if (bt === 'number') { %>double precision<% } else if (bt === 'boolean') { %>boolean<% } else if (bt === 'Date') { %>bigint<% } else { %>text<% } %><% if (!isNullable(f.GoType)) { %> NOT NULL<% } %>,
+<% } %>      created_at bigint NOT NULL,
+      updated_at bigint NOT NULL
+    )
+  `);
+
+  const now = Date.now();
+  for (let i = 0; i < 25; i++) {
+    const ts = now + i;
+    await db.execute(sql`
+      INSERT INTO <%= EntityLower %>s (id<% for (const f of Fields) { %>, <%= f.DBColumn %><% } %>, created_at, updated_at)
+      VALUES (
+        ${randomUUID()}<% for (const f of Fields) { %>,
+        ${<%= seedSqlValue(f.GoType) %>}<% } %>,
+        ${ts},
+        ${ts}
+      )
+    `);
+  }
+
+  // eslint-disable-next-line no-console
+  console.log('seeded 25 <%= EntityLower %>s');
+  await closeDb(db);
+}
+
+main().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('seed failed', err);
+  process.exit(1);
+});

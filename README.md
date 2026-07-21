@@ -52,6 +52,34 @@ doc (state machines → per-transition cases with downstream impact → matrix �
 
 ▸ **The pipeline, canonical schema & bundled scripts → [testcraft README](plugins/testcraft/README.md)**
 
+### `peruri-go-scaffolder` — scaffold production-ready Go services
+
+Generate a complete Go service (`api` · `consumer` · `publisher`) wired to `go-peruri-lib` in one
+pass — a hexagonal (ports & adapters) layout across **5 HTTP frameworks** (nethttp/gin/chi/mux/echo)
+× 3 brokers (kafka/rabbitmq/redis) × postgres/mysql/none × redis/memory/couchbase/none. `/create-go-app`
+orchestrates the per-layer skills and adds `cmd/`, `config/`, `go.mod`; API services ship OpenAPI 3.1 +
+Stoplight Elements UI via huma v2. Requires the `go-lsp` MCP server (gopls) for post-write diagnostics.
+
+```bash
+/plugin install peruri-go-scaffolder@pangaealabs-claude-plugins-marketplace
+```
+
+▸ **Frameworks, the config store, lib auto-sync & runtime integration tests → [peruri-go-scaffolder README](plugins/peruri-go-scaffolder/README.md)**
+
+### `peruri-elysia-scaffolder` — scaffold production-ready ElysiaJS/Bun services
+
+The TypeScript/Bun counterpart of `peruri-go-scaffolder`, wired to `@peruri/ts-lib`. Generates domain
+types, ports, Drizzle repositories (optional caching), services, and TypeBox HTTP controllers across
+Drizzle (postgres/mysql/none) × cache (redis/memory/couchbase/none) × broker (kafka/rabbitmq/redis).
+API services ship OpenAPI 3.1 + Scalar UI via `@elysiajs/openapi` and a tree-shaken `SERVICE_BACKEND=stub`
+mode so frontends can integrate against the contract before backend logic is finalized.
+
+```bash
+/plugin install peruri-elysia-scaffolder@pangaealabs-claude-plugins-marketplace
+```
+
+▸ **Parameters, stub mode, hexagonal architecture & the config store → [peruri-elysia-scaffolder README](plugins/peruri-elysia-scaffolder/README.md)**
+
 ---
 
 _Maintaining a plugin in this repo? See **[CLAUDE.md](CLAUDE.md)** (monitors, evals, the release

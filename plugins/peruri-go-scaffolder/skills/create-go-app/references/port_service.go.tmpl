@@ -1,0 +1,30 @@
+// {{.Entity}}Service is the use-case port. The handler depends on this
+// interface; both the production service ({{.Module}}/internal/service)
+// and the canned-response stub ({{.Module}}/internal/service/stub) implement
+// it so they are interchangeable at the composition root.
+//
+// Method names mirror the operations defined on the handler. Each method
+// represents one endpoint's business use case — the implementation may
+// orchestrate many repositories internally.
+//
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source={{.EntityLower}}_service.go -destination=../../../mocks/mock_{{.EntityLower}}_service.go -package=mocks
+package port
+
+import (
+	"context"
+
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/db/repo"
+
+	"{{.Module}}/internal/domain"
+)
+
+// {{.Entity}}Service is the contract the {{.EntityLower}} HTTP handler depends on.
+// Implementations must be safe for concurrent use.
+type {{.Entity}}Service interface {
+	Find(ctx context.Context, id string) (*domain.{{.Entity}}, error)
+	Create(ctx context.Context, entity *domain.{{.Entity}}) error
+	Update(ctx context.Context, entity *domain.{{.Entity}}) error
+	Delete(ctx context.Context, id string) error
+	List(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, *repo.CursorPage, error)
+	ListOffset(ctx context.Context, p repo.OffsetParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, int64, error)
+}

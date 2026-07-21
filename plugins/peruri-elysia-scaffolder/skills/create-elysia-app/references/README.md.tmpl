@@ -1,0 +1,138 @@
+# <%= Name %>
+
+<% var dbLabel = Database === 'drizzle-mysql' ? 'MySQL (Drizzle)' : Database === 'none' ? 'no database' : 'PostgreSQL (Drizzle)'; var cacheLabel = Cache === 'none' ? 'no cache' : Cache + ' cache'; -%>
+<%= Type === 'api' ? 'An' : 'A' %> <%= Type %> service on **ElysiaJS + Bun**, wired to `@peruri/ts-lib`.
+Stack: <%= Type === 'api' ? 'Elysia HTTP' : Broker + ' ' + Type %> · <%= dbLabel %> · <%= cacheLabel %> · TypeBox · hexagonal.
+
+> Scaffolded by `peruri-elysia-scaffolder`. The hexagonal **core** (domain / port /
+> service / repository / apperr) is framework-agnostic; the inbound adapter is a thin,
+> idiomatic Elysia <%= Type === 'api' ? 'controller' : Type === 'consumer' ? 'subscriber' : 'publisher' %>.
+
+## Quick start
+
+```bash
+bun install
+<% if (Type !== 'publisher') { %>docker compose up -d --wait                 # <%= Database === 'drizzle-mysql' ? 'mysql' : 'postgres' %><% if (Cache === 'redis') { %> + redis<% } %>
+SERVICE_BACKEND=real bun run src/cmd/seed.ts # seed 25 rows
+<% } %><% if (Type === 'api') { %>SERVICE_BACKEND=stub bun run src/index.ts    # canned responses, no DB needed — FE points at /docs
+SERVICE_BACKEND=real bun run src/index.ts    # full stack
+<% } else { %>bun run src/index.ts                         # connects to <%= Broker %> (KAFKA_BROKERS / RABBITMQ_URL / BROKER_REDIS_ADDR)
+<% } %>```
+
+<% if (Type === 'api') { %>- API base: `http://localhost:8080/api/v1/<%= EntityLower %>s`
+- OpenAPI + Scalar UI: `http://localhost:8080/docs` (set `DOCS_ENABLED=true`); spec at `/docs/json`
+- Health: `/healthz` · `/version`
+
+### Endpoints
+
+| Method | Path | |
+|---|---|---|
+| `GET` | `/api/v1/<%= EntityLower %>s` | list (cursor pagination: `?limit=&cursor=`) |
+| `GET` | `/api/v1/<%= EntityLower %>s/:id` | fetch one |
+| `POST` | `/api/v1/<%= EntityLower %>s` | create → `201` |
+| `PUT` | `/api/v1/<%= EntityLower %>s/:id` | update |
+| `DELETE` | `/api/v1/<%= EntityLower %>s/:id` | delete → `204` |
+<% } else if (Type === 'consumer') { %>- Consumes topic `<%= EntityLower %>s` from <%= Broker %> (group `<%= Name %>`).
+<% } else { %>- Publishes `<%= Entity %>` events to topic `<%= EntityLower %>s` on <%= Broker %>.
+<% } %>
+
+## Architecture (hexagonal)
+
+```
+<% if (Type === 'publisher') { -%>
+src/index.ts                                 composition root: creates the <%= Broker %> publisher + graceful stop
+config/config.ts                             env-driven config
+src/domain/<%= EntityLower %>.ts                          business types (camelCase)
+src/adapter/outbound/publisher/publisher.ts  <%= Entity %> event publisher (wraps pubsub.Publisher)
+<% } else { -%>
+src/index.ts                                 composition root: Elysia/runtime + ALS + middleware + graceful stop
+config/config.ts                             env-driven config
+src/domain/<%= EntityLower %>.ts                          business types (camelCase)
+src/port/<%= EntityLower %>.ts                            <%= Entity %>Repository interface (driven port)
+src/port/<%= EntityLower %>-service.ts                    <%= Entity %>Service interface (the use-case contract)
+src/service/<%= EntityLower %>.ts                         use-cases — `satisfies <%= Entity %>Service`
+<% if (Type === 'api') { -%>
+src/service/stub/<%= EntityLower %>.ts                    canned stub (tree-shaken from prod build)
+src/service/factory.ts                       SERVICE_BACKEND switch
+<% } -%>
+src/apperr/<%= EntityLower %>.ts                          error-code registry
+<% if (Database !== 'none') { -%>
+src/db/schema/<%= EntityLower %>.ts                       Drizzle table
+src/adapter/outbound/repository/<%= EntityLower %>.ts     Drizzle repo (BaseRepo/CachedRepo)
+<% } -%>
+<% if (Type === 'api') { -%>
+src/adapter/inbound/http/<%= EntityLower %>.ts            thin Elysia controller (routes)
+src/adapter/inbound/http/<%= EntityLower %>.dto.ts        TypeBox DTO + wire<->domain mapping
+<% } else { -%>
+src/adapter/inbound/subscriber/handler.ts    message handler (decode → service)
+<% } -%>
+<% } -%>
+```
+
+<% if (Type === 'publisher') { -%>
+**Dependency rule (DIP):** the publisher adapter depends on the `Publisher` port from
+`@peruri/ts-lib/pubsub` — the broker is swappable without touching call sites. Wiring
+happens only in `src/index.ts`.
+<% } else { -%>
+**Dependency rule (DIP):** `service/` imports `port/` only — never a concrete adapter.
+The inbound adapter and the repository depend *inward* on the ports; everything is
+substitutable (swap the cache for `nop()`, the repo for a fake, in tests).
+<% } -%>
+
+## Request → response flow
+<% if (Type === 'api') { %>
+```
+HTTP  GET /api/v1/<%= EntityLower %>s/:id
+  │
+  ▼  serverPlugin.onRequest         x-request-id (gen/echo) + AsyncLocalStorage(request logger)
+  ▼  Elysia route + TypeBox         validates `body` on POST/PUT  ──► fail = onError(VALIDATION) ─► 422
+  │
+  ▼  INBOUND  src/adapter/inbound/http/<%= EntityLower %>.ts   (thin Elysia controller, depends on <%= Entity %>Service)
+  │     return data( toResponse( await svc.find(id) ) )       toResponse: camel domain → snake wire, Date→ISO
+  ▼  SERVICE  src/service/<%= EntityLower %>.ts                 depends on <%= Entity %>Repository
+  ▼  OUTBOUND src/adapter/outbound/repository/<%= EntityLower %>.ts   map repo.ErrNotFound → ApiError
+<% if (Cache !== 'none') { -%>
+  │     CachedRepo.findById:  cache.get ─► <%= Cache %>   (miss) ─► BaseRepo ─► <%= Database === 'drizzle-mysql' ? 'MySQL' : 'Postgres' %>  ─► cache.set (ttl±jitter)
+<% } else { -%>
+  │     BaseRepo.findById ─► <%= Database === 'drizzle-mysql' ? 'MySQL' : 'Postgres' %>
+<% } -%>
+  ▼  controller returns { status:true, data:{…} }  ─► Elysia serializes to JSON
+  ▼  serverPlugin.onAfterResponse   log: http.method, url.path, status, duration_ms, request_id
+  │
+HTTP  200  {"status":true,"data":{"id":"…","<%= Fields[0] ? Fields[0].JSONName : 'field' %>":"…","created_at":"…"}}   + x-request-id
+
+errors:  throw new ApiError(...)  ─► serverPlugin.onError  ─► {"status":false,"error_code":"…"} @ its status
+         NOT_FOUND→404 · VALIDATION→422 · invalid cursor→400 · everything else→500 (+stack log)
+```
+<% } else if (Type === 'consumer') { %>
+```
+<%= Broker %> message  (topic "<%= EntityLower %>s", group "<%= Name %>")
+  │
+  ▼  consumer.subscribe → src/adapter/inbound/subscriber/handler.ts
+  │     decode JSON payload (snake wire) → <%= Entity %>Input
+  ▼  SERVICE  src/service/<%= EntityLower %>.ts            depends on <%= Entity %>Repository
+<% if (Database !== 'none') { -%>
+  ▼  OUTBOUND repository<% if (Cache !== 'none') { %> (CachedRepo + <%= Cache %>)<% } %> ─► <%= Database === 'drizzle-mysql' ? 'MySQL' : 'Postgres' %>
+<% } -%>
+  ▼  handler resolves ─► ACK        (handler throws ─► NACK / requeue)
+       in-flight handlers run to completion during shutdown (context.WithoutCancel analogue)
+```
+<% } else { %>
+```
+business event  →  <%= Entity %>Publisher.publish<%= Entity %>(topic, entity)
+  │     to<%= Entity %>Event(entity): camel domain → snake wire (Date → ISO)
+  ▼  pubsub.Publisher.publish(topic, { key: id, payload })  ─► <%= Broker %>   (at-least-once)
+```
+<% } %>
+## Configuration
+
+Env-driven (`config/config.ts`, Bun auto-loads `.env`). Key vars:
+`SERVICE_NAME`, `SERVICE_VERSION`<% if (Type === 'api') { %>, `PORT`, `DOCS_ENABLED`, `SERVICE_BACKEND` (stub|real)<% } %><% if (Database !== 'none') { %>, `DATABASE_DSN`, `DB_LOG_LEVEL`<% } %><% if (Cache === 'redis') { %>, `REDIS_ADDR`, `REDIS_PASSWORD`, `CACHE_TTL_MS`<% } %><% if (Type !== 'api') { %>, `<%= Broker === 'kafka' ? 'KAFKA_BROKERS' : Broker === 'rabbitmq' ? 'RABBITMQ_URL' : 'BROKER_REDIS_ADDR' %>`, `TOPIC`<% if (Type === 'consumer') { %>, `CONSUMER_GROUP`<% } %><% } %>.
+
+## Build
+
+```bash
+bunx tsc --noEmit                                            # type-check
+bun build ./src/index.ts --target bun --outdir dist         # production (stub tree-shaken out)
+<% if (Type === 'api') { %>bun build ./src/index.ts --target bun --define SERVICE_STUB=true --outdir dist-stub
+<% } %>```

@@ -1,0 +1,8 @@
+{
+  "name": "peruri-go-scaffolder",
+  "description": "Scaffold Go services (api, consumer, publisher) wired to go-peruri-lib. Includes 4 skills (create-go-app orchestrator + per-layer create-go-handler / create-go-repository / create-go-service) and 28 templates covering 5 HTTP frameworks (nethttp, gin, chi, mux, echo) x 3 brokers (kafka, rabbitmq, redis) x postgres/mysql/none x redis/memory/couchbase/none. API services ship OpenAPI 3.1 + Stoplight Elements UI via huma v2 (gated by DOCS_ENABLED) and a service-level canned-response stub (//go:build stub) so frontends can integrate against the contract before backend business logic is finalized.",
+  "version": "0.13.0",
+  "author": {
+    "name": "Harry"
+  }
+}

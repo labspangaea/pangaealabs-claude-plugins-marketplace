@@ -1,0 +1,109 @@
+//go:build stub
+// +build stub
+
+// Package stub provides a canned-response implementation of
+// port.{{.Entity}}Service used during FE/BE parallel development.
+//
+// All methods are stateless. Create/Update/Delete return nil but do not
+// persist anything — subsequent List/Find calls return the same fixed
+// sample data. This matches the Prism mock-server model: the frontend can
+// drive contract integration against shape-correct responses while the
+// real backend service is still being built.
+//
+// Production builds (`go build`, no `-tags=stub`) exclude this file
+// entirely; the stub package is never linked into the prod binary.
+package stub
+
+import (
+	"context"
+	"time"
+
+	"github.com/google/uuid"
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/db/repo"
+{{- if hasNullableField .Fields }}
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/ptr"
+{{- end }}
+
+	"{{.Module}}/internal/domain"
+	"{{.Module}}/internal/port"
+)
+
+// Compile-time assertion: *{{.Entity}} satisfies port.{{.Entity}}Service.
+var _ port.{{.Entity}}Service = (*{{.Entity}})(nil)
+
+// {{.Entity}} is the canned-response {{.EntityLower}} service. Constructed
+// without any dependencies — no repo, no DB, no cache. Safe for concurrent
+// use; all state is read-only after package init.
+type {{.Entity}} struct{}
+
+// New{{.Entity}} constructs the stub {{.EntityLower}} service.
+func New{{.Entity}}() *{{.Entity}} {
+	return &{{.Entity}}{}
+}
+
+// canned{{.Entity}}s is the fixed sample set returned by List/ListOffset.
+// Built once at package init using the same seedValue conventions as
+// cmd/seed/main.go so the response shape matches what production will return.
+var canned{{.Entity}}s = []*domain.{{.Entity}}{
+{{- range $i, $_ := (seq 25) }}
+	{
+		ID: "{{$.EntityLower}}-stub-{{$i}}",
+{{- range $.Fields }}
+		{{.Name}}: {{seedValue .GoType $i}},
+{{- end }}
+		CreatedAt: time.Now().UTC().Add(-time.Duration({{$i}}) * time.Hour),
+		UpdatedAt: time.Now().UTC().Add(-time.Duration({{$i}}) * time.Hour),
+	},
+{{- end }}
+}
+
+// Find returns a canned {{.EntityLower}} echoing the requested id so the
+// frontend sees its id round-trip. Always succeeds — never returns NotFound.
+func (s *{{.Entity}}) Find(ctx context.Context, id string) (*domain.{{.Entity}}, error) {
+	out := *canned{{.Entity}}s[0]
+	out.ID = id
+	return &out, nil
+}
+
+// Create stamps ID and timestamps on the input but does not persist anything.
+// Matches the real service's pre-write field initialization so the entity
+// returned to the handler looks production-shaped.
+func (s *{{.Entity}}) Create(ctx context.Context, entity *domain.{{.Entity}}) error {
+	if entity.ID == "" {
+		entity.ID = uuid.NewString()
+	}
+	now := time.Now().UTC()
+	if entity.CreatedAt.IsZero() {
+		entity.CreatedAt = now
+	}
+	if entity.UpdatedAt.IsZero() {
+		entity.UpdatedAt = now
+	}
+	return nil
+}
+
+// Update touches UpdatedAt on the input but does not persist anything.
+func (s *{{.Entity}}) Update(ctx context.Context, entity *domain.{{.Entity}}) error {
+	entity.UpdatedAt = time.Now().UTC()
+	return nil
+}
+
+// Delete always succeeds.
+func (s *{{.Entity}}) Delete(ctx context.Context, id string) error {
+	return nil
+}
+
+// List returns the fixed sample set with an empty cursor page (no further
+// pages). Filters are ignored — the stub doesn't model filtering semantics.
+func (s *{{.Entity}}) List(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, *repo.CursorPage, error) {
+	return canned{{.Entity}}s, &repo.CursorPage{
+		NextCursor: "",
+		HasNext:    false,
+		Limit:      p.Limit,
+	}, nil
+}
+
+// ListOffset returns the fixed sample set with total = len(canned).
+func (s *{{.Entity}}) ListOffset(ctx context.Context, p repo.OffsetParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, int64, error) {
+	return canned{{.Entity}}s, int64(len(canned{{.Entity}}s)), nil
+}

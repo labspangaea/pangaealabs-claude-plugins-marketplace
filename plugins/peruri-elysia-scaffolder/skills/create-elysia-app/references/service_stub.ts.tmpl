@@ -1,0 +1,48 @@
+/**
+ * Canned-response stub for FE/BE parallel development. Stateless: create/update
+ * echo the input without persisting; list/find return deterministic fixtures
+ * (ids "<%= EntityLower %>-stub-<i>") so the frontend can hardcode test data.
+ *
+ * In the production build this module is excluded from the binary — the factory's
+ * stub branch is gated by the SERVICE_STUB compile-time constant and tree-shaken
+ * out by `bun build` when it is not defined.
+ */
+import type { <%= Entity %>, <%= Entity %>Input } from '../../domain/<%= EntityLower %>.ts';
+import type { <%= Entity %>Service } from '../../port/<%= EntityLower %>-service.ts';
+import type { CursorParams, CursorPage } from '@peruri/ts-lib/db/repo';
+
+const EPOCH = new Date(0);
+const STUB_COUNT = 5;
+
+function canned<%= Entity %>(i: number): <%= Entity %> {
+  return {
+    id: `<%= EntityLower %>-stub-${i}`,
+<% for (const f of Fields) { %>    <%= f.Name %>: <%= stubValue(f.GoType) %>,
+<% } %>    createdAt: EPOCH,
+    updatedAt: EPOCH,
+  };
+}
+
+const canned: <%= Entity %>[] = Array.from({ length: STUB_COUNT }, (_, i) => canned<%= Entity %>(i));
+
+export class <%= Entity %>ServiceStub implements <%= Entity %>Service {
+  find(id: string): Promise<<%= Entity %>> {
+    return Promise.resolve({ ...canned<%= Entity %>(0), id });
+  }
+
+  create(input: <%= Entity %>Input): Promise<<%= Entity %>> {
+    return Promise.resolve({ id: '<%= EntityLower %>-stub-new', ...input, createdAt: EPOCH, updatedAt: EPOCH });
+  }
+
+  update(id: string, input: <%= Entity %>Input): Promise<<%= Entity %>> {
+    return Promise.resolve({ id, ...input, createdAt: EPOCH, updatedAt: EPOCH });
+  }
+
+  remove(_id: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  list(params: CursorParams): Promise<{ rows: <%= Entity %>[]; page: CursorPage }> {
+    return Promise.resolve({ rows: canned, page: { has_next: false, limit: params.limit } });
+  }
+}

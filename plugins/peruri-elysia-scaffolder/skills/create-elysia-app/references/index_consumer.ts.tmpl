@@ -1,0 +1,102 @@
+/**
+ * Composition root for the <%= Name %> consumer.
+ *
+ * Wires: config -> logger -> <% if (Database !== 'none') { %><%= Database === 'drizzle-mysql' ? 'MySQL' : 'Postgres' %> -> <% } %><% if (Cache !== 'none') { %><%= Cache %> cache -> <% } %>repository -> service ->
+ * <%= Broker %> consumer -> subscriber handler -> graceful shutdown.
+ */
+import { createLogger } from '@peruri/ts-lib/logger';
+<% if (Broker === 'kafka') { %>import { Kafka } from 'kafkajs';
+import { newKafkaConsumer } from '@peruri/ts-lib/pubsub/kafka';
+<% } else if (Broker === 'rabbitmq') { %>import { connect as amqpConnect } from 'amqplib';
+import { newRabbitMQConsumer } from '@peruri/ts-lib/pubsub/rabbitmq';
+<% } else { %>import { newRedisConsumer } from '@peruri/ts-lib/pubsub/redis';
+<% } %><% if (Cache === 'redis' || Broker === 'redis') { %>import { Redis } from 'ioredis';
+<% } %><% if (Cache === 'redis') { %>import { createRedisCache } from '@peruri/ts-lib/cache';
+<% } else if (Cache === 'memory') { %>import { createMemoryCache } from '@peruri/ts-lib/cache';
+<% } else if (Cache === 'couchbase') { %>import { connect as cbConnect } from 'couchbase';
+import { createCouchbaseCache } from '@peruri/ts-lib/cache';
+<% } %><% if (Database === 'drizzle-mysql') { %>import { openMysql, closeDb } from '@peruri/ts-lib/db';
+<% } else if (Database !== 'none') { %>import { openPostgres, closeDb } from '@peruri/ts-lib/db';
+<% } %>import { loadConfig } from '../config/config.ts';
+<% if (Cache !== 'none') { %>import { newCached<%= Entity %>Repository, type <%= Entity %>Row } from './adapter/outbound/repository/<%= EntityLower %>.ts';
+<% } else if (Database !== 'none') { %>import { new<%= Entity %>Repository } from './adapter/outbound/repository/<%= EntityLower %>.ts';
+<% } %>import { <%= Entity %>ServiceImpl } from './service/<%= EntityLower %>.ts';
+import { <%= Entity %>Subscriber } from './adapter/inbound/subscriber/handler.ts';
+import './apperr/<%= EntityLower %>.ts';
+
+async function main(): Promise<void> {
+  const cfg = loadConfig();
+  const logger = createLogger({
+    serviceName: cfg.serviceName,
+    version: cfg.version,
+    instanceId: cfg.instanceId,
+  });
+
+<% if (Database === 'drizzle-mysql') { %>  const db = openMysql(cfg.databaseDsn, { logLevel: cfg.dbLogLevel });
+<% } else if (Database !== 'none') { %>  const db = openPostgres(cfg.databaseDsn, { logLevel: cfg.dbLogLevel });
+<% } %><% if (Cache === 'redis') { %>  const [ch, cp] = cfg.redisAddr.split(':');
+  const cacheRedis = new Redis({
+    host: ch ?? 'localhost',
+    port: Number(cp ?? '6379'),
+    password: cfg.redisPassword || undefined,
+    db: cfg.redisDb,
+    lazyConnect: true,
+    // Skip the readiness INFO probe: on a cold redis it can race ahead of AUTH
+    // and surface a spurious NOAUTH, wedging the connection.
+    enableReadyCheck: false,
+  });
+  cacheRedis.on('error', (err: Error) => logger.warn({ error: err.message }, 'redis cache connection error'));
+  const cache = createRedisCache<<%= Entity %>Row>(cacheRedis);
+  const repo = newCached<%= Entity %>Repository(db, cache, cfg.cacheTtlMs, cfg.cacheJitterFactor);
+<% } else if (Cache === 'memory') { %>  const cache = createMemoryCache<<%= Entity %>Row>({ capacity: cfg.memoryCacheCapacity });
+  const repo = newCached<%= Entity %>Repository(db, cache, cfg.cacheTtlMs, cfg.cacheJitterFactor);
+<% } else if (Cache === 'couchbase') { %>  const cluster = await cbConnect(cfg.couchbaseUrl, {
+    username: cfg.couchbaseUsername,
+    password: cfg.couchbasePassword,
+  });
+  const cache = createCouchbaseCache<<%= Entity %>Row>(
+    cluster.bucket(cfg.couchbaseBucket).defaultCollection(),
+  );
+  const repo = newCached<%= Entity %>Repository(db, cache, cfg.cacheTtlMs, cfg.cacheJitterFactor);
+<% } else { %>  const repo = new<%= Entity %>Repository(db);
+<% } %>  const svc = new <%= Entity %>ServiceImpl(repo);
+  const subscriber = new <%= Entity %>Subscriber(svc);
+
+<% if (Broker === 'kafka') { %>  const kafka = new Kafka({ clientId: cfg.serviceName, brokers: cfg.kafkaBrokers });
+  const consumer = newKafkaConsumer(kafka);
+<% } else if (Broker === 'rabbitmq') { %>  const conn = await amqpConnect(cfg.rabbitmqUrl);
+  const consumer = newRabbitMQConsumer(conn, cfg.exchange);
+<% } else { %>  const [bh, bp] = cfg.brokerRedisAddr.split(':');
+  const brokerRedis = new Redis({
+    host: bh ?? 'localhost',
+    port: Number(bp ?? '6379'),
+    password: cfg.brokerRedisPassword || undefined,
+    db: cfg.brokerRedisDb,
+  });
+  const consumer = newRedisConsumer(brokerRedis);
+<% } %>
+  logger.info({ topic: cfg.topic, group: cfg.consumerGroup }, 'consumer starting');
+  const running = consumer.subscribe(cfg.topic, cfg.consumerGroup, subscriber.handle);
+
+  let shuttingDown = false;
+  const shutdown = async (signal: string): Promise<void> => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info({ signal }, 'shutdown signal received');
+    await consumer.close();
+    await running.catch(() => {});
+<% if (Database !== 'none') { %>    await closeDb(db);
+<% } %>    logger.info('consumer shutdown success');
+    process.exit(0);
+  };
+  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+
+  await running;
+}
+
+main().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('fatal: failed to start <%= Name %> consumer', err);
+  process.exit(1);
+});

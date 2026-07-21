@@ -1,0 +1,150 @@
+// Package service implements application use cases. It depends only on port
+// interfaces — never on concrete adapter implementations (DIP).
+package service
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/google/uuid"
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/db/repo"
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/logger"
+
+	"{{.Module}}/internal/domain"
+	"{{.Module}}/internal/port"
+)
+
+// {{.Entity}} orchestrates {{.EntityLower}} business operations.
+type {{.Entity}} struct {
+	repo port.{{.Entity}}Repository
+}
+
+// Compile-time assertion: *{{.Entity}} satisfies port.{{.Entity}}Service.
+// Failing this at build time is cheaper than discovering a missing method
+// when the composition root tries to assign the factory's return value.
+var _ port.{{.Entity}}Service = (*{{.Entity}})(nil)
+
+// New creates a {{.Entity}} service. All dependencies are injected via port interfaces.
+func New(repo port.{{.Entity}}Repository) *{{.Entity}} {
+	return &{{.Entity}}{repo: repo}
+}
+
+// Find retrieves a {{.EntityLower}} by ID.
+func (s *{{.Entity}}) Find(ctx context.Context, id string) (*domain.{{.Entity}}, error) {
+	l := logger.FromContext(ctx)
+	l.Info("finding {{.EntityLower}}", "id", id)
+
+	entity, err := s.repo.Find{{.Entity}}(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("service: find {{.EntityLower}} %s: %w", id, err)
+	}
+	return entity, nil
+}
+
+// Create persists a new {{.EntityLower}}.
+//
+// If the caller did not set entity.ID, a fresh UUIDv4 is generated. Callers
+// that need idempotency keys or externally-issued IDs may set entity.ID
+// before calling — that value is preserved as-is.
+//
+// CreatedAt / UpdatedAt are set here when zero so the entity returned to the
+// handler matches what's persisted. Without this, responses would show
+// "0001-01-01T00:00:00Z" because the handler returns the input entity (no
+// post-insert reload) and the repository's UnixMilli() call on a zero time
+// produces a huge-negative DB value rather than triggering autoCreateTime.
+func (s *{{.Entity}}) Create(ctx context.Context, entity *domain.{{.Entity}}) error {
+	l := logger.FromContext(ctx)
+	if entity.ID == "" {
+		entity.ID = uuid.NewString()
+	}
+	now := time.Now().UTC()
+	if entity.CreatedAt.IsZero() {
+		entity.CreatedAt = now
+	}
+	if entity.UpdatedAt.IsZero() {
+		entity.UpdatedAt = now
+	}
+	l.Info("creating {{.EntityLower}}", "id", entity.ID)
+
+	if err := s.repo.Create{{.Entity}}(ctx, entity); err != nil {
+		return fmt.Errorf("service: create {{.EntityLower}}: %w", err)
+	}
+	return nil
+}
+
+// List returns a cursor-paginated page of {{.EntityLower}}s matching the given filters.
+func (s *{{.Entity}}) List(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, *repo.CursorPage, error) {
+	entities, page, err := s.repo.List{{.Entity}}s(ctx, p, filters...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("service: list {{.EntityLower}}s: %w", err)
+	}
+	return entities, page, nil
+}
+
+// ListOffset returns an offset/limit-paginated page of {{.EntityLower}}s matching filters,
+// along with the total row count. Prefer List for hot paths — keyset cursor pagination
+// scales without the OFFSET-N performance cliff. Use ListOffset when the client genuinely
+// needs total-count semantics or random-access positioning.
+func (s *{{.Entity}}) ListOffset(ctx context.Context, p repo.OffsetParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, int64, error) {
+	entities, total, err := s.repo.List{{.Entity}}sOffset(ctx, p, filters...)
+	if err != nil {
+		return nil, 0, fmt.Errorf("service: list-offset {{.EntityLower}}s: %w", err)
+	}
+	return entities, total, nil
+}
+
+// ListIDs returns cursor-paginated primary keys matching filters.
+// Prefer this over List when callers only need IDs — avoids transferring full
+// entity payloads for batch operations or event-driven fan-out.
+func (s *{{.Entity}}) ListIDs(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]string, *repo.CursorPage, error) {
+	ids, page, err := s.repo.List{{.Entity}}IDs(ctx, p, filters...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("service: list {{.EntityLower}} ids: %w", err)
+	}
+	return ids, page, nil
+}
+
+// Update overwrites the persisted {{.EntityLower}}.
+//
+// The Find call before the write preserves CreatedAt (immutable across
+// updates — REST PUT replaces the body, not the original creation
+// timestamp) and surfaces apperr.Err{{.Entity}}NotFound when the row is
+// missing so PUT-on-nothing returns 404. UpdatedAt is stamped here so the
+// entity returned to the handler reflects what's now persisted, without a
+// post-write reload.
+func (s *{{.Entity}}) Update(ctx context.Context, entity *domain.{{.Entity}}) error {
+	l := logger.FromContext(ctx)
+	l.Info("updating {{.EntityLower}}", "id", entity.ID)
+
+	existing, err := s.repo.Find{{.Entity}}(ctx, entity.ID)
+	if err != nil {
+		return fmt.Errorf("service: update {{.EntityLower}} %s: %w", entity.ID, err)
+	}
+	entity.CreatedAt = existing.CreatedAt
+	entity.UpdatedAt = time.Now().UTC()
+
+	if err := s.repo.Update{{.Entity}}(ctx, entity); err != nil {
+		return fmt.Errorf("service: update {{.EntityLower}} %s: %w", entity.ID, err)
+	}
+	return nil
+}
+
+// Delete removes a {{.EntityLower}} by ID.
+func (s *{{.Entity}}) Delete(ctx context.Context, id string) error {
+	l := logger.FromContext(ctx)
+	l.Info("deleting {{.EntityLower}}", "id", id)
+	if err := s.repo.Delete{{.Entity}}(ctx, id); err != nil {
+		return fmt.Errorf("service: delete {{.EntityLower}} %s: %w", id, err)
+	}
+	return nil
+}
+
+// HandleEvent processes an inbound pub/sub event for the {{.EntityLower}}.
+// Used by consumer-type services. Stub by default — implement service-specific
+// handling at scaffold time (e.g. upsert, status transition, dispatch).
+func (s *{{.Entity}}) HandleEvent(ctx context.Context, event any) error {
+	l := logger.FromContext(ctx)
+	l.Info("handling {{.EntityLower}} event", "event", fmt.Sprintf("%+v", event))
+	return nil
+}

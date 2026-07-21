@@ -1,0 +1,264 @@
+// Package main is the composition root for the {{.Name}} API service.
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/danielgtaylor/huma/v2"
+	humaecho "github.com/danielgtaylor/huma/v2/adapters/humaecho"
+	"github.com/labstack/echo/v4"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/apierr"
+{{- if ne .Database "none" }}
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/db"
+{{- end }}
+	humares "sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/httpx/humaresponse"
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/httpx/server"
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/logger"
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/telemetry"
+{{- if eq .Database "gorm-postgres" }}
+	"gorm.io/driver/postgres"
+	gormlogger "gorm.io/gorm/logger"
+{{- else if eq .Database "gorm-mysql" }}
+	"gorm.io/driver/mysql"
+	gormlogger "gorm.io/gorm/logger"
+{{- end }}
+{{- if ne .Cache "none" }}
+	dbrepo "sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/db/repo"
+{{- end }}
+{{- if eq .Cache "redis" }}
+	goredis "github.com/redis/go-redis/v9"
+	cacheredis "sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/cache/redis"
+{{- end }}
+{{- if eq .Cache "memory" }}
+	cachemem "sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/cache/memory"
+{{- end }}
+{{- if eq .Cache "couchbase" }}
+	"github.com/couchbase/gocb/v2"
+	cachecb "sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/cache/couchbase"
+{{- end }}
+
+	"{{.Module}}/config"
+	"{{.Module}}/internal/adapter/inbound/httphandler"
+{{- if ne .Database "none" }}
+	"{{.Module}}/internal/adapter/outbound/repository"
+{{- end }}
+	"{{.Module}}/internal/service"
+)
+
+func main() {
+	cfg := config.Load()
+	log := logger.New(logger.WithServiceInfo(cfg.ServiceName, cfg.Version, cfg.InstanceID))
+	ctx := logger.WithLogger(context.Background(), log)
+
+	otelOpts := []telemetry.Option{
+		telemetry.WithEndpoint(cfg.OTelEndpoint),
+		telemetry.WithProtocol(cfg.OTelProtocol),
+		telemetry.WithServiceInfo(cfg.ServiceName, cfg.Version, cfg.InstanceID),
+	}
+	if cfg.OTelInsecure {
+		otelOpts = append(otelOpts, telemetry.WithInsecure())
+	}
+	if len(cfg.OTelHeaders) > 0 {
+		otelOpts = append(otelOpts, telemetry.WithHeaders(cfg.OTelHeaders))
+	}
+	_, lp, otelShutdown, err := telemetry.Setup(ctx, otelOpts...)
+	if err != nil {
+		log.Warn("telemetry setup failed, continuing without tracing", slog.Any(logger.KeyError, err))
+	} else {
+		defer otelShutdown(ctx)
+	}
+
+	// Optional: stream high-severity slog records to OTLP via the OTel log bridge.
+	if err == nil && cfg.OTelLogBridgeEnabled && lp != nil {
+		log = logger.New(
+			logger.WithServiceInfo(cfg.ServiceName, cfg.Version, cfg.InstanceID),
+			logger.WithOTelBridge(lp, cfg.OTelLogMinSeverity),
+		)
+		ctx = logger.WithLogger(ctx, log)
+	}
+
+{{- if ne .Database "none" }}
+
+	var dbLogLevel gormlogger.LogLevel
+	switch cfg.DBLogLevel {
+	case "info":   dbLogLevel = gormlogger.Info
+	case "error":  dbLogLevel = gormlogger.Error
+	case "silent": dbLogLevel = gormlogger.Silent
+	default:       dbLogLevel = gormlogger.Warn
+	}
+
+	gormDB, err := db.Open(
+{{- if eq .Database "gorm-postgres" }}postgres.Open(cfg.DatabaseDSN){{else if eq .Database "gorm-mysql" }}mysql.Open(cfg.DatabaseDSN){{end}},
+		db.WithMaxOpenConns(cfg.DBMaxOpen),
+		db.WithSlowThreshold(cfg.DBSlowThreshold),
+		db.WithLogLevel(dbLogLevel),
+	)
+	if err != nil {
+		log.Error("db open failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+	defer db.Close(gormDB)
+
+	// Auto-migrate the schema. Idempotent — safe to call on every startup.
+	// For production environments using explicit migration tools (Atlas, Goose,
+	// dbmate), remove this block and run migrations out-of-band before deploy.
+	if err := gormDB.AutoMigrate(&repository.{{.Entity}}Model{}); err != nil {
+		log.Error("schema migration failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+{{- end }}
+
+{{- if eq .Cache "redis" }}
+
+	redisClient := goredis.NewClient(&goredis.Options{
+		Addr:     cfg.RedisAddr,
+		Password: cfg.RedisPassword,
+		DB:       cfg.RedisDB,
+	})
+	defer redisClient.Close()
+	if err := redisClient.Ping(ctx).Err(); err != nil {
+		log.Error("redis connection failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+	{{.EntityLower}}Cache := cacheredis.New[*repository.{{.Entity}}Model](redisClient)
+{{- else if eq .Cache "memory" }}
+
+	{{.EntityLower}}Cache := cachemem.New[*repository.{{.Entity}}Model](
+		cachemem.WithCapacity[*repository.{{.Entity}}Model](cfg.MemoryCacheCapacity),
+	)
+{{- else if eq .Cache "couchbase" }}
+
+	cluster, err := gocb.Connect(cfg.CouchbaseURL, gocb.ClusterOptions{
+		Username: cfg.CouchbaseUsername,
+		Password: cfg.CouchbasePassword,
+	})
+	if err != nil {
+		log.Error("couchbase connect failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+	defer cluster.Close(nil)
+	col := cluster.Bucket(cfg.CouchbaseBucket).DefaultCollection()
+	{{.EntityLower}}Cache := cachecb.New[*repository.{{.Entity}}Model](col)
+{{- end }}
+
+{{- if ne .Database "none" }}
+
+{{- if ne .Cache "none" }}
+	{{.EntityLower}}Repo := repository.NewCached(gormDB, {{.EntityLower}}Cache,
+		dbrepo.WithTTL(cfg.CacheTTL),
+		dbrepo.WithJitter(cfg.CacheJitterFactor),
+		dbrepo.WithTwoPhaseList(),
+	)
+{{- else }}
+	{{.EntityLower}}Repo := repository.New(gormDB)
+{{- end }}
+	svc := service.New{{.Entity}}Service(cfg, {{.EntityLower}}Repo)
+{{- else }}
+
+	svc := service.New{{.Entity}}Service(cfg, nil)
+{{- end }}
+
+	router := echo.New()
+
+	// huma config — docs gated by DOCS_ENABLED. Setting the paths to ""
+	// unregisters /docs and /openapi.* so they 404 in production builds.
+	humaConfig := huma.DefaultConfig(cfg.ServiceName, cfg.Version)
+	if !cfg.DocsEnabled {
+		humaConfig.DocsPath = ""
+		humaConfig.OpenAPIPath = ""
+		humaConfig.SchemasPath = ""
+	}
+
+	// Override huma's error factory so error responses ride the same JSON
+	// envelope as success responses ({status, message, error_detail,
+	// error_code}). Domain errors that implement huma.StatusError
+	// (CodeErr/CodeErrEnum) keep their HTTP status and code; everything
+	// else falls back to the status huma chose with a generic ERR<N>000 code.
+	huma.NewError = func(status int, msg string, errs ...error) huma.StatusError {
+		detail := ""
+		for i, e := range errs {
+			if i > 0 {
+				detail += "; "
+			}
+			detail += e.Error()
+		}
+		return humares.NewError(apierr.CodeErr{
+			StatusCode: status,
+			Message:    msg,
+			Detail:     detail,
+			Code:       fmt.Sprintf("ERR%d000", status),
+		})
+	}
+
+	api := humaecho.New(router, humaConfig)
+	h := httphandler.New{{.Entity}}(svc)
+	h.RegisterRoutes(api)
+	httphandler.NewHealth(cfg.Version).RegisterRoutes(api)
+
+	handler := server.Chain(router,
+		server.Recover(log),
+		server.RequestID(),
+		otelhttp.NewMiddleware(cfg.ServiceName),
+		server.Logging(log, server.WithBody(cfg.LogBody)),
+	)
+
+	srv := &http.Server{
+		Addr:         cfg.HTTPAddr,
+		Handler:      handler,
+		ReadTimeout:  cfg.HTTPReadTimeout,
+		WriteTimeout: cfg.HTTPWriteTimeout,
+		IdleTimeout:  cfg.HTTPIdleTimeout,
+	}
+
+	fatalErr := make(chan error, 1)
+	go func() {
+		log.Info("http server starting", slog.String("addr", cfg.HTTPAddr))
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			fatalErr <- err
+		}
+	}()
+
+	// Wait for either a shutdown signal or a fatal server error. Both paths
+	// fall through to the deferred cleanup (DB close, telemetry flush, etc.) —
+	// using os.Exit(1) here would skip those defers.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	select {
+	case <-ctx.Done():
+		log.Info("shutdown signal received")
+	case err := <-fatalErr:
+		log.Error("http server error", slog.Any(logger.KeyError, err))
+	}
+
+	// Graceful shutdown: stop accepting new requests, wait for in-flight up to
+	// HTTPShutdownTimeout. Race the shutdown against the timeout so we get an
+	// explicit log line if the timeout wins (long-running handlers, leaked
+	// goroutines, etc.) — without this, a stuck Shutdown call is silent.
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.HTTPShutdownTimeout)
+	defer cancel()
+
+	shutdownErr := make(chan error, 1)
+	go func() {
+		shutdownErr <- srv.Shutdown(shutdownCtx)
+	}()
+
+	select {
+	case err := <-shutdownErr:
+		if err != nil {
+			log.Error("server shutdown error", slog.Any(logger.KeyError, err))
+		} else {
+			log.Info("server shutdown success")
+		}
+	case <-shutdownCtx.Done():
+		log.Warn("graceful shutdown timeout reached")
+	}
+}

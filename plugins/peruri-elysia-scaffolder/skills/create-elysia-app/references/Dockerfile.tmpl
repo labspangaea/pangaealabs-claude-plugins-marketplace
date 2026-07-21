@@ -1,0 +1,23 @@
+# Multi-stage Bun image for <%= Name %>.
+#
+# NOTE: the @peruri/ts-lib dependency value above comes from the scaffolder config
+# store (~/.peruri-elysia-scaffolder/config.json → tsLibDependency, default
+# `file:../peruri-ts-lib` for local-workspace dev). For a real image build, set
+# tsLibDependency to the GitLab-private-registry version (e.g. "^0.1.0") so
+# `bun install` resolves it inside the build context, and provide the registry auth
+# via a bunfig.toml / .npmrc secret.
+FROM oven/bun:1 AS base
+WORKDIR /app
+
+# Dependencies (cached layer).
+COPY package.json ./
+COPY bun.lock* ./
+RUN bun install --production || bun install
+
+# Source.
+COPY . .
+
+ENV NODE_ENV=production
+<% if (Type === 'api') { %>EXPOSE 8080
+<% } %>USER bun
+CMD ["bun", "run", "src/index.ts"]

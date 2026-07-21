@@ -1,0 +1,21 @@
+/**
+ * <%= Entity %>Repository is the driven port (DIP): the domain declares the
+ * persistence contract; the outbound adapter implements it. Domain types only.
+ */
+import type { <%= Entity %> } from '../domain/<%= EntityLower %>.ts';
+import type { CursorParams, CursorPage, Filter } from '@peruri/ts-lib/db/repo';
+
+export interface <%= Entity %>Repository {
+  find<%= Entity %>(id: string): Promise<<%= Entity %>>;
+  create<%= Entity %>(entity: <%= Entity %>): Promise<void>;
+  update<%= Entity %>(entity: <%= Entity %>): Promise<void>;
+  delete<%= Entity %>(id: string): Promise<void>;
+  list<%= Entity %>s(
+    params: CursorParams,
+    ...filters: Filter[]
+  ): Promise<{ rows: <%= Entity %>[]; page: CursorPage }>;
+  list<%= Entity %>Ids(
+    params: CursorParams,
+    ...filters: Filter[]
+  ): Promise<{ ids: string[]; page: CursorPage }>;
+}

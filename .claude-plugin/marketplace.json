@@ -9,14 +9,43 @@
     {
       "name": "docsmith",
       "source": "./plugins/docsmith",
-      "skills": ["./skills/make-pdf"],
+      "skills": [
+        "./skills/make-pdf"
+      ],
       "description": "Turn markdown into professional, on-brand PDFs across design-system templates. Ships handbook (LaTeX book via pandoc+tectonic) plus corporate-deck, claudecode-deck, kawaii-storybook, and concept-deck (ByteByteGo-style SVG-first tech-doc) (16:9 slides via marp-cli). The make-pdf skill fans one source out to several PDFs via parallel subagents; every visual is hand-written raw SVG embedded inline (no d2, Mermaid, or image generation). Layered config (global profile + per-template overrides + per-doc front-matter) under ~/.docsmith/."
     },
     {
       "name": "testcraft",
       "source": "./plugins/testcraft",
-      "skills": ["./skills/testcase-importer", "./skills/userflow-to-testcases"],
+      "skills": [
+        "./skills/testcase-importer",
+        "./skills/userflow-to-testcases"
+      ],
       "description": "Turn an app's user flows into a complete, importer-ready test-case suite and an offline HTML console. Two chained skills: userflow-to-testcases authors cases FROM a flow doc (PDF/markdown/spec/screenshots) by modeling actor+resource state machines — per-transition cases with cross-flow downstream impact, an actor x resource matrix, end-to-end journeys, and a security/abuse (VAPT) pass — and testcase-importer normalizes any existing case data (xls/xlsx, CSV/TSV, PDF tables, pasted/markdown) into the canonical CSV and renders a single-file, filterable, offline console. Adds two subagents (testcase-architect, testcase-vapt-auditor) for heavy/parallel authoring and the adversarial pass. Every case is tagged Type (POS/NEG/VAPT) x Outcome (TN/TP/FP/FN!) with a dual-scale priority and one-line severity reasoning."
+    },
+    {
+      "name": "peruri-go-scaffolder",
+      "source": "./plugins/peruri-go-scaffolder",
+      "skills": [
+        "./skills/create-go-app",
+        "./skills/create-go-repository",
+        "./skills/create-go-service",
+        "./skills/create-go-handler",
+        "./skills/integration-test-go-app"
+      ],
+      "description": "Scaffold production-ready Go services (api, consumer, publisher) wired to go-peruri-lib. 5 skills — create-go-app orchestrator + per-layer create-go-repository / create-go-service / create-go-handler + integration-test-go-app runtime tester — across 5 HTTP frameworks (nethttp/gin/chi/mux/echo) × 3 brokers (kafka/rabbitmq/redis) × postgres/mysql/none × redis/memory/couchbase/none. API services ship OpenAPI 3.1 + Stoplight Elements UI via huma v2. Hexagonal (ports & adapters) architecture. Requires the go-lsp MCP server (gopls) for post-write diagnostics."
+    },
+    {
+      "name": "peruri-elysia-scaffolder",
+      "source": "./plugins/peruri-elysia-scaffolder",
+      "skills": [
+        "./skills/create-elysia-app",
+        "./skills/create-elysia-repository",
+        "./skills/create-elysia-service",
+        "./skills/create-elysia-handler",
+        "./skills/integration-test-elysia-app"
+      ],
+      "description": "Scaffold ElysiaJS/Bun services (api, consumer, publisher) wired to @peruri/ts-lib (the TypeScript port of go-peruri-lib). 5 skills — create-elysia-app orchestrator + per-layer create-elysia-repository / create-elysia-service / create-elysia-handler + integration-test-elysia-app — across Drizzle (postgres/mysql/none) × cache (redis/memory/couchbase/none) × broker (kafka/rabbitmq/redis). API services ship OpenAPI 3.1 + Scalar UI via @elysiajs/openapi (gated by DOCS_ENABLED) and a tree-shaken canned-response stub (SERVICE_BACKEND=stub) so frontends can integrate against the contract early. Hexagonal core (domain/port/service/repository/apperr) + a thin Elysia controller as inbound adapter; TypeBox validation + OpenAPI; AsyncLocalStorage request-scoped logger/trace context."
     }
   ]
 }

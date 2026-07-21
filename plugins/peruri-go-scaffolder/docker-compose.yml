@@ -1,0 +1,89 @@
+# Local testing services for generated peruri-go-scaffolder applications.
+#
+# Not used by the compile-only smoke runner — that just runs `go build`.
+# This compose file is for MANUAL runtime testing of individual generated
+# services. Bring up only what you need:
+#
+#   docker compose up -d postgres redis        # for an api+postgres+redis combo
+#   docker compose up -d mysql                 # for a mysql combo
+#   docker compose down -v                     # teardown + delete volumes
+#
+# All credentials use admin/admin per request. NEVER use these in any
+# environment that isn't your laptop.
+#
+# Combos NOT covered by this file (because they need broker/cache services
+# you didn't ask for): kafka, rabbitmq, couchbase. Add equivalent services
+# here when you need them.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: peruri-go-scaffolder-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d appdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mysql:
+    image: mysql:8.4
+    container_name: peruri-go-scaffolder-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: appdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uadmin", "-padmin"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: peruri-go-scaffolder-redis
+    command: ["redis-server", "--requirepass", "admin"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "admin", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  mysql_data:
+  redis_data:
+
+# DSN / addr cheatsheet for generated services (see config.go.tmpl):
+#
+#   gorm-postgres:
+#     DATABASE_DSN="host=localhost user=admin password=admin dbname=appdb port=5432 sslmode=disable"
+#
+#   gorm-mysql:
+#     DATABASE_DSN="admin:admin@tcp(localhost:3306)/appdb?parseTime=true&loc=Local"
+#
+#   redis cache (Cache=redis):
+#     REDIS_ADDR=localhost:6379
+#     REDIS_PASSWORD=admin
+#     REDIS_DB=0
+#
+#   redis broker (Broker=redis):
+#     BROKER_REDIS_ADDR=localhost:6379
+#     BROKER_REDIS_PASSWORD=admin
+#     BROKER_REDIS_DB=1

@@ -1,0 +1,26 @@
+# Stage 1: build
+FROM golang:1.26.2-alpine AS builder
+RUN apk update && apk add --no-cache git coreutils openssh-client
+WORKDIR /app
+COPY go.mod go.sum ./
+# GOPRIVATE host — overridable at build time (`docker build --build-arg
+# GOPRIVATE_HOST=...`). Default matches the scaffolder config store's remoteHost.
+ARG GOPRIVATE_HOST=sipgn-git.bgn.go.id
+RUN go env -w GOPRIVATE=${GOPRIVATE_HOST}
+RUN --mount=type=secret,id=netrc \
+    cp /run/secrets/netrc /root/.netrc && \
+    chmod 600 /root/.netrc && \
+    go mod download && \
+    rm -f /root/.netrc
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /app/server ./cmd/{{.Name}}
+
+# Stage 2: runtime
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates tzdata && \
+    addgroup -S app && \
+    adduser -S -G app app
+COPY --chown=app:app --from=builder /app/server /server
+USER app
+EXPOSE 8080
+CMD ["/server"]

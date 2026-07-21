@@ -6,6 +6,23 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## peruri-go-scaffolder 0.13.0 — 2026-07-21
+Add peruri-go-scaffolder: scaffold production-ready Go services wired to go-peruri-lib.
+- Moved into this marketplace from peruri-claude-plugins-marketplace (version unchanged at 0.13.0).
+- 5 skills — create-go-app orchestrator + per-layer create-go-repository / create-go-service /
+  create-go-handler + integration-test-go-app runtime tester — across 5 HTTP frameworks
+  (nethttp/gin/chi/mux/echo) × 3 brokers (kafka/rabbitmq/redis) × postgres/mysql/none ×
+  redis/memory/couchbase/none. Hexagonal (ports & adapters); OpenAPI 3.1 + Stoplight UI via huma v2.
+- Needs the go-lsp MCP server (gopls) for post-write diagnostics; go-peruri-lib is fetched over GOPRIVATE.
+
+## peruri-elysia-scaffolder 0.1.0 — 2026-07-21
+Add peruri-elysia-scaffolder: the TypeScript/Bun counterpart of peruri-go-scaffolder.
+- Moved into this marketplace from peruri-claude-plugins-marketplace (version unchanged at 0.1.0).
+- 5 skills — create-elysia-app orchestrator + per-layer create-elysia-repository /
+  create-elysia-service / create-elysia-handler + integration-test-elysia-app — wired to
+  @peruri/ts-lib. Drizzle (postgres/mysql/none) × cache (redis/memory/couchbase/none) × broker
+  (kafka/rabbitmq/redis). OpenAPI 3.1 + Scalar UI via @elysiajs/openapi; SERVICE_BACKEND=stub mode.
+
 ## docsmith 0.9.5 — 2026-06-25
 Dedupe `docsmith_home()` into a shared `scripts/_common.py`.
 - `build.py` and `setup_profile.py` each defined an identical `docsmith_home()`; extracted to

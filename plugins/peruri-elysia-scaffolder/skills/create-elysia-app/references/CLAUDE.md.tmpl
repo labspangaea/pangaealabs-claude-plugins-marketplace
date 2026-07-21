@@ -1,0 +1,97 @@
+# CLAUDE.md — <%= Name %>
+
+<%= Type === 'api' ? 'An' : 'A' %> <%= Type %> service on **ElysiaJS + Bun**, wired to `@peruri/ts-lib`.
+Hexagonal (ports & adapters): a framework-agnostic core with a thin idiomatic Elysia
+<%= Type === 'api' ? 'controller' : Type === 'consumer' ? 'subscriber' : 'publisher' %> as the inbound adapter.
+
+## Commands
+
+```bash
+bunx tsc --noEmit            # type-check (MUST pass before done)
+bun test                     # unit tests
+<% if (Type === 'api') { -%>
+SERVICE_BACKEND=stub bun run src/index.ts   # canned responses, no DB/redis
+SERVICE_BACKEND=real bun run src/index.ts   # full stack
+<% } else { -%>
+bun run src/index.ts         # connect to <%= Broker %>
+<% } -%>
+<% if (Database !== 'none') { -%>
+SERVICE_BACKEND=real bun run src/cmd/seed.ts   # seed 25 rows
+bunx drizzle-kit generate    # migration from src/db/schema
+<% } -%>
+```
+
+After editing any `.ts`, run `mcp__ts-lsp__ts_diagnose` then `bunx tsc --noEmit`. Don't report done until both are clean.
+
+## Layout & the dependency rule
+
+```
+<% if (Type === 'publisher') { -%>
+src/domain/<%= EntityLower %>.ts                  business types (camelCase)
+config/config.ts                      env-driven config
+src/adapter/outbound/publisher/       <%= Entity %> event publisher (wraps pubsub.Publisher)
+src/index.ts                          composition root — creates the <%= Broker %> publisher
+<% } else { -%>
+src/domain/      business types (camelCase)         ← depends on nothing
+src/port/        interfaces (Repository, Service)    ← the contracts
+src/service/     use-cases                           ← imports port/ ONLY (never an adapter)
+src/apperr/      error-code registry
+src/adapter/inbound/<%= Type === 'api' ? 'http/        thin Elysia controller + TypeBox DTO' : 'subscriber/   message handler (decode → service)' %>
+<% if (Database !== 'none') { -%>
+src/adapter/outbound/repository/  Drizzle repo (BaseRepo/CachedRepo)
+<% } -%>
+src/index.ts     composition root — wires everything; the ONLY place that touches concrete adapters
+<% } -%>
+```
+
+<% if (Type === 'publisher') { -%>
+**DIP (MUST):** the publisher adapter depends on the `Publisher` port from `@peruri/ts-lib/pubsub` —
+swap the broker without touching call sites. Wiring happens only in `src/index.ts`.
+<% } else { -%>
+**DIP (MUST):** `service/` and the inbound adapter depend on `port/` interfaces, never on a
+concrete repository/cache/broker. Wiring happens only in `src/index.ts`.
+<% } -%>
+
+**OCP (SHOULD):** add behavior by adding files (a new service method, a new entity via the
+scaffolder), not by editing existing switch/factory blocks.
+
+## Conventions (load-bearing)
+
+<% if (Type !== 'publisher') { -%>
+- **Errors:** `throw new ApiError(Err<%= Entity %>...)` — never build `{status:false,...}` JSON by hand.
+  The server plugin's `onError` renders the envelope (`ApiError`→its status, validation→422,
+  not-found→404, invalid cursor→400, else→500). Define codes in `src/apperr/<%= EntityLower %>.ts`.
+<% } -%>
+<% if (Type === 'api') { -%>
+- **Wire vs domain:** the domain is camelCase; the HTTP wire is snake_case. Map ONLY in the DTO
+  (`bodyToInput` / `toResponse`) — never serialize the domain object straight to the response.
+- **Validation:** declare a TypeBox `body:` schema on the route. It drives both runtime validation
+  AND the OpenAPI spec. No second validator.
+<% } else { -%>
+- **Wire vs domain:** the domain is camelCase; the broker payload is snake_case JSON. Map at the
+  <%= Type === 'consumer' ? 'subscriber (decode → service input)' : 'publisher (to' + Entity + 'Event)' %> boundary.
+<% } -%>
+<% if (Database !== 'none') { -%>
+- **Timestamps:** `created_at`/`updated_at` are `bigint` epoch-ms columns. The driver returns
+  bigint as a **string**, so the repository coerces `new Date(Number(col))` — a bare
+  `new Date(col)` yields `Invalid Date`. Domain Dates serialize to ISO on the wire.
+- **Updates:** pass an explicit column list to `repo.update` so `id`/`created_at` are never clobbered.
+<% } -%>
+- **Durations are milliseconds** everywhere (TTLs, timeouts).
+- **Logging:** `import { fromContext } from '@peruri/ts-lib/logger'; fromContext().info(...)` inside
+  methods — never a struct/field logger. AsyncLocalStorage carries the request-bound logger
+  (request_id/trace_id) automatically. No hardcoded timeouts in `index.ts` — read `cfg.*`.
+<% if (Type === 'api') { -%>
+- **Stub:** `src/service/stub/<%= EntityLower %>.ts` is stateless with deterministic ids
+  (`<%= EntityLower %>-stub-<i>`). Keep create/update/delete as no-ops — it must NOT pretend to persist.
+  It is excluded from the production build via `bun build` tree-shaking.
+<% } else if (Type === 'consumer') { -%>
+- **Handler lifecycle:** a handler that resolves ACKs, a throw NACKs/requeues. Don't tie the handler
+  to a shutdown signal — in-flight work runs to completion (the `context.WithoutCancel` analogue).
+<% } -%>
+
+## Adding to this service
+
+- New entity → `/peruri-elysia-scaffolder:create-elysia-repository` (then service, then handler).
+- New endpoint on <%= Entity %> → edit `src/adapter/inbound/http/<%= EntityLower %>.ts` + its DTO.
+- Library API reference: `@peruri/ts-lib` (see the plugin's `references/codebase.md`).

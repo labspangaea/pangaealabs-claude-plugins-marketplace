@@ -1,0 +1,95 @@
+// Package main is the composition root for the {{.Name}} publisher service.
+package main
+
+import (
+	"context"
+	"log/slog"
+	"os/signal"
+	"syscall"
+
+	goredis "github.com/redis/go-redis/v9"
+{{- if ne .Database "none" }}
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/db"
+{{- end }}
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/logger"
+	pubsubredis "sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/pubsub/redis"
+	"sipgn-git.bgn.go.id/harry.sitohang/go-peruri-lib/telemetry"
+{{- if eq .Database "gorm-postgres" }}
+	"gorm.io/driver/postgres"
+{{- else if eq .Database "gorm-mysql" }}
+	"gorm.io/driver/mysql"
+{{- end }}
+
+	"{{.Module}}/config"
+)
+
+func main() {
+	cfg := config.Load()
+
+	log := logger.New(
+		logger.WithServiceInfo(cfg.ServiceName, cfg.Version, cfg.InstanceID),
+	)
+	ctx := logger.WithLogger(context.Background(), log)
+
+	otelOpts := []telemetry.Option{
+		telemetry.WithEndpoint(cfg.OTelEndpoint),
+		telemetry.WithProtocol(cfg.OTelProtocol),
+		telemetry.WithServiceInfo(cfg.ServiceName, cfg.Version, cfg.InstanceID),
+	}
+	if cfg.OTelInsecure {
+		otelOpts = append(otelOpts, telemetry.WithInsecure())
+	}
+	if len(cfg.OTelHeaders) > 0 {
+		otelOpts = append(otelOpts, telemetry.WithHeaders(cfg.OTelHeaders))
+	}
+	_, lp, otelShutdown, err := telemetry.Setup(ctx, otelOpts...)
+	if err != nil {
+		log.Warn("telemetry setup failed, continuing without tracing", slog.Any(logger.KeyError, err))
+	} else {
+		defer otelShutdown(ctx)
+	}
+
+	// Optional: stream high-severity slog records to OTLP via the OTel log bridge.
+	if err == nil && cfg.OTelLogBridgeEnabled && lp != nil {
+		log = logger.New(
+			logger.WithServiceInfo(cfg.ServiceName, cfg.Version, cfg.InstanceID),
+			logger.WithOTelBridge(lp, cfg.OTelLogMinSeverity),
+		)
+		ctx = logger.WithLogger(ctx, log)
+	}
+
+{{- if ne .Database "none" }}
+
+	gormDB, err := db.Open(
+{{- if eq .Database "gorm-postgres" }}postgres.Open(cfg.DatabaseDSN){{else if eq .Database "gorm-mysql" }}mysql.Open(cfg.DatabaseDSN){{end}},
+		db.WithMaxOpenConns(cfg.DBMaxOpen),
+		db.WithSlowThreshold(cfg.DBSlowThreshold),
+	)
+	if err != nil {
+		log.Error("db open failed", slog.Any(logger.KeyError, err))
+		return
+	}
+	defer db.Close(gormDB)
+{{- end }}
+
+	brokerClient := goredis.NewClient(&goredis.Options{
+		Addr:     cfg.BrokerRedisAddr,
+		Password: cfg.BrokerRedisPassword,
+		DB:       cfg.BrokerRedisDB,
+	})
+	defer brokerClient.Close()
+	if err := brokerClient.Ping(ctx).Err(); err != nil {
+		log.Error("redis broker connection failed", slog.Any(logger.KeyError, err))
+		return
+	}
+
+	pub := pubsubredis.NewPublisher(brokerClient)
+	defer pub.Close()
+	_ = pub
+
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	<-ctx.Done()
+
+	log.Info("publisher shutdown complete")
+}
