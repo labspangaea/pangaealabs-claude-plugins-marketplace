@@ -1,0 +1,8 @@
+{
+  "name": "elysia-scaffolder",
+  "description": "Scaffold ElysiaJS/Bun services (api, consumer, publisher) wired to @labspangaea/ts-lib (the TypeScript port of go-lib). Includes 5 skills (create-elysia-app orchestrator + per-layer create-elysia-repository / create-elysia-service / create-elysia-handler + integration-test-elysia-app) and a Bun/TS template set covering Drizzle (postgres/mysql/none) x cache (redis/memory/couchbase/none) x broker (kafka/rabbitmq/redis). API services ship OpenAPI 3.1 + Scalar UI via @elysiajs/openapi (gated by DOCS_ENABLED) and a service-level canned-response stub (excluded from the production binary via bun build --compile tree-shaking) so frontends can integrate against the contract before backend business logic is finalized. Hexagonal core (domain/port/service/repository/apperr) + a thin idiomatic Elysia controller as the inbound adapter; TypeBox for validation + OpenAPI; AsyncLocalStorage for request-scoped logger/trace context.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Harry"
+  }
+}

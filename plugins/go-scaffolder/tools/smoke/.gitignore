@@ -1,0 +1,6 @@
+# Scratch dir for `-all` runs (rendered combos + go build artifacts).
+# Kept around for inspection but never committed.
+scratch/
+
+# Compiled binary if anyone runs `go build` directly.
+smoke

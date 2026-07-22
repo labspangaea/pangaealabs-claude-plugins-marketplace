@@ -1,0 +1,15 @@
+/**
+ * <%= Entity %>Service is the use-case contract the inbound controller depends on.
+ * Both the real service and the stub implement it (LSP); the controller never
+ * sees the concrete type.
+ */
+import type { <%= Entity %>, <%= Entity %>Input } from '../domain/<%= EntityLower %>.ts';
+import type { CursorParams, CursorPage } from '@labspangaea/ts-lib/db/repo';
+
+export interface <%= Entity %>Service {
+  find(id: string): Promise<<%= Entity %>>;
+  create(input: <%= Entity %>Input): Promise<<%= Entity %>>;
+  update(id: string, input: <%= Entity %>Input): Promise<<%= Entity %>>;
+  remove(id: string): Promise<void>;
+  list(params: CursorParams): Promise<{ rows: <%= Entity %>[]; page: CursorPage }>;
+}

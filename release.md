@@ -6,6 +6,23 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## go-scaffolder 0.13.0 — 2026-07-21
+Add go-scaffolder: scaffold production-ready Go services wired to go-lib.
+- Added to this marketplace at version 0.13.0.
+- 5 skills — create-go-app orchestrator + per-layer create-go-repository / create-go-service /
+  create-go-handler + integration-test-go-app runtime tester — across 5 HTTP frameworks
+  (nethttp/gin/chi/mux/echo) × 3 brokers (kafka/rabbitmq/redis) × postgres/mysql/none ×
+  redis/memory/couchbase/none. Hexagonal (ports & adapters); OpenAPI 3.1 + Stoplight UI via huma v2.
+- Needs the go-lsp MCP server (gopls) for post-write diagnostics; go-lib is a public Go module fetched via `go mod tidy` (no token, no GOPRIVATE).
+
+## elysia-scaffolder 0.1.0 — 2026-07-21
+Add elysia-scaffolder: the TypeScript/Bun counterpart of go-scaffolder.
+- Added to this marketplace at version 0.1.0.
+- 5 skills — create-elysia-app orchestrator + per-layer create-elysia-repository /
+  create-elysia-service / create-elysia-handler + integration-test-elysia-app — wired to
+  @labspangaea/ts-lib. Drizzle (postgres/mysql/none) × cache (redis/memory/couchbase/none) × broker
+  (kafka/rabbitmq/redis). OpenAPI 3.1 + Scalar UI via @elysiajs/openapi; SERVICE_BACKEND=stub mode.
+
 ## docsmith 0.9.6 — 2026-07-12
 Platform-aware install hints in `doctor.py`.
 - `doctor.py` always printed `brew install …` hints; on Linux (no Homebrew) those are dead ends.

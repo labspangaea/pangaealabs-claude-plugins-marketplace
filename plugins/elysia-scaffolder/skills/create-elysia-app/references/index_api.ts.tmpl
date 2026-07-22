@@ -1,0 +1,116 @@
+/**
+ * Composition root for the <%= Name %> API.
+ *
+ * Wires: config -> logger -> <% if (Database !== 'none') { %><%= Database === 'drizzle-mysql' ? 'MySQL' : 'Postgres' %> (Drizzle) -> <% } %><% if (Cache !== 'none') { %><%= Cache %> cache -> <% } %>repository ->
+ * service (factory) -> Elysia app (server middleware + health + controller) ->
+ * graceful shutdown.
+ */
+import { Elysia } from 'elysia';
+import { openapi } from '@elysiajs/openapi';
+<% if (Cache === 'redis') { %>import { Redis } from 'ioredis';
+import { createRedisCache } from '@labspangaea/ts-lib/cache';
+<% } else if (Cache === 'memory') { %>import { createMemoryCache } from '@labspangaea/ts-lib/cache';
+<% } else if (Cache === 'couchbase') { %>import { connect } from 'couchbase';
+import { createCouchbaseCache } from '@labspangaea/ts-lib/cache';
+<% } %>import { createLogger } from '@labspangaea/ts-lib/logger';
+import { serverPlugin } from '@labspangaea/ts-lib/server';
+<% if (Database === 'drizzle-mysql') { %>import { openMysql, closeDb } from '@labspangaea/ts-lib/db';
+<% } else if (Database !== 'none') { %>import { openPostgres, closeDb } from '@labspangaea/ts-lib/db';
+<% } %>import { loadConfig } from '../config/config.ts';
+<% if (Cache !== 'none') { %>import { newCached<%= Entity %>Repository, type <%= Entity %>Row } from './adapter/outbound/repository/<%= EntityLower %>.ts';
+<% } else if (Database !== 'none') { %>import { new<%= Entity %>Repository } from './adapter/outbound/repository/<%= EntityLower %>.ts';
+<% } %>import { new<%= Entity %>Service } from './service/factory.ts';
+import { <%= EntityLower %>Controller } from './adapter/inbound/http/<%= EntityLower %>.ts';
+import { healthController } from './adapter/inbound/http/health.ts';
+import './apperr/<%= EntityLower %>.ts'; // register entity error codes (side-effect import)
+
+async function main(): Promise<void> {
+  const cfg = loadConfig();
+  const logger = createLogger({
+    serviceName: cfg.serviceName,
+    version: cfg.version,
+    instanceId: cfg.instanceId,
+  });
+
+<% if (Database === 'drizzle-mysql') { %>  const db = openMysql(cfg.databaseDsn, { logLevel: cfg.dbLogLevel });
+<% } else if (Database !== 'none') { %>  // Postgres via Bun's native SQL driver (lazy — stub mode boots without a DB).
+  const db = openPostgres(cfg.databaseDsn, { logLevel: cfg.dbLogLevel });
+<% } %>
+<% if (Cache === 'redis') { %>  const [redisHost, redisPort] = cfg.redisAddr.split(':');
+  const redis = new Redis({
+    host: redisHost ?? 'localhost',
+    port: Number(redisPort ?? '6379'),
+    password: cfg.redisPassword || undefined,
+    db: cfg.redisDb,
+    lazyConnect: true,
+    // Skip the readiness INFO probe: on a cold (just-started) redis it can race
+    // ahead of AUTH and surface a spurious NOAUTH, wedging the connection.
+    enableReadyCheck: false,
+  });
+  // Cache is best-effort (the repo degrades to the DB on cache error); handle the
+  // connection 'error' event so a transient redis blip (e.g. cold start) is logged,
+  // not thrown as an unhandled error, and ioredis recovers on its own.
+  redis.on('error', (err: Error) => logger.warn({ error: err.message }, 'redis cache connection error'));
+  const cache = createRedisCache<<%= Entity %>Row>(redis);
+  const repo = newCached<%= Entity %>Repository(db, cache, cfg.cacheTtlMs, cfg.cacheJitterFactor);
+<% } else if (Cache === 'memory') { %>  const cache = createMemoryCache<<%= Entity %>Row>({ capacity: cfg.memoryCacheCapacity });
+  const repo = newCached<%= Entity %>Repository(db, cache, cfg.cacheTtlMs, cfg.cacheJitterFactor);
+<% } else if (Cache === 'couchbase') { %>  const cluster = await connect(cfg.couchbaseUrl, {
+    username: cfg.couchbaseUsername,
+    password: cfg.couchbasePassword,
+  });
+  const cache = createCouchbaseCache<<%= Entity %>Row>(
+    cluster.bucket(cfg.couchbaseBucket).defaultCollection(),
+  );
+  const repo = newCached<%= Entity %>Repository(db, cache, cfg.cacheTtlMs, cfg.cacheJitterFactor);
+<% } else { %>  const repo = new<%= Entity %>Repository(db);
+<% } %>  const svc = await new<%= Entity %>Service({ serviceBackend: cfg.serviceBackend }, repo);
+
+  const app = new Elysia()
+    .use(serverPlugin({ logger, serviceName: cfg.serviceName }))
+    // OpenAPI 3.1 spec + Scalar UI at /docs (spec JSON at /docs/json), derived from
+    // the TypeBox DTO schemas. Gated by DOCS_ENABLED — disabled is a no-op plugin so
+    // the routes 404 in production.
+    .use(
+      cfg.docsEnabled
+        ? openapi({
+            path: '/docs',
+            documentation: { info: { title: cfg.serviceName, version: cfg.version } },
+          })
+        : new Elysia(),
+    )
+    .use(healthController(cfg.version))
+    .use(<%= EntityLower %>Controller(svc));
+
+  app.listen(cfg.port);
+  logger.info({ port: cfg.port, backend: cfg.serviceBackend }, 'http server starting');
+
+  let shuttingDown = false;
+  const shutdown = async (signal: string): Promise<void> => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info({ signal }, 'shutdown signal received');
+    const timer = setTimeout(() => {
+      logger.warn('graceful shutdown timeout reached');
+      process.exit(1);
+    }, cfg.httpShutdownTimeoutMs);
+    try {
+      await app.stop();
+<% if (Database !== 'none') { %>      await closeDb(db);
+<% } %><% if (Cache === 'redis') { %>      redis.disconnect();
+<% } %>      logger.info('server shutdown success');
+    } finally {
+      clearTimeout(timer);
+      process.exit(0);
+    }
+  };
+
+  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+}
+
+main().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('fatal: failed to start <%= Name %>', err);
+  process.exit(1);
+});

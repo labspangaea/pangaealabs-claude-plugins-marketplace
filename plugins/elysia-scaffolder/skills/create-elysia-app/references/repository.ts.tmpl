@@ -1,0 +1,139 @@
+/**
+ * Outbound adapter: Drizzle-backed <%= Entity %>Repository. Wraps the generic
+ * BaseRepo/CachedRepo from @labspangaea/ts-lib/db/repo over an internal snake_case row
+ * type, and maps row <-> domain at the boundary.
+ */
+import {
+  ErrNotFound,
+  makeRepository,
+<% if (Cache !== 'none') { %>  makeCachedRepository,
+  withTTL,
+  withJitter,
+<% } %>  type Repository,
+  type ModelMeta,
+  type CursorParams,
+  type CursorPage,
+  type Filter,
+} from '@labspangaea/ts-lib/db/repo';
+<% if (Cache !== 'none') { %>import type { Cache } from '@labspangaea/ts-lib/cache';
+<% } %>import type { AnyDatabase } from '@labspangaea/ts-lib/db';
+import { ApiError } from '@labspangaea/ts-lib/apperr';
+import type { <%= Entity %> } from '../../../domain/<%= EntityLower %>.ts';
+import type { <%= Entity %>Repository } from '../../../port/<%= EntityLower %>.ts';
+import { Err<%= Entity %>NotFound } from '../../../apperr/<%= EntityLower %>.ts';
+
+/** DB row shape — snake_case columns, epoch-ms timestamps. Exported so the
+ * composition root can type the cache backend (`Cache<<%= Entity %>Row>`). */
+export interface <%= Entity %>Row {
+  id: string;
+<% for (const f of Fields) { %>  <%= f.DBColumn %>: <% if (baseType(f.GoType) === 'Date') { %>number<% } else { %><%= baseType(f.GoType) %><% if (isNullable(f.GoType)) { %> | null<% } %><% } %>;
+<% } %>  created_at: number;
+  updated_at: number;
+}
+
+const meta: ModelMeta<<%= Entity %>Row, string> = {
+  table: '<%= EntityLower %>s',
+  primaryKey: 'id',
+  columns: ['id'<% for (const f of Fields) { %>, '<%= f.DBColumn %>'<% } %>, 'created_at', 'updated_at'],
+  getPK: (r) => r.id,
+};
+
+/** Columns a PUT may change — never id or created_at. */
+const UPDATE_COLUMNS = [<% for (const f of Fields) { %>'<%= f.DBColumn %>', <% } %>'updated_at'];
+
+function toDomain(r: <%= Entity %>Row): <%= Entity %> {
+  return {
+    id: r.id,
+<% for (const f of Fields) { %><% if (baseType(f.GoType) === 'Date') { %>    <%= f.Name %>: new Date(Number(r.<%= f.DBColumn %>)),
+<% } else { %>    <%= f.Name %>: r.<%= f.DBColumn %>,
+<% } %><% } %>    // Postgres bigint is returned by the driver as a string; coerce to number.
+    createdAt: new Date(Number(r.created_at)),
+    updatedAt: new Date(Number(r.updated_at)),
+  };
+}
+
+function toRow(o: <%= Entity %>): <%= Entity %>Row {
+  return {
+    id: o.id,
+<% for (const f of Fields) { %><% if (baseType(f.GoType) === 'Date') { %>    <%= f.DBColumn %>: o.<%= f.Name %>.getTime(),
+<% } else { %>    <%= f.DBColumn %>: o.<%= f.Name %>,
+<% } %><% } %>    created_at: o.createdAt.getTime(),
+    updated_at: o.updatedAt.getTime(),
+  };
+}
+
+/** mapRepoErr translates repo sentinels to entity-scoped ApiErrors. */
+function mapRepoErr(e: unknown): unknown {
+  if (e === ErrNotFound) return new ApiError(Err<%= Entity %>NotFound);
+  return e;
+}
+
+class <%= Entity %>RepositoryAdapter implements <%= Entity %>Repository {
+  constructor(private readonly repo: Repository<<%= Entity %>Row, string>) {}
+
+  async find<%= Entity %>(id: string): Promise<<%= Entity %>> {
+    try {
+      return toDomain(await this.repo.findById(id));
+    } catch (e) {
+      throw mapRepoErr(e);
+    }
+  }
+
+  async create<%= Entity %>(entity: <%= Entity %>): Promise<void> {
+    await this.repo.create(toRow(entity));
+  }
+
+  async update<%= Entity %>(entity: <%= Entity %>): Promise<void> {
+    try {
+      await this.repo.update(toRow(entity), UPDATE_COLUMNS);
+    } catch (e) {
+      throw mapRepoErr(e);
+    }
+  }
+
+  async delete<%= Entity %>(id: string): Promise<void> {
+    await this.repo.del(id);
+  }
+
+  async list<%= Entity %>s(
+    params: CursorParams,
+    ...filters: Filter[]
+  ): Promise<{ rows: <%= Entity %>[]; page: CursorPage }> {
+    const { rows, page } = await this.repo.list(params, ...filters);
+    return { rows: rows.map(toDomain), page };
+  }
+
+  async list<%= Entity %>Ids(
+    params: CursorParams,
+    ...filters: Filter[]
+  ): Promise<{ ids: string[]; page: CursorPage }> {
+    return this.repo.listIds(params, ...filters);
+  }
+}
+
+/** new<%= Entity %>Repository builds a direct (non-cached) repository. */
+export function new<%= Entity %>Repository(db: AnyDatabase): <%= Entity %>Repository {
+  return new <%= Entity %>RepositoryAdapter(makeRepository<<%= Entity %>Row, string>(db, meta));
+}
+<% if (Cache !== 'none') { %>
+/**
+ * newCached<%= Entity %>Repository builds a cache-decorated repository over any
+ * cache backend. The composition root constructs the backend (redis/memory/
+ * couchbase) and passes it here; the cache stores rows keyed by
+ * "<%= EntityLower %>:<id>" — the prefix is owned by makeCachedRepository (do not
+ * also prefix the backend).
+ */
+export function newCached<%= Entity %>Repository(
+  db: AnyDatabase,
+  cache: Cache<<%= Entity %>Row>,
+  ttlMs: number,
+  jitterFactor: number,
+): <%= Entity %>Repository {
+  const base = makeRepository<<%= Entity %>Row, string>(db, meta);
+  const cached = makeCachedRepository<<%= Entity %>Row, string>(base, cache, '<%= EntityLower %>', {
+    getPK: (r) => r.id,
+    options: [withTTL(ttlMs), withJitter(jitterFactor)],
+  });
+  return new <%= Entity %>RepositoryAdapter(cached);
+}
+<% } %>

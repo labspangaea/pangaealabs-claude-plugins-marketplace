@@ -1,0 +1,44 @@
+package httphandler
+
+import (
+	"context"
+
+	"github.com/danielgtaylor/huma/v2"
+	humares "github.com/labspangaea/go-lib/httpx/humaresponse"
+)
+
+// Health handles system-level HTTP endpoints. Independent of any entity.
+type Health struct {
+	ver string
+}
+
+// NewHealth creates a Health handler with the resolved application version.
+// Version is sourced from config.Load() which reads SERVICE_VERSION env and
+// overrides with the .version file when present.
+func NewHealth(version string) *Health { return &Health{ver: version} }
+
+// RegisterRoutes binds /healthz and /version to the given huma API.
+func (h *Health) RegisterRoutes(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "health-check",
+		Method:      "GET",
+		Path:        "/healthz",
+		Summary:     "Health check",
+		Tags:        []string{"System"},
+	}, h.check)
+	huma.Register(api, huma.Operation{
+		OperationID: "app-version",
+		Method:      "GET",
+		Path:        "/version",
+		Summary:     "Application version",
+		Tags:        []string{"System"},
+	}, h.version)
+}
+
+func (h *Health) check(_ context.Context, _ *struct{}) (*humares.DataOutput[string], error) {
+	return humares.Data("ok"), nil
+}
+
+func (h *Health) version(_ context.Context, _ *struct{}) (*humares.DataOutput[string], error) {
+	return humares.Data(h.ver), nil
+}

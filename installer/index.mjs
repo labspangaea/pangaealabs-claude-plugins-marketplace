@@ -60,7 +60,7 @@ Usage:
   npx github:labspangaea/pangaealabs-claude-plugins-marketplace [add <plugin>...] [options]
 
 Options:
-  add <plugin>     Pre-select plugins (e.g. "add docsmith")
+  add <plugin>     Pre-select plugins (e.g. "add docsmith", "add go-scaffolder")
   -s, --skill <id> Pre-select skills by name (repeatable or comma-separated;
                    needed to install a multi-skill plugin like testcraft non-interactively)
   -a, --agent <id> Pre-select agents (repeatable or comma-separated)
@@ -266,17 +266,52 @@ async function main() {
   );
 }
 
+// Informational, per-plugin toolchain heads-ups — printed when a plugin that
+// generates code against an external toolchain is being installed but the
+// toolchain looks missing/too old. Never blocks the install.
 function maybeToolchainNote(skills) {
+  const inPlugin = (name) => skills.some((s) => path.basename(s.pluginDir) === name);
+
+  // docsmith: local PDF toolchain, probed by its own doctor.py
   const docsmithSkill = skills.find((s) => s.name === "make-pdf");
-  if (!docsmithSkill) return;
-  const doctor = path.join(docsmithSkill.pluginDir, "scripts", "doctor.py");
-  const r = spawnSync("python3", [doctor], { encoding: "utf8" });
-  if (r.status && r.status !== 0) {
-    p.log.warn(
-      "docsmith renders PDFs locally and needs a toolchain (pandoc, tectonic, marp-cli, rsvg, " +
-        "poppler, headless Chrome). doctor.py flags missing pieces:\n" +
-        (r.stdout || r.stderr || "").trim()
-    );
+  if (docsmithSkill) {
+    const doctor = path.join(docsmithSkill.pluginDir, "scripts", "doctor.py");
+    const r = spawnSync("python3", [doctor], { encoding: "utf8" });
+    if (r.status && r.status !== 0) {
+      p.log.warn(
+        "docsmith renders PDFs locally and needs a toolchain (pandoc, tectonic, marp-cli, rsvg, " +
+          "poppler, headless Chrome). doctor.py flags missing pieces:\n" +
+          (r.stdout || r.stderr || "").trim()
+      );
+    }
+  }
+
+  // go-scaffolder: generates Go services against the public go-lib module
+  if (inPlugin("go-scaffolder")) {
+    const r = spawnSync("go", ["version"], { encoding: "utf8" });
+    const v = (r.stdout || "").match(/go(\d+)\.(\d+)/);
+    const ok = v && (Number(v[1]) > 1 || (Number(v[1]) === 1 && Number(v[2]) >= 26));
+    if (!ok) {
+      p.log.warn(
+        `go-scaffolder generates Go services and needs Go 1.26+ on PATH ${v ? `(found go${v[1]}.${v[2]})` : "(go not found)"}.\n` +
+          "It also expects the go-lsp MCP server (gopls) for post-write diagnostics. Generated " +
+          "services fetch github.com/labspangaea/go-lib from the public Go proxy — no token, no GOPRIVATE."
+      );
+    }
+  }
+
+  // elysia-scaffolder: generates ElysiaJS/Bun services against the public @labspangaea/ts-lib
+  if (inPlugin("elysia-scaffolder")) {
+    const r = spawnSync("bun", ["--version"], { encoding: "utf8" });
+    const v = (r.stdout || "").trim().match(/^(\d+)\.(\d+)/);
+    const ok = v && (Number(v[1]) > 1 || (Number(v[1]) === 1 && Number(v[2]) >= 1));
+    if (!ok) {
+      p.log.warn(
+        `elysia-scaffolder generates ElysiaJS/Bun services and needs Bun 1.1+ on PATH ${v ? `(found ${v[1]}.${v[2]})` : "(bun not found)"}.\n` +
+          "It also expects the ts-lsp MCP server for diagnostics. Generated services install " +
+          "@labspangaea/ts-lib from the public npm registry — no token, no .npmrc auth."
+      );
+    }
   }
 }
 
