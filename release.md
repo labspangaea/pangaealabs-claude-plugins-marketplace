@@ -23,6 +23,13 @@ Add elysia-scaffolder: the TypeScript/Bun counterpart of go-scaffolder.
   @labspangaea/ts-lib. Drizzle (postgres/mysql/none) × cache (redis/memory/couchbase/none) × broker
   (kafka/rabbitmq/redis). OpenAPI 3.1 + Scalar UI via @elysiajs/openapi; SERVICE_BACKEND=stub mode.
 
+## docsmith 0.9.6 — 2026-07-12
+Platform-aware install hints in `doctor.py`.
+- `doctor.py` always printed `brew install …` hints; on Linux (no Homebrew) those are dead ends.
+  Missing-tool hints now pick by `sys.platform`: apt commands on Linux (`poppler-utils`,
+  `librsvg2-bin`, …) and a pointer to the prebuilt release binary for tectonic, which apt
+  doesn't package. macOS output unchanged.
+
 ## docsmith 0.9.5 — 2026-06-25
 Dedupe `docsmith_home()` into a shared `scripts/_common.py`.
 - `build.py` and `setup_profile.py` each defined an identical `docsmith_home()`; extracted to

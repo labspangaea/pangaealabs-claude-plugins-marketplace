@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 
-# tool -> (probe args, install hint)
+# tool -> (probe args, macOS install hint)
 TOOLS = {
     "pandoc": (["--version"], "brew install pandoc"),
     "tectonic": (["--version"], "brew install tectonic"),
@@ -17,6 +17,21 @@ TOOLS = {
     "npx": (["--version"], "install Node.js (brew install node / asdf)"),
     "pdfinfo": (["-v"], "brew install poppler"),
 }
+
+# Debian/Ubuntu hints (tectonic isn't packaged in apt — ship the release binary).
+LINUX_HINTS = {
+    "pandoc": "sudo apt-get install pandoc",
+    "tectonic": "prebuilt binary → ~/.local/bin from https://github.com/tectonic-typesetting/tectonic/releases (not in apt)",
+    "rsvg-convert": "sudo apt-get install librsvg2-bin",
+    "npx": "install Node.js (apt / nvm)",
+    "pdfinfo": "sudo apt-get install poppler-utils",
+}
+
+
+def hint(tool: str) -> str:
+    if sys.platform.startswith("linux"):
+        return LINUX_HINTS.get(tool, TOOLS[tool][1])
+    return TOOLS[tool][1]
 
 # which tools each backend needs. rsvg-convert is shared: the handbook converts
 # embedded SVG→PDF with it, and every template uses it to validate hand-written
@@ -69,7 +84,7 @@ def main() -> int:
     print(f"docsmith doctor — checking backends: {', '.join(backends)}")
     for t in needed:
         present = have(t)
-        print(f"  [{'OK ' if present else 'MISS'}] {t}" + ("" if present else f"  → {TOOLS[t][1]}"))
+        print(f"  [{'OK ' if present else 'MISS'}] {t}" + ("" if present else f"  → {hint(t)}"))
         ok = ok and present
 
     if "marp-cli" in backends:
