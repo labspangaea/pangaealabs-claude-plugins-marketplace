@@ -1,0 +1,19 @@
+# Multi-stage Bun image for <%= Name %>.
+#
+# @labspangaea/ts-lib is a public npm package, so `bun install` fetches it from the
+# public registry inside the build context — no registry auth, no .npmrc/bunfig secret.
+FROM oven/bun:1 AS base
+WORKDIR /app
+
+# Dependencies (cached layer).
+COPY package.json ./
+COPY bun.lock* ./
+RUN bun install --production || bun install
+
+# Source.
+COPY . .
+
+ENV NODE_ENV=production
+<% if (Type === 'api') { %>EXPOSE 8080
+<% } %>USER bun
+CMD ["bun", "run", "src/index.ts"]

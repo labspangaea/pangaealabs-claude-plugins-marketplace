@@ -1,0 +1,66 @@
+// Package main seeds the database with 25 sample {{.Entity}} records
+// for testing CRUD, cursor pagination, and offset pagination.
+//
+// Usage:
+//
+//	DATABASE_DSN="..." go run ./cmd/seed
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+{{- if hasFieldType "time.Time" .Fields }}
+	"time"
+{{- end }}
+
+	"github.com/google/uuid"
+{{- if eq .Database "gorm-postgres" }}
+	"gorm.io/driver/postgres"
+{{- else if eq .Database "gorm-mysql" }}
+	"gorm.io/driver/mysql"
+{{- end }}
+	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
+{{- if hasNullableField .Fields }}
+
+	"github.com/labspangaea/go-lib/ptr"
+{{- end }}
+
+	"{{.Module}}/internal/adapter/outbound/repository"
+)
+
+func main() {
+	dsn := os.Getenv("DATABASE_DSN")
+	if dsn == "" {
+		log.Fatal("DATABASE_DSN is required")
+	}
+
+	db, err := gorm.Open({{dbOpen .Database}}, &gorm.Config{
+		Logger: gormlogger.Default.LogMode(gormlogger.Info),
+	})
+	if err != nil {
+		log.Fatalf("db open: %v", err)
+	}
+
+	if err := db.AutoMigrate(&repository.{{.Entity}}Model{}); err != nil {
+		log.Fatalf("migrate: %v", err)
+	}
+
+	records := []repository.{{.Entity}}Model{
+{{- range $i, $_ := (seq 25) }}
+		{
+			ID: uuid.NewString(),
+{{- range $.Fields }}
+			{{.Name}}: {{seedValue .GoType $i}},
+{{- end }}
+		},
+{{- end }}
+	}
+
+	result := db.Create(&records)
+	if result.Error != nil {
+		log.Fatalf("seed: %v", result.Error)
+	}
+	fmt.Printf("seeded %d {{.EntityLower}} records\n", len(records))
+}

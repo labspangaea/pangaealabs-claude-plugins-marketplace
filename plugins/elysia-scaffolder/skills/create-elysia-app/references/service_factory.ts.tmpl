@@ -1,0 +1,32 @@
+/**
+ * Service factory — selects the real service or the canned stub.
+ *
+ * SERVICE_STUB is a compile-time constant injected only by the stub build
+ * (`bun build --define SERVICE_STUB=true`). In the default production build it is
+ * left undefined, so `typeof SERVICE_STUB` is 'undefined' at runtime (never a
+ * ReferenceError), and a production `bun build --define SERVICE_STUB=false` makes
+ * the stub branch statically dead — the dynamic import is tree-shaken out so the
+ * stub is NOT linked into the production binary. At runtime, SERVICE_BACKEND
+ * chooses real vs stub when the stub branch is retained.
+ */
+import type { <%= Entity %>Service } from '../port/<%= EntityLower %>-service.ts';
+import type { <%= Entity %>Repository } from '../port/<%= EntityLower %>.ts';
+import { <%= Entity %>ServiceImpl } from './<%= EntityLower %>.ts';
+
+declare const SERVICE_STUB: boolean;
+
+export interface ServiceFactoryConfig {
+  serviceBackend: string;
+}
+
+export async function new<%= Entity %>Service(
+  cfg: ServiceFactoryConfig,
+  repo: <%= Entity %>Repository,
+): Promise<<%= Entity %>Service> {
+  const stubRetained = typeof SERVICE_STUB === 'undefined' || SERVICE_STUB;
+  if (stubRetained && cfg.serviceBackend === 'stub') {
+    const { <%= Entity %>ServiceStub } = await import('./stub/<%= EntityLower %>.ts');
+    return new <%= Entity %>ServiceStub();
+  }
+  return new <%= Entity %>ServiceImpl(repo);
+}

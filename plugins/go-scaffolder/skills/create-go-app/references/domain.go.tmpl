@@ -1,0 +1,17 @@
+// Package domain defines pure business types and value objects.
+// This package has ZERO external dependencies — it imports only stdlib.
+package domain
+
+import "time"
+
+// {{.Entity}} represents a {{.EntityLower}} in the system.
+//
+// JSON tags use snake_case so request and response shapes match. The domain
+// is otherwise dependency-free — these tags don't bring in any imports beyond
+// what's already here.
+type {{.Entity}} struct {
+	ID        string    `json:"id"`
+{{range .Fields}}	{{.Name}} {{.GoType}} `json:"{{.JSONName}}"`
+{{end}}	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

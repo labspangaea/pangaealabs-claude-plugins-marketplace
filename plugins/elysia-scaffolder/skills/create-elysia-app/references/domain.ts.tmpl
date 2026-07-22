@@ -1,0 +1,12 @@
+/** <%= Entity %> is the core domain entity. Plain TS, no framework or DB types. */
+export interface <%= Entity %> {
+  id: string;
+<% for (const f of Fields) { %>  <%= f.Name %>: <%= f.GoType %>;
+<% } %>  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** <%= Entity %>Input carries the user-settable fields when creating or updating. */
+export interface <%= Entity %>Input {
+<% for (const f of Fields) { %>  <%= f.Name %>: <%= f.GoType %>;
+<% } %>}

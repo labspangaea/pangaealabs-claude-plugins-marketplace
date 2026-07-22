@@ -1,0 +1,40 @@
+/**
+ * Real <%= Entity %> use-cases. Depends only on the <%= Entity %>Repository port
+ * (DIP). Create stamps id + timestamps; Update is find-then-write so created_at
+ * is preserved and updated_at refreshed.
+ */
+import { randomUUID } from 'node:crypto';
+import type { <%= Entity %>, <%= Entity %>Input } from '../domain/<%= EntityLower %>.ts';
+import type { <%= Entity %>Service } from '../port/<%= EntityLower %>-service.ts';
+import type { <%= Entity %>Repository } from '../port/<%= EntityLower %>.ts';
+import type { CursorParams, CursorPage } from '@labspangaea/ts-lib/db/repo';
+
+export class <%= Entity %>ServiceImpl implements <%= Entity %>Service {
+  constructor(private readonly repo: <%= Entity %>Repository) {}
+
+  find(id: string): Promise<<%= Entity %>> {
+    return this.repo.find<%= Entity %>(id);
+  }
+
+  async create(input: <%= Entity %>Input): Promise<<%= Entity %>> {
+    const now = new Date();
+    const entity: <%= Entity %> = { id: randomUUID(), ...input, createdAt: now, updatedAt: now };
+    await this.repo.create<%= Entity %>(entity);
+    return entity;
+  }
+
+  async update(id: string, input: <%= Entity %>Input): Promise<<%= Entity %>> {
+    const existing = await this.repo.find<%= Entity %>(id); // throws ApiError(NotFound) on miss
+    const updated: <%= Entity %> = { ...existing, ...input, updatedAt: new Date() };
+    await this.repo.update<%= Entity %>(updated);
+    return updated;
+  }
+
+  remove(id: string): Promise<void> {
+    return this.repo.delete<%= Entity %>(id);
+  }
+
+  list(params: CursorParams): Promise<{ rows: <%= Entity %>[]; page: CursorPage }> {
+    return this.repo.list<%= Entity %>s(params);
+  }
+}

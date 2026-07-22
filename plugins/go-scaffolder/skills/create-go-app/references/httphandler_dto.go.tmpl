@@ -1,0 +1,70 @@
+package httphandler
+
+import (
+	"github.com/labspangaea/go-lib/db/repo"
+
+	"{{.Module}}/internal/domain"
+)
+
+// ── Inputs ───────────────────────────────────────────────────────────────────
+
+// Find{{.Entity}}Input binds path params for GET /api/v1/{{.EntityLower}}s/{id}.
+type Find{{.Entity}}Input struct {
+	ID string `path:"id" doc:"{{.Entity}} ID"`
+}
+
+// List{{.Entity}}sInput binds query params for GET /api/v1/{{.EntityLower}}s.
+// Offset uses a -1 sentinel to mean "not provided" (huma rejects pointer
+// types for query params; 0 is a legitimate offset value). When ?offset is
+// absent or negative the handler falls back to cursor pagination.
+type List{{.Entity}}sInput struct {
+	Cursor string `query:"cursor" doc:"Opaque cursor for next page"`
+	Limit  int    `query:"limit"  doc:"Page size (default 20)"`
+	Offset int    `query:"offset" default:"-1" doc:"Offset (>=0 activates offset pagination; default uses cursor pagination)"`
+{{range .Fields}}{{if eq .GoType "string"}}	{{.Name}} string `query:"{{.JSONName}}" doc:"Filter by {{.JSONName}}"`
+{{end}}{{end}}}
+
+// ToFilters converts query params to repo.Filter values (Filterable pattern).
+func (q *List{{.Entity}}sInput) ToFilters() []repo.Filter {
+	var fs repo.FilterSet
+{{range .Fields}}{{if eq .GoType "string"}}	fs.AddIf(q.{{.Name}} != "", repo.Like("{{.DBColumn}}", q.{{.Name}}))
+{{end}}{{end}}	return fs.Build()
+}
+
+// Create{{.Entity}}Input wraps the JSON body for POST /api/v1/{{.EntityLower}}s.
+// Huma validates the body via JSON Schema: fields without omitempty are required;
+// maxLength:"N" tags enforce length limits. No separate validator library needed.
+type Create{{.Entity}}Input struct {
+	Body {{.Entity}}Body
+}
+
+// Update{{.Entity}}Input combines the path id and JSON body for PUT.
+type Update{{.Entity}}Input struct {
+	ID   string `path:"id"`
+	Body {{.Entity}}Body
+}
+
+// Delete{{.Entity}}Input binds path params for DELETE.
+type Delete{{.Entity}}Input struct {
+	ID string `path:"id"`
+}
+
+// ── Request body ────────────────────────────────────────────────────────────
+
+// {{.Entity}}Body is the JSON body shared by POST + PUT (the only difference
+// at the HTTP layer is the path-bound `id` on Update — already lifted into
+// Update{{.Entity}}Input). Required fields omit omitempty so huma marks them
+// required in the JSON Schema; optional (nullable) fields carry omitempty;
+// maxLength:"N" sets the schema constraint.
+type {{.Entity}}Body struct {
+{{range .Fields}}	{{.Name}} {{.GoType}} `json:"{{.JSONName}}{{if not (isRequired .Validate)}},omitempty{{end}}"{{if parseMaxLength .Validate}} maxLength:"{{parseMaxLength .Validate}}"{{end}}`
+{{end}}}
+
+// toDomain materialises a domain.{{.Entity}} from the request body. Pass an
+// empty id for Create (service assigns); the path id for Update.
+func (b {{.Entity}}Body) toDomain(id string) *domain.{{.Entity}} {
+	return &domain.{{.Entity}}{
+		ID: id,
+{{range .Fields}}		{{.Name}}: b.{{.Name}},
+{{end}}	}
+}

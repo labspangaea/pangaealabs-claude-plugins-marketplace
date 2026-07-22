@@ -1,0 +1,55 @@
+// Package apperr defines application-specific API error codes.
+// These extend the built-in codes from go-lib/apierr.
+//
+// Use a high base (1000+) to avoid collisions with library-defined values.
+package apperr
+
+import (
+	"net/http"
+
+	"github.com/labspangaea/go-lib/apierr"
+)
+
+// Service-specific error codes for {{.Entity}}.
+// Base offset: {{.ApperrBase}} — increment by 1000 for each additional entity.
+const (
+	Err{{.Entity}}NotFound            apierr.CodeErrEnum = iota + {{.ApperrBase}}
+	Err{{.Entity}}Expired
+	Err{{.Entity}}Duplicate
+	ErrMissingID
+	Err{{.Entity}}ForeignKeyViolation
+	Err{{.Entity}}ConstraintViolation
+)
+
+func init() {
+	apierr.AppendCodeErrMap(Err{{.Entity}}NotFound, apierr.CodeErr{
+		Message:    "{{.Entity}} not found",
+		Code:       "ERR404100",
+		StatusCode: http.StatusNotFound,
+	})
+	apierr.AppendCodeErrMap(Err{{.Entity}}Expired, apierr.CodeErr{
+		Message:    "{{.Entity}} has expired",
+		Code:       "ERR410100",
+		StatusCode: http.StatusGone,
+	})
+	apierr.AppendCodeErrMap(Err{{.Entity}}Duplicate, apierr.CodeErr{
+		Message:    "{{.Entity}} already exists",
+		Code:       "ERR409100",
+		StatusCode: http.StatusConflict,
+	})
+	apierr.AppendCodeErrMap(ErrMissingID, apierr.CodeErr{
+		Message:    "missing or empty id path parameter",
+		Code:       "ERR400100",
+		StatusCode: http.StatusBadRequest,
+	})
+	apierr.AppendCodeErrMap(Err{{.Entity}}ForeignKeyViolation, apierr.CodeErr{
+		Message:    "referenced resource does not exist",
+		Code:       "ERR422100",
+		StatusCode: http.StatusUnprocessableEntity,
+	})
+	apierr.AppendCodeErrMap(Err{{.Entity}}ConstraintViolation, apierr.CodeErr{
+		Message:    "value violates a database constraint",
+		Code:       "ERR400101",
+		StatusCode: http.StatusBadRequest,
+	})
+}

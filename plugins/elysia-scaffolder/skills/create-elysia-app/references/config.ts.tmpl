@@ -1,0 +1,87 @@
+/** Env-driven configuration (Bun.env / process.env), with sane defaults. */
+
+export interface Config {
+  serviceName: string;
+  version: string;
+  instanceId: string;
+  port: number;
+  databaseDsn: string;
+  dbLogLevel: 'silent' | 'warn' | 'info';
+  redisAddr: string;
+  redisPassword: string;
+  redisDb: number;
+  cacheTtlMs: number;
+  cacheJitterFactor: number;
+<% if (Cache === 'memory') { %>  memoryCacheCapacity: number;
+<% } %><% if (Cache === 'couchbase') { %>  couchbaseUrl: string;
+  couchbaseUsername: string;
+  couchbasePassword: string;
+  couchbaseBucket: string;
+<% } %>
+  serviceBackend: string;
+  docsEnabled: boolean;
+  httpShutdownTimeoutMs: number;
+<% if (Type !== 'api') { %>  // message broker
+  kafkaBrokers: string[];
+  topic: string;
+  consumerGroup: string;
+  rabbitmqUrl: string;
+  exchange: string;
+  brokerRedisAddr: string;
+  brokerRedisPassword: string;
+  brokerRedisDb: number;
+<% } %>}
+
+function env(key: string, fallback: string): string {
+  return process.env[key] ?? fallback;
+}
+function envInt(key: string, fallback: number): number {
+  const v = process.env[key];
+  if (v === undefined) return fallback;
+  const n = Number.parseInt(v, 10);
+  return Number.isFinite(n) ? n : fallback;
+}
+function envFloat(key: string, fallback: number): number {
+  const v = process.env[key];
+  if (v === undefined) return fallback;
+  const n = Number.parseFloat(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+function envBool(key: string, fallback: boolean): boolean {
+  const v = process.env[key];
+  if (v === undefined) return fallback;
+  return v === 'true' || v === '1';
+}
+
+export function loadConfig(): Config {
+  return {
+    serviceName: env('SERVICE_NAME', '<%= Name %>'),
+    version: env('SERVICE_VERSION', '0.1.0'),
+    instanceId: env('SERVICE_INSTANCE_ID', 'local'),
+    port: envInt('PORT', 8080),
+    databaseDsn: env('DATABASE_DSN', 'postgres://admin:admin@localhost:5432/appdb'),
+    dbLogLevel: env('DB_LOG_LEVEL', 'warn') as Config['dbLogLevel'],
+    redisAddr: env('REDIS_ADDR', 'localhost:6379'),
+    redisPassword: env('REDIS_PASSWORD', ''),
+    redisDb: envInt('REDIS_DB', 0),
+    cacheTtlMs: envInt('CACHE_TTL_MS', 300_000),
+    cacheJitterFactor: envFloat('CACHE_JITTER_FACTOR', 0.1),
+<% if (Cache === 'memory') { %>    memoryCacheCapacity: envInt('MEMORY_CACHE_CAPACITY', 10_000),
+<% } %><% if (Cache === 'couchbase') { %>    couchbaseUrl: env('COUCHBASE_URL', 'couchbase://localhost'),
+    couchbaseUsername: env('COUCHBASE_USERNAME', 'admin'),
+    couchbasePassword: env('COUCHBASE_PASSWORD', 'admin'),
+    couchbaseBucket: env('COUCHBASE_BUCKET', 'cache'),
+<% } %>
+    serviceBackend: env('SERVICE_BACKEND', 'stub'),
+    docsEnabled: envBool('DOCS_ENABLED', false),
+    httpShutdownTimeoutMs: envInt('HTTP_SHUTDOWN_TIMEOUT_MS', 10_000),
+<% if (Type !== 'api') { %>    kafkaBrokers: env('KAFKA_BROKERS', 'localhost:9092').split(',').map((s) => s.trim()).filter(Boolean),
+    topic: env('TOPIC', '<%= EntityLower %>s'),
+    consumerGroup: env('CONSUMER_GROUP', '<%= Name %>'),
+    rabbitmqUrl: env('RABBITMQ_URL', 'amqp://guest:guest@localhost:5672/'),
+    exchange: env('EXCHANGE', '<%= EntityLower %>s'),
+    brokerRedisAddr: env('BROKER_REDIS_ADDR', 'localhost:6379'),
+    brokerRedisPassword: env('BROKER_REDIS_PASSWORD', ''),
+    brokerRedisDb: envInt('BROKER_REDIS_DB', 1),
+<% } %>  };
+}

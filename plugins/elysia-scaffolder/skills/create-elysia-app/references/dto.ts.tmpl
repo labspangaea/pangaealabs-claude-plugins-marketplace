@@ -1,0 +1,40 @@
+/**
+ * TypeBox DTOs for the <%= Entity %> HTTP boundary. TypeBox drives both runtime
+ * validation AND the OpenAPI schema (single source of truth). The wire is
+ * snake_case; the domain is camelCase — bodyToInput/toResponse map between them.
+ */
+import { t } from 'elysia';
+import type { Static } from '@sinclair/typebox';
+import type { <%= Entity %>, <%= Entity %>Input } from '../../../domain/<%= EntityLower %>.ts';
+
+/** Create/Update request body. Required fields omit Optional; maxLength enforced. */
+export const <%= Entity %>Body = t.Object({
+<% for (const f of Fields) { var bt = baseType(f.GoType); var ml = parseMaxLength(f.Validate); var inner; if (bt === 'string') { inner = ml > 0 ? `t.String({ maxLength: ${ml} })` : 't.String()'; } else if (bt === 'number') { inner = 't.Number()'; } else if (bt === 'boolean') { inner = 't.Boolean()'; } else if (bt === 'Date') { inner = "t.String({ format: 'date-time' })"; } else { inner = 't.String()'; } if (isNullable(f.GoType)) { inner = `t.Union([${inner}, t.Null()])`; } if (!isRequired(f.Validate)) { inner = `t.Optional(${inner})`; } %>  <%= f.JSONName %>: <%= inner %>,
+<% } %>});
+export type <%= Entity %>BodyType = Static<typeof <%= Entity %>Body>;
+
+/** Response shape (snake_case wire); timestamps serialized as ISO strings. */
+export const <%= Entity %>Response = t.Object({
+  id: t.String(),
+<% for (const f of Fields) { var bt = baseType(f.GoType); var inner; if (bt === 'number') { inner = 't.Number()'; } else if (bt === 'boolean') { inner = 't.Boolean()'; } else { inner = 't.String()'; } if (isNullable(f.GoType)) { inner = `t.Union([${inner}, t.Null()])`; } %>  <%= f.JSONName %>: <%= inner %>,
+<% } %>  created_at: t.String(),
+  updated_at: t.String(),
+});
+export type <%= Entity %>ResponseType = Static<typeof <%= Entity %>Response>;
+
+/** bodyToInput maps the snake_case wire body to the camelCase domain input. */
+export function bodyToInput(b: <%= Entity %>BodyType): <%= Entity %>Input {
+  return {
+<% for (const f of Fields) { %>    <%= f.Name %>: <% if (isNullable(f.GoType)) { %>b.<%= f.JSONName %> ?? null<% } else { %>b.<%= f.JSONName %><% } %>,
+<% } %>  };
+}
+
+/** toResponse maps a domain <%= Entity %> to the snake_case wire shape. */
+export function toResponse(o: <%= Entity %>): <%= Entity %>ResponseType {
+  return {
+    id: o.id,
+<% for (const f of Fields) { %>    <%= f.JSONName %>: <% if (baseType(f.GoType) === 'Date') { %>o.<%= f.Name %>.toISOString()<% } else { %>o.<%= f.Name %><% } %>,
+<% } %>    created_at: o.createdAt.toISOString(),
+    updated_at: o.updatedAt.toISOString(),
+  };
+}

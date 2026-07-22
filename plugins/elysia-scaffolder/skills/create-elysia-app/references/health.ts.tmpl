@@ -1,0 +1,9 @@
+/** Liveness + version endpoints. */
+import { Elysia } from 'elysia';
+import { data } from '@labspangaea/ts-lib/response';
+
+export function healthController(version: string) {
+  return new Elysia()
+    .get('/healthz', () => data('ok'))
+    .get('/version', () => data(version));
+}
