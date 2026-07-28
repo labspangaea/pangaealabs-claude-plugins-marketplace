@@ -38,7 +38,8 @@ critiques never need to open a reference at all.
 
 | | |
 |---|---|
-| Contrast, body text | **≥ 4.5:1** · large text (18pt / 14pt bold) and UI components **≥ 3:1** |
+| Contrast, body text | **≥ 4.5:1** · large text (18pt / 14pt bold) **≥ 3:1** |
+| Contrast, non-text | **≥ 3:1** — borders, focus rings, icons, chart strokes (WCAG 1.4.11). The commonly-missed one |
 | Colour alone | never the only carrier of meaning — always pair with label, icon, shape or position |
 | Typefaces | **2–3 maximum**; weights within one family are free |
 | Measure (line length) | **45–75 characters**, ~66 ideal; 40–60 on screen |
@@ -140,8 +141,15 @@ adjectives:
 
 Work in this order. It runs cheapest-to-check first, and roughly in the order a viewer's eye does.
 
-1. **Legibility floor** — is body text ≥ 4.5:1 and large text ≥ 3:1 against its background? Is any
-   meaning carried by colour alone? (`color.md` §8) *This is pass/fail, not preference — check it
+1. **Legibility floor** — body text ≥ 4.5:1, large text ≥ 3:1, and **non-text ≥ 3:1: component
+   borders, focus rings, icons, chart strokes** — any boundary the user must perceive (WCAG 1.4.11).
+   Check the non-text cases explicitly; they are the ones reviews miss, because a button whose label
+   passes at 13:1 can have a border at 2:1, and the border is what tells you the button is there.
+   Then: is any meaning carried by colour alone? (`color.md` §8)
+
+   Run the numbers rather than judging from the render — `scripts/contrast.py` takes a pair
+   (`python3 scripts/contrast.py "#713946" "#270710" ui`) or a TSV of them via `--pairs`, and reports
+   the verdict against the threshold that applies. *This is pass/fail, not preference — check it
    first so you never approve a beautiful unreadable thing.*
 2. **Colour** — is there an identifiable scheme, or arbitrary colours? Is the 60/30/10 proportion
    deliberate, with real contrast between primary and secondary? (`color.md` §2–3)

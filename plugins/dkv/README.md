@@ -1,7 +1,7 @@
 # dkv — graphic-design fundamentals
 
 **DKV** (*Desain Komunikasi Visual*) turns design theory into a working review method. One skill,
-five reference files, no scripts and no dependencies — it is pure knowledge, loaded on demand.
+five reference files, and one small script — no dependencies beyond Python 3.
 
 ## The skill
 
@@ -30,6 +30,11 @@ images.
 | `references/principles.md` | the cross-cutting index — CRAP, KISS, contrast, hierarchy, repetition — each pointing at the file where it is operationalised |
 
 The router in `SKILL.md` means only the relevant one or two files are ever read.
+
+`scripts/contrast.py` computes WCAG ratios and reports the verdict against the threshold that
+applies — including **`ui` (3:1) for non-text**: borders, focus rings, icons, chart strokes. That
+case is the one reviews miss, since a button label can pass at 13:1 while its border fails at 2:1,
+and the border is what tells you the button is there. Run `--selfcheck` to verify it.
 
 ## Sourcing
 

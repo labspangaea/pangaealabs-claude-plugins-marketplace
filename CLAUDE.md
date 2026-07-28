@@ -23,7 +23,8 @@ by Pangaea Labs. Today it ships five plugins: **`docsmith`** (markdown → on-br
 | `plugins/testcraft/` | second plugin — **user flows → test cases**; everything under here installs to users |
 | `plugins/testcraft/skills/{testcase-importer,userflow-to-testcases}/` | the two user-facing skills (each `SKILL.md` + `scripts/` + `references/`) |
 | `plugins/testcraft/agents/` | `testcase-architect`, `testcase-vapt-auditor` subagents (self-contained — no project-`CLAUDE.md` dependency) |
-| `plugins/dkv/` | third plugin — **graphic-design fundamentals**; pure knowledge, no scripts/assets/agents |
+| `plugins/dkv/` | third plugin — **graphic-design fundamentals**; knowledge + one script, no assets/agents |
+| `plugins/dkv/skills/design-fundamentals/scripts/contrast.py` | WCAG ratios + verdict per threshold. **`ui` (3:1, non-text) is the case reviews miss** — a label can pass at 13:1 while its border fails at 2:1. Has `--selfcheck`. |
 | `plugins/dkv/skills/design-fundamentals/` | the only user-facing skill (`SKILL.md` router + rubric) |
 | `plugins/dkv/skills/design-fundamentals/references/` | `color.md`, `typography.md`, `layout.md`, `gestalt.md`, `principles.md` — section-numbered so `SKILL.md` cites `§N`. **`principles.md` is an index, not a peer doc** — contrast/hierarchy/repetition live where they're operationalised; don't restate them there. |
 | `plugins/{go-scaffolder,elysia-scaffolder}/` | the two service scaffolders (5 skills each) |
