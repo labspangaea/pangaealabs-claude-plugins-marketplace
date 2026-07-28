@@ -1,8 +1,10 @@
 # CLAUDE.md — pangaealabs-claude-plugins-marketplace
 
 Maintainer/agent guidance for this repo. This is a **Claude Code plugin marketplace**
-by Pangaea Labs. Today it ships two plugins: **`docsmith`** (markdown → on-brand PDFs)
-and **`testcraft`** (user flows → test-case suite + offline HTML console).
+by Pangaea Labs. Today it ships five plugins: **`docsmith`** (markdown → on-brand PDFs),
+**`testcraft`** (user flows → test-case suite + offline HTML console), **`dkv`**
+(graphic-design fundamentals → design critique + direction), and the two scaffolders
+**`go-scaffolder`** / **`elysia-scaffolder`**.
 
 ## Layout
 
@@ -21,6 +23,10 @@ and **`testcraft`** (user flows → test-case suite + offline HTML console).
 | `plugins/testcraft/` | second plugin — **user flows → test cases**; everything under here installs to users |
 | `plugins/testcraft/skills/{testcase-importer,userflow-to-testcases}/` | the two user-facing skills (each `SKILL.md` + `scripts/` + `references/`) |
 | `plugins/testcraft/agents/` | `testcase-architect`, `testcase-vapt-auditor` subagents (self-contained — no project-`CLAUDE.md` dependency) |
+| `plugins/dkv/` | third plugin — **graphic-design fundamentals**; pure knowledge, no scripts/assets/agents |
+| `plugins/dkv/skills/design-fundamentals/` | the only user-facing skill (`SKILL.md` router + rubric) |
+| `plugins/dkv/skills/design-fundamentals/references/` | `color.md`, `typography.md`, `layout.md`, `gestalt.md`, `principles.md` — section-numbered so `SKILL.md` cites `§N`. **`principles.md` is an index, not a peer doc** — contrast/hierarchy/repetition live where they're operationalised; don't restate them there. |
+| `plugins/{go-scaffolder,elysia-scaffolder}/` | the two service scaffolders (5 skills each) |
 | `dev/` | **dev/eval workspaces — NOT shipped** (moved out of `plugins/` on purpose) |
 | `dev/docsmith-workspace/trigger-evals.json` | the skill-triggering eval set (20 queries) |
 
@@ -46,6 +52,27 @@ Severity_Reasoning, Transition, Title, Steps / Test Data, Expected Result + Down
 Fix` — is the interchange format between both skills and the console; the bundled
 `validate_cases.py` is the importer-ready gate. No monitors/evals ship here — testcraft's eval
 workspaces live in its originating project, not this repo.
+
+## `dkv` (third plugin — design theory → critique + direction)
+
+`plugins/dkv/` ships one skill, `design-fundamentals`, and no code. `SKILL.md` is a router + review
+rubric; five section-numbered reference files hold the theory, and only the relevant one or two are
+ever read.
+
+**The sourcing convention is load-bearing — don't strip it when editing.** Unmarked statements are
+ordinary craft convention (each file says so at the top). Two things are marked inline:
+
+- **`⚠ contested`** — popular but weakly supported, with what's actually known. There are exactly
+  four: φ as a law of beauty (Zeising/Devlin), pink lowering heart rate (Baker-Miller, failed
+  replication), the 80% brand-recognition figure (miscited Hoadley 1990), and 60/30/10's empirical
+  status. Removing these tags is how the plugin becomes just another confident design-folklore
+  repeater, which is the exact failure mode it exists to avoid.
+- **citations** — wherever a specific number does the work (WCAG ratios, 45–75 measure,
+  NN/g scan patterns, Müller-Brockmann, Paoletti).
+
+`gestalt.md` covers the full canonical set of ten grouping laws, including Prägnanz, common region
+and uniform connectedness — §11's strength ordering (connectedness > region > proximity >
+similarity) is the part a critique actually needs, so keep it if the file is ever trimmed.
 
 ## The `npx` installer (`installer/` — cross-agent install, NOT the Claude plugin)
 

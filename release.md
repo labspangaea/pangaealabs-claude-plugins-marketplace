@@ -6,6 +6,23 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## dkv 0.1.0 — 2026-07-28
+Add dkv: graphic-design fundamentals as a working review method.
+- Added to this marketplace at version 0.1.0.
+- One skill, `design-fundamentals`, in two modes — CRITIQUE an existing design (structured review
+  pass, impact-ranked fixes, per-finding severity) or DIRECT a new one (palette with hex +
+  60/30/10 + measured contrast ratios, type pairing on a modular scale, grid strategy). Covers
+  graphic design and UI; explicitly defers frontend code to `frontend-design`/`impeccable`, PDF
+  rendering to docsmith's `make-pdf`, and chart colours to `dataviz`.
+- Five reference files behind a router (`color`, `typography`, `layout`, `gestalt`, `principles`),
+  section-numbered so `SKILL.md` cites `§N` instead of loading whole files. Pure knowledge — no
+  scripts, no assets, no agents, no installer changes.
+- Validated against the literature rather than assembled from received wisdom. Carries the numbers
+  most design advice omits — the WCAG contrast floor, colour-blind-safe palettes (Okabe–Ito), the
+  45–75 character measure, 120–150% leading, Müller-Brockmann grid provenance, the 8pt grid — and
+  marks four popular-but-unsupported claims (φ as a law of beauty, Baker-Miller pink, the 80%
+  brand-recognition figure, 60/30/10's empirical status) rather than repeating them.
+
 ## go-scaffolder 0.13.0 — 2026-07-21
 Add go-scaffolder: scaffold production-ready Go services wired to go-lib.
 - Added to this marketplace at version 0.13.0.

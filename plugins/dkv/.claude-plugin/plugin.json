@@ -1,0 +1,8 @@
+{
+  "name": "dkv",
+  "description": "Graphic-design fundamentals as a working review method — colour theory, typography, layout and grid, Gestalt principles, and visual hierarchy — applied to any visual work: posters, social posts, slide decks, packaging, logos, landing pages, dashboards. The `design-fundamentals` skill runs in two modes: CRITIQUE an existing design against a structured review pass with impact-ranked fixes, or DIRECT a new one with a proportioned palette, a type pairing on a modular scale, and a grid strategy. Validated against the literature rather than assembled from received wisdom — it carries the numbers most design advice omits (WCAG contrast floors, the 45-75 character measure, 120-150% leading, the 8pt grid) and marks the popular-but-unsupported claims (the golden ratio as a law of beauty, Baker-Miller pink, the 80% brand-recognition figure) instead of repeating them.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Pangaea Labs"
+  }
+}
