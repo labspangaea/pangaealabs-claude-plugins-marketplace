@@ -74,12 +74,35 @@ Accessibility detail is `references/color.md` §8. Reading patterns (F/Z) are `r
 
 When there is an existing design: an image, screenshot, deck, URL, or a description of one.
 
-1. **Look before judging.** Name what the piece is, who it is for, and what it is trying to make the
-   viewer do. A critique that ignores the brief just imposes taste — a dense data dashboard and a
-   luxury perfume poster fail completely different tests.
-2. **Run the review pass** below, reading the reference sections it points to.
-3. **Report.** Lead with the two or three highest-impact problems, then the rest. A critique nobody
+1. **See all of it before judging any of it.** For anything longer than one screen — a scrolling
+   page, a multi-slide deck, a set of screens — enumerate the parts first (from the source, a
+   section list, or a full-page capture), then confirm you have actually viewed each one. Scrolling
+   in big jumps and reporting on what you happened to land on produces a confident-looking list with
+   silent holes, and the reader cannot tell which parts you never opened. **State your coverage and
+   viewport in the answer** — "at 1440×900, all seven sections" is checkable; a bare list of findings
+   is not. If you did sample, say which parts you skipped. An honest partial review is useful; an
+   unmarked one is misleading, because "no findings there" and "I never looked" are indistinguishable.
+2. **Look for stated intent.** Source files and captions often carry the designer's reasoning —
+   comments, notes, a line of copy explaining an unusual choice. Read it before calling anything
+   broken. An uneven grid the caption explains, or a spacing decision documented in a comment, is a
+   *decision you are reviewing*, not a mistake you are catching. Disagree if you have grounds, but
+   argue with the reasoning rather than reporting it as an accident.
+3. **Name what the piece is** — medium, audience, and what it is trying to make the viewer do. A
+   critique that ignores the brief just imposes taste; a dense data dashboard and a luxury perfume
+   poster fail completely different tests.
+4. **Run the review pass** below, reading the reference sections it points to.
+5. **Report.** Lead with the two or three highest-impact problems, then the rest. A critique nobody
    acts on is worthless, and a flat list of fifteen findings does not get acted on.
+
+**Measure before you trust your eye, and say which won.** Contrast, spans, sizes and margins are all
+checkable against the source — do that rather than judging from the render. Your impression is a
+hypothesis: a colour that looks too dim may measure fine, and a grid that looks ragged may sum
+exactly. When a measurement overrules your impression, report the measurement and note that it did,
+because "this looked wrong and isn't" is information the reader needs.
+
+**A finding someone else reports is a hypothesis too.** If a claim arrives from another review, a
+colleague, or a previous session, verify it against the artifact in front of you before repeating or
+fixing it. Files change, and a real finding about last week's version is a false one today.
 
 Use this shape:
 
