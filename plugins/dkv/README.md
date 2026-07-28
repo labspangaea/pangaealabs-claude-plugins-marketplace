@@ -33,8 +33,13 @@ The router in `SKILL.md` means only the relevant one or two files are ever read.
 
 ## Sourcing
 
-Checked against the literature rather than assembled from received wisdom, because a lot of
-widely-shared design advice is folklore. Two things are marked inline:
+The point of this plugin is **consistency**, not secret knowledge. A capable model already gives good
+design advice; what it does not do reliably is state its audience assumption every time, always check
+contrast against a real floor, always derive sizes from a named scale, and always structure a
+critique so the top three fixes are obvious. This makes those the default rather than the good day.
+
+The content is checked against the literature rather than assembled from received wisdom, because a
+lot of widely-shared design advice is folklore. Two things are marked inline:
 
 - **⚠ contested** — popular but weakly supported. There are four, and they are the point:
   - *the golden ratio as a law of beauty* — traces to Adolf Zeising in the 1850s; no scientific

@@ -146,12 +146,19 @@ Worked example at base 16px, ratio 1.25: `16 → 20 → 25 → 31 → 39 → 49`
 `16 → 26 → 42 → 68` — only four usable steps, which is why φ suits posters and title slides more
 than interfaces.
 
-⚠ **contested — φ as a law of beauty.** The claim that 1.618 governs aesthetic preference traces to
-Adolf Zeising in the 1850s, who saw the ratio in places it is not; Keith Devlin and others find no
-scientific support for φ driving what people find beautiful, and the famous attributions to the
-Parthenon and the Mona Lisa are retrofitted. **φ remains a perfectly good scale ratio — it is simply
-one option among several, not the correct one.** Choose your ratio by how much hierarchy contrast the
-project needs.
+⚠ **contested — φ as a law of beauty.** The idea that 1.618 governs aesthetic preference was
+popularised by Adolf Zeising in the 1850s, who saw the ratio in places it is not. Its empirical
+origin is Fechner's 1876 rectangle-preference experiments — and the replications did not hold:
+Godkewitsch (1974) and Green's 1995 review of the literature found the preference disappears once
+stimulus range and context are controlled. What survives is a mild preference for a *broad band* of
+ratios roughly between 1.4 and 1.8, within which **1.618 is not special**. The Parthenon and Mona
+Lisa attributions were fitted after the fact; you can fit a golden rectangle to almost anything.
+
+**φ remains a perfectly good scale ratio — one option among several, not the correct one.** Choose
+your ratio by how much hierarchy contrast the project needs, and note that φ's steep steps mean you
+run out of usable sizes fast: a UI needing screen title, section title, subhead, body, caption, label
+and legal text will exhaust a φ scale and start inventing off-system sizes, which is the exact
+problem a scale exists to prevent.
 
 Hierarchy is then built from **size, weight and colour together** — headline, subheadline, body,
 caption. Changing only one channel produces weak hierarchy; changing all three at once on every level

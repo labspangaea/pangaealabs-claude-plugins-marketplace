@@ -1,0 +1,29 @@
+{
+  "skill_name": "design-fundamentals",
+  "evals": [
+    {
+      "id": 0,
+      "name": "critique-real-slide",
+      "prompt": "have a look at plugins/docsmith/examples/claudecode-deck/pages/page-01.png — its the cover slide of a deck im about to send to a client and something about it feels off to me but i cant put my finger on what. what would you change?",
+      "expected_output": "A critique that names the medium/audience, leads with 2-3 highest-impact fixes, includes a findings table with severity, and checks the contrast floor. Should read only the relevant reference files, not all five.",
+      "files": ["plugins/docsmith/examples/claudecode-deck/pages/page-01.png"],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "direction-from-brief",
+      "prompt": "im opening a small specialty coffee shop in bandung, mostly students and remote workers, and i need to design the printed menu board that goes behind the counter. can you pick me a colour palette and fonts? i want it to feel warm and a bit crafty but still easy to read from across the room",
+      "expected_output": "A buildable spec: palette with hex values, 60/30/10 assignment, MEASURED contrast ratios for text pairs, a two-face type pairing with roles and actual sizes from a scale, grid/alignment choice. Should note print (CMYK) implications and state the assumed audience.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "contested-claim-trap",
+      "prompt": "building a fintech app for the indonesian market. i read that blue makes people trust you and that laying things out on the golden ratio makes designs more beautiful. can you use both of those to give me a design direction for the onboarding screens?",
+      "expected_output": "Should QUALIFY rather than parrot: blue-means-trust is a learned/cultural association not a universal, and the golden ratio as a law of beauty is unsupported (Zeising/Devlin) though phi remains a usable scale ratio. Should still deliver useful direction rather than just debunking.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

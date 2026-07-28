@@ -31,21 +31,44 @@ Two things make this more useful than reciting principles. First, the reference 
 contains a lot of confidently-repeated folklore, and passing it on unqualified is how you give
 advice that sounds authoritative and is wrong.
 
-## Router — read only what you need
+## The numbers, inline
 
-Do not read all five files. Read the one or two that cover the question; each is sectioned so you
-can cite `references/color.md` §3 rather than the whole file.
+These come up in almost every review, so they live here rather than behind a file read. Most
+critiques never need to open a reference at all.
+
+| | |
+|---|---|
+| Contrast, body text | **≥ 4.5:1** · large text (18pt / 14pt bold) and UI components **≥ 3:1** |
+| Colour alone | never the only carrier of meaning — always pair with label, icon, shape or position |
+| Typefaces | **2–3 maximum**; weights within one family are free |
+| Measure (line length) | **45–75 characters**, ~66 ideal; 40–60 on screen |
+| Leading | **120–150%** of size for body; tighter (1.0–1.2) for headlines |
+| Palette proportion | **60 / 30 / 10** — and the real contrast sits between the 60 and the 30 |
+| Type scale | pick a ratio and stick to it: 1.2 / 1.25 / 1.333 conservative → dramatic; φ 1.618 gives only ~4 usable steps |
+| Screen spacing | multiples of **8** |
+
+## Router — one file, occasionally two
+
+Open a reference when you need the *reasoning* behind one of these, or when the question goes
+beyond them. Each file is sectioned, so cite `references/color.md` §3 rather than reading around.
 
 | The question / symptom | Read |
 |---|---|
-| Palette, colour scheme, "these colours clash", brand colour, print vs screen, is this readable | `references/color.md` |
-| Font choice, pairing, "what goes with X", sizes, hierarchy scale, body copy looks messy | `references/typography.md` |
-| Composition, placement, grid, alignment, spacing, "it looks empty/cramped", balance | `references/layout.md` |
-| Grouping, "these don't look related", scan order, logo negative space, what the eye does first | `references/gestalt.md` |
-| "It just looks off" with no specific symptom · a general review · which principle applies | `references/principles.md` first — it indexes the rest |
+| Palette, colour scheme, "these colours clash", brand colour, print vs screen, colour meaning | `references/color.md` |
+| Font choice, pairing, "what goes with X", scale, body copy looks messy | `references/typography.md` |
+| Composition, placement, grid, alignment, white space, "it looks empty/cramped", balance | `references/layout.md` |
+| Grouping, "these don't look related", scan order, logo negative space, what the eye sees first | `references/gestalt.md` |
+| Which principle applies to a symptom you can't name yet | `references/principles.md` — index only, ~60 lines |
 
-Accessibility questions (contrast, colour blindness) are in `references/color.md` §8. Reading
-patterns (F/Z) are in `references/gestalt.md` §2, not layout.
+**A vague brief is not a licence to read everything.** "Something feels off", "review this", "give me
+a direction" are the *most* common openings, and they tempt you to load all five files just in case.
+Don't: look at the artifact first, let it tell you which one or two axes are actually failing, then
+open those. Reading five files to produce one critique costs a large multiple of the tokens and
+reliably produces a worse answer — a flat recital of every principle instead of a judgement about
+this piece. **If you have opened three, stop and write.**
+
+Accessibility detail is `references/color.md` §8. Reading patterns (F/Z) are `references/gestalt.md`
+§2, not layout.
 
 ## Mode A — Critique
 
