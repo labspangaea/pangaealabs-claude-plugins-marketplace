@@ -1,0 +1,23 @@
+//go:build !stub
+// +build !stub
+
+package service
+
+import (
+	"{{.Module}}/config"
+	"{{.Module}}/internal/port"
+)
+
+// New{{.Entity}}Service is the composition-root entry point for constructing
+// the {{.EntityLower}} service. Under default builds (no `-tags=stub`) this
+// returns the production service; cfg.ServiceBackend is ignored because the
+// stub backend is not linked into the binary.
+//
+// The factory shape exists so cmd/{{.Name}}/main.go can call one function
+// regardless of build tag — the stub-tagged variant of this file (in
+// factory_stub.go) switches on cfg.ServiceBackend to choose between the
+// real service and the stub.
+func New{{.Entity}}Service(cfg config.Config, repo port.{{.Entity}}Repository) port.{{.Entity}}Service {
+	_ = cfg // honored only by the stub-tagged build
+	return New(repo)
+}

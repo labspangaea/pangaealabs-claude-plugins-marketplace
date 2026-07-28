@@ -1,0 +1,26 @@
+/**
+ * Inbound adapter: the <%= Entity %> message subscriber. Decodes a broker message
+ * (JSON, snake_case wire) and applies it via the service — the message-driven
+ * analogue of the HTTP controller. Resolve = ack; throw = nack/requeue.
+ */
+import { Buffer } from 'node:buffer';
+import { fromContext } from '@labspangaea/ts-lib/logger';
+import type { Message } from '@labspangaea/ts-lib/pubsub';
+import type { <%= Entity %>Service } from '../../../port/<%= EntityLower %>-service.ts';
+
+export class <%= Entity %>Subscriber {
+  constructor(private readonly svc: <%= Entity %>Service) {}
+
+  handle = async (msg: Message): Promise<void> => {
+    const log = fromContext();
+    const text =
+      typeof msg.payload === 'string' ? msg.payload : Buffer.from(msg.payload).toString('utf8');
+    const ev = JSON.parse(text) as Record<string, unknown>;
+
+    await this.svc.create({
+<% for (const f of Fields) { %>      <%= f.Name %>: <% if (isNullable(f.GoType)) { %>(ev.<%= f.JSONName %> ?? null) as <%= f.GoType %><% } else { %>ev.<%= f.JSONName %> as <%= f.GoType %><% } %>,
+<% } %>    });
+
+    log.info({ id: msg.id }, '<%= EntityLower %> event processed');
+  };
+}

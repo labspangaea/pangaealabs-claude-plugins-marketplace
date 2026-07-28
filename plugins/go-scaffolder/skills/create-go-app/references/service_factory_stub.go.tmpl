@@ -1,0 +1,39 @@
+//go:build stub
+// +build stub
+
+package service
+
+import (
+	"fmt"
+
+	"{{.Module}}/config"
+	"{{.Module}}/internal/port"
+	"{{.Module}}/internal/service/stub"
+)
+
+// New{{.Entity}}Service is the stub-build entry point for constructing the
+// {{.EntityLower}} service. cfg.ServiceBackend chooses between:
+//
+//   - "stub" (default in fresh scaffolds) — returns the canned-response stub.
+//     No external dependencies required; great for FE/BE parallel work.
+//   - "real" — returns the production service. Still requires whatever
+//     external deps the real service needs (DB, cache, etc.).
+//
+// Any other value panics at startup. The mismatch is loud on purpose:
+// silently falling through to "real" when an operator typos the env var
+// would defeat the point of having a stub mode.
+//
+// To remove the stub entirely once business logic is ready:
+//   1. Delete this file and internal/service/stub/.
+//   2. Delete ServiceBackend from config/config.go.
+//   3. Inline `return New(repo)` from factory_default.go into main.go.
+func New{{.Entity}}Service(cfg config.Config, repo port.{{.Entity}}Repository) port.{{.Entity}}Service {
+	switch cfg.ServiceBackend {
+	case "stub", "":
+		return stub.New{{.Entity}}()
+	case "real":
+		return New(repo)
+	default:
+		panic(fmt.Sprintf("config: SERVICE_BACKEND=%q is invalid (must be %q or %q)", cfg.ServiceBackend, "stub", "real"))
+	}
+}

@@ -1,0 +1,143 @@
+// Package httphandler provides HTTP request handlers for the {{.Name}} API.
+// Handlers are framework-agnostic: huma derives the OpenAPI spec from the
+// input/output struct types in {{.EntityLower}}_dto.go and dispatches via the
+// chosen framework's adapter (constructed in main).
+package httphandler
+
+import (
+	"context"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/labspangaea/go-lib/db/repo"
+	humares "github.com/labspangaea/go-lib/httpx/humaresponse"
+
+	"{{.Module}}/internal/domain"
+)
+
+// {{.Entity}}Service is the use-case interface this handler depends on. The
+// interface lives in the consumer package (handler) per Go convention so the
+// handler can be exercised in unit tests with a stub. The concrete
+// *service.{{.Entity}} implements every method below structurally.
+type {{.Entity}}Service interface {
+	Find(ctx context.Context, id string) (*domain.{{.Entity}}, error)
+	Create(ctx context.Context, entity *domain.{{.Entity}}) error
+	Update(ctx context.Context, entity *domain.{{.Entity}}) error
+	Delete(ctx context.Context, id string) error
+	List(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, *repo.CursorPage, error)
+	ListOffset(ctx context.Context, p repo.OffsetParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, int64, error)
+}
+
+// {{.Entity}} holds HTTP handler methods for the {{.Entity}} resource.
+type {{.Entity}} struct {
+	svc {{.Entity}}Service
+}
+
+// New{{.Entity}} creates a {{.Entity}} handler with the given service dependency.
+// Accepts any type implementing {{.Entity}}Service (production: *service.{{.Entity}};
+// tests: an in-package stub).
+func New{{.Entity}}(svc {{.Entity}}Service) *{{.Entity}} {
+	return &{{.Entity}}{svc: svc}
+}
+
+// RegisterRoutes binds handler methods to the given huma API. The huma API
+// itself wraps the underlying framework router (constructed in main).
+func (h *{{.Entity}}) RegisterRoutes(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "list-{{.EntityLower}}s",
+		Method:      "GET",
+		Path:        "/api/v1/{{.EntityLower}}s",
+		Summary:     "List {{.Entity}}s",
+		Tags:        []string{"{{.Entity}}"},
+	}, h.list)
+	huma.Register(api, huma.Operation{
+		OperationID: "get-{{.EntityLower}}",
+		Method:      "GET",
+		Path:        "/api/v1/{{.EntityLower}}s/{id}",
+		Summary:     "Get {{.Entity}} by ID",
+		Tags:        []string{"{{.Entity}}"},
+	}, h.find)
+	huma.Register(api, huma.Operation{
+		OperationID:   "create-{{.EntityLower}}",
+		Method:        "POST",
+		Path:          "/api/v1/{{.EntityLower}}s",
+		Summary:       "Create {{.Entity}}",
+		Tags:          []string{"{{.Entity}}"},
+		DefaultStatus: 201,
+	}, h.create)
+	huma.Register(api, huma.Operation{
+		OperationID: "update-{{.EntityLower}}",
+		Method:      "PUT",
+		Path:        "/api/v1/{{.EntityLower}}s/{id}",
+		Summary:     "Update {{.Entity}}",
+		Tags:        []string{"{{.Entity}}"},
+	}, h.update)
+	huma.Register(api, huma.Operation{
+		OperationID:   "delete-{{.EntityLower}}",
+		Method:        "DELETE",
+		Path:          "/api/v1/{{.EntityLower}}s/{id}",
+		Summary:       "Delete {{.Entity}}",
+		Tags:          []string{"{{.Entity}}"},
+		DefaultStatus: 204,
+	}, h.delete)
+}
+
+func (h *{{.Entity}}) find(ctx context.Context, input *Find{{.Entity}}Input) (*humares.DataOutput[*domain.{{.Entity}}], error) {
+	entity, err := h.svc.Find(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+	return humares.Data(entity), nil
+}
+
+func (h *{{.Entity}}) create(ctx context.Context, input *Create{{.Entity}}Input) (*humares.DataOutput[*domain.{{.Entity}}], error) {
+	entity := input.Body.toDomain("") // empty id — service assigns
+	if err := h.svc.Create(ctx, entity); err != nil {
+		return nil, err
+	}
+	return humares.Data(entity), nil
+}
+
+func (h *{{.Entity}}) update(ctx context.Context, input *Update{{.Entity}}Input) (*humares.DataOutput[*domain.{{.Entity}}], error) {
+	entity := input.Body.toDomain(input.ID)
+	if err := h.svc.Update(ctx, entity); err != nil {
+		return nil, err
+	}
+	return humares.Data(entity), nil
+}
+
+func (h *{{.Entity}}) delete(ctx context.Context, input *Delete{{.Entity}}Input) (*struct{}, error) {
+	if err := h.svc.Delete(ctx, input.ID); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+// list dispatches to cursor or offset pagination. Offset >= 0 selects offset
+// pagination; the default sentinel -1 (set in List{{.Entity}}sInput) falls
+// through to cursor (keyset) — preferred for large datasets because it
+// avoids the OFFSET-N performance cliff.
+func (h *{{.Entity}}) list(ctx context.Context, input *List{{.Entity}}sInput) (*humares.ListOutput[[]*domain.{{.Entity}}], error) {
+	if input.Offset >= 0 {
+		params := repo.NewOffsetParams(input.Offset, input.Limit)
+		entities, total, err := h.svc.ListOffset(ctx, params, input.ToFilters()...)
+		if err != nil {
+			return nil, err
+		}
+		return humares.List(entities, humares.WithOffset[[]*domain.{{.Entity}}](&humares.OffsetPagination{
+			Total:   total,
+			Limit:   params.Limit,
+			Offset:  params.Offset,
+			HasNext: int64(params.Offset+params.Limit) < total,
+		})), nil
+	}
+	params := repo.NewCursorParams(input.Cursor, input.Limit, repo.Descending("created_at"), repo.Asc("id"))
+	entities, page, err := h.svc.List(ctx, params, input.ToFilters()...)
+	if err != nil {
+		return nil, err
+	}
+	return humares.List(entities, humares.WithCursor[[]*domain.{{.Entity}}](&humares.CursorPagination{
+		NextCursor: page.NextCursor,
+		HasNext:    page.HasNext,
+		Limit:      page.Limit,
+	})), nil
+}

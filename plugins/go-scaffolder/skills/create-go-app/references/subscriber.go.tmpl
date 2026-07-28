@@ -1,0 +1,53 @@
+// Package subscriber provides message handler functions that bridge pub/sub
+// messages to application service calls.
+package subscriber
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/labspangaea/go-lib/logger"
+	"github.com/labspangaea/go-lib/pubsub"
+
+	"{{.Module}}/internal/service"
+)
+
+// Handler dispatches incoming pub/sub messages to the appropriate service method.
+type Handler struct {
+	svc *service.{{.Entity}}
+}
+
+// NewHandler creates a subscriber handler with the given service dependency.
+func NewHandler(svc *service.{{.Entity}}) *Handler {
+	return &Handler{svc: svc}
+}
+
+// Handle processes a single message. It returns nil to ack the message, or an
+// error to nack/requeue.
+//
+// The context passed by the consumer backend (Kafka, Redis) uses
+// context.WithoutCancel — the handler's own DB/HTTP calls will NOT be aborted
+// during graceful shutdown.
+func (h *Handler) Handle(ctx context.Context, msg pubsub.Message) error {
+	l := logger.FromContext(ctx)
+	l.Info("processing message", "msg_id", msg.ID, "key", msg.Key)
+
+	var event {{.Entity}}Event
+	if err := json.Unmarshal(msg.Payload, &event); err != nil {
+		// Return error to nack — the message will be redelivered or moved to DLQ.
+		return fmt.Errorf("subscriber: unmarshal: %w", err)
+	}
+
+	if err := h.svc.HandleEvent(ctx, &event); err != nil {
+		return fmt.Errorf("subscriber: handle event %s: %w", msg.ID, err)
+	}
+
+	return nil
+}
+
+// {{.Entity}}Event is the deserialized message payload.
+type {{.Entity}}Event struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}

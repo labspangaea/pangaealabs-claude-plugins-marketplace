@@ -1,0 +1,294 @@
+// Package config loads application configuration from environment variables.
+//
+// No external config library is used — os.Getenv with sensible defaults keeps
+// the dependency graph small and the startup fast.
+package config
+
+import (
+	"log/slog"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// Config holds all application settings. Loaded once at startup, treated as
+// immutable afterwards.
+type Config struct {
+	// Service identity — used by logger and telemetry.
+	ServiceName string
+	Version     string
+	InstanceID  string
+
+	// Observability.
+	//
+	// Defaults preserve the local-collector / sidecar pattern (insecure gRPC to
+	// localhost:4317). To push directly to a SaaS backend (New Relic, Truewatch
+	// SaaS, Grafana Cloud) flip OTEL_EXPORTER_OTLP_INSECURE=false and supply
+	// OTEL_EXPORTER_OTLP_HEADERS with the vendor's auth header.
+	OTelEndpoint         string            // OTEL_ENDPOINT
+	OTelProtocol         string            // OTEL_EXPORTER_OTLP_PROTOCOL: "grpc" (default) | "http/protobuf"
+	OTelInsecure         bool              // OTEL_EXPORTER_OTLP_INSECURE: default true (local sidecar)
+	OTelHeaders          map[string]string // OTEL_EXPORTER_OTLP_HEADERS: CSV of k=v (e.g. "api-key=...,x-tenant=...")
+	OTelLogBridgeEnabled bool              // OTEL_LOG_BRIDGE_ENABLED: default false; when true, slog records >= OTelLogMinSeverity also flow to OTLP
+	OTelLogMinSeverity   slog.Level        // OTEL_LOG_MIN_SEVERITY: error (default) | warn | info | debug
+
+	// HTTP server (api and publisher types).
+	HTTPAddr            string
+	HTTPReadTimeout     time.Duration
+	HTTPWriteTimeout    time.Duration
+	HTTPIdleTimeout     time.Duration
+	HTTPShutdownTimeout time.Duration
+{{- if eq .Type "api" }}
+
+	// API documentation (huma OpenAPI + Stoplight Elements UI).
+	// Default false — enable in dev/test only. When false the /docs and
+	// /openapi.json routes are unregistered.
+	DocsEnabled bool
+
+	// Per-request body capture in the access log (request_body +
+	// response_body fields). JSON content-type only, truncated at 64 KiB.
+	// Default false — bodies hold PII and inflate log volume; intended
+	// for dev/test/integration use.
+	LogBody bool
+
+	// ServiceBackend selects which service implementation main.go wires
+	// behind the HTTP handler. Only consulted when the binary was built
+	// with `-tags=stub`; production builds (no tag) ignore this value and
+	// always wire the real service.
+	//
+	//   "stub" — canned-response stub (no DB / cache required). Default in
+	//            fresh scaffolds so `go run -tags=stub ./cmd/...` boots
+	//            without external dependencies. Useful for FE/BE parallel
+	//            development against the huma OpenAPI contract.
+	//   "real" — production service. Still needs whatever external deps
+	//            (DB, cache, brokers) the real service requires.
+	//
+	// Any other value panics at startup under `-tags=stub` — a typo'd env
+	// var must not silently fall through to "real".
+	ServiceBackend string
+{{- end }}
+
+	// Database.
+	DatabaseDSN      string
+	DBMaxOpen        int
+	DBSlowThreshold  time.Duration
+	DBLogLevel       string // "silent" | "error" | "warn" (default) | "info"
+
+	// Kafka (consumer and publisher types).
+	KafkaBrokers  []string
+	Topic         string
+	ConsumerGroup string
+{{- if eq .Broker "rabbitmq" }}
+
+	// RabbitMQ broker.
+	RabbitMQURL string
+{{- end }}
+{{- if eq .Broker "redis" }}
+
+	// Redis broker (separate from the cache backend).
+	BrokerRedisAddr     string
+	BrokerRedisPassword string
+	BrokerRedisDB       int
+{{- end }}
+{{- if ne .Cache "none" }}
+
+	// Cache (applied uniformly across every cached repository in the service).
+	CacheTTL          time.Duration // base TTL for cached entries
+	CacheJitterFactor float64       // 0..1; effective TTL = base + rand(0, base*factor)
+{{- end }}
+{{- if eq .Cache "redis" }}
+
+	// Redis cache backend.
+	RedisAddr     string
+	RedisPassword string
+	RedisDB       int
+{{- end }}
+{{- if eq .Cache "memory" }}
+
+	// In-process memory cache.
+	MemoryCacheCapacity int
+{{- end }}
+{{- if eq .Cache "couchbase" }}
+
+	// Couchbase cache backend.
+	CouchbaseURL      string
+	CouchbaseUsername string
+	CouchbasePassword string
+	CouchbaseBucket   string
+{{- end }}
+}
+
+// Load reads environment variables and returns a Config with defaults applied.
+// If a .version file exists in the working directory its trimmed content
+// overrides SERVICE_VERSION, matching the deploy convention where the CI
+// pipeline writes the semver tag to .version before building the image.
+func Load() Config {
+	cfg := Config{
+		ServiceName:          envOr("SERVICE_NAME", "{{.Name}}"),
+		Version:              envOr("SERVICE_VERSION", "0.1.0"),
+		InstanceID:           envOr("SERVICE_INSTANCE_ID", "local-1"),
+		OTelEndpoint:         envOr("OTEL_ENDPOINT", "localhost:4317"),
+		OTelProtocol:         envOr("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc"),
+		OTelInsecure:         envBoolOr("OTEL_EXPORTER_OTLP_INSECURE", true),
+		OTelHeaders:          parseHeaders(envOr("OTEL_EXPORTER_OTLP_HEADERS", "")),
+		OTelLogBridgeEnabled: envBoolOr("OTEL_LOG_BRIDGE_ENABLED", false),
+		OTelLogMinSeverity:   parseSlogLevel(envOr("OTEL_LOG_MIN_SEVERITY", "error")),
+		HTTPAddr:            envOr("HTTP_ADDR", ":8080"),
+		HTTPReadTimeout:     envDurationOr("HTTP_READ_TIMEOUT", 15*time.Second),
+		HTTPWriteTimeout:    envDurationOr("HTTP_WRITE_TIMEOUT", 15*time.Second),
+		HTTPIdleTimeout:     envDurationOr("HTTP_IDLE_TIMEOUT", 60*time.Second),
+		HTTPShutdownTimeout: envDurationOr("HTTP_SHUTDOWN_TIMEOUT", 30*time.Second),
+{{- if eq .Type "api" }}
+		DocsEnabled:         envOr("DOCS_ENABLED", "false") == "true",
+		LogBody:             envOr("LOG_BODY", "false") == "true",
+		ServiceBackend:      envOr("SERVICE_BACKEND", "stub"),
+{{- end }}
+		DatabaseDSN:         envOr("DATABASE_DSN", ""),
+		DBMaxOpen:           envIntOr("DB_MAX_OPEN", 20),
+		DBSlowThreshold:     envDurationOr("DB_SLOW_THRESHOLD", 500*time.Millisecond),
+		DBLogLevel:          envOr("DB_LOG_LEVEL", "warn"),
+		KafkaBrokers:        strings.Split(envOr("KAFKA_BROKERS", "localhost:9092"), ","),
+		Topic:               envOr("KAFKA_TOPIC", ""),
+		ConsumerGroup:       envOr("KAFKA_CONSUMER_GROUP", "{{.Name}}"),
+{{- if eq .Broker "rabbitmq" }}
+
+		RabbitMQURL: envOr("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
+{{- end }}
+{{- if eq .Broker "redis" }}
+
+		BrokerRedisAddr:     envOr("BROKER_REDIS_ADDR", "localhost:6379"),
+		BrokerRedisPassword: envOr("BROKER_REDIS_PASSWORD", ""),
+		BrokerRedisDB:       envIntOr("BROKER_REDIS_DB", 0),
+{{- end }}
+{{- if ne .Cache "none" }}
+
+		CacheTTL:          envDurationOr("CACHE_TTL", 5*time.Minute),
+		CacheJitterFactor: envFloatOr("CACHE_JITTER_FACTOR", 0.1),
+{{- end }}
+{{- if eq .Cache "redis" }}
+
+		RedisAddr:     envOr("REDIS_ADDR", "localhost:6379"),
+		RedisPassword: envOr("REDIS_PASSWORD", ""),
+		RedisDB:       envIntOr("REDIS_DB", 0),
+{{- end }}
+{{- if eq .Cache "memory" }}
+
+		MemoryCacheCapacity: envIntOr("MEMORY_CACHE_CAPACITY", 1000),
+{{- end }}
+{{- if eq .Cache "couchbase" }}
+
+		CouchbaseURL:      envOr("COUCHBASE_URL", "couchbase://localhost"),
+		CouchbaseUsername: envOr("COUCHBASE_USERNAME", "Administrator"),
+		CouchbasePassword: envOr("COUCHBASE_PASSWORD", ""),
+		CouchbaseBucket:   envOr("COUCHBASE_BUCKET", "{{.Name}}"),
+{{- end }}
+	}
+	if data, err := os.ReadFile(".version"); err == nil {
+		if v := strings.TrimSpace(string(data)); v != "" {
+			cfg.Version = v
+		}
+	}
+	return cfg
+}
+
+func envOr(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+func envIntOr(key string, fallback int) int {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return fallback
+	}
+	return n
+}
+
+func envDurationOr(key string, fallback time.Duration) time.Duration {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
+	}
+	d, err := time.ParseDuration(v)
+	if err != nil {
+		return fallback
+	}
+	return d
+}
+
+func envBoolOr(key string, fallback bool) bool {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
+	}
+	b, err := strconv.ParseBool(v)
+	if err != nil {
+		return fallback
+	}
+	return b
+}
+
+// parseHeaders parses a CSV of k=v pairs into a map.
+// Format matches the OpenTelemetry SDK convention: "api-key=secret,x-tenant=foo".
+// Whitespace around keys/values is trimmed; malformed pairs are dropped.
+func parseHeaders(csv string) map[string]string {
+	csv = strings.TrimSpace(csv)
+	if csv == "" {
+		return nil
+	}
+	out := make(map[string]string)
+	for _, pair := range strings.Split(csv, ",") {
+		k, v, ok := strings.Cut(pair, "=")
+		if !ok {
+			continue
+		}
+		k = strings.TrimSpace(k)
+		v = strings.TrimSpace(v)
+		if k == "" {
+			continue
+		}
+		out[k] = v
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+// parseSlogLevel maps a human-readable severity name to a slog.Level.
+// Unknown values fall back to LevelError so the OTel log bridge stays quiet
+// rather than flooding the backend on misconfiguration.
+func parseSlogLevel(s string) slog.Level {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn", "warning":
+		return slog.LevelWarn
+	default:
+		return slog.LevelError
+	}
+}
+
+{{- if ne .Cache "none" }}
+
+func envFloatOr(key string, fallback float64) float64 {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
+	}
+	f, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		return fallback
+	}
+	return f
+}
+{{- end }}

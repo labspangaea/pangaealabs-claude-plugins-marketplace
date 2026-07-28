@@ -1,0 +1,212 @@
+// Package repository implements the port.{{.Entity}}Repository interface.
+// It embeds repo.Repository[T, ID] so the same struct can be backed by either
+// *repo.BaseRepo (direct SQL via New) or *repo.CachedRepo (with cache layer via NewCached).
+package repository
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
+
+	"gorm.io/gorm"
+
+{{- if ne .Cache "none" }}
+	"github.com/labspangaea/go-lib/cache"
+{{- end }}
+	"github.com/labspangaea/go-lib/db/repo"
+
+	"{{.Module}}/internal/apperr"
+	"{{.Module}}/internal/domain"
+)
+
+// {{.Entity}} is the GORM-backed implementation of port.{{.Entity}}Repository.
+// The embedded repo.Repository may be a *repo.BaseRepo (direct SQL) or a
+// *repo.CachedRepo (cache layer in front of SQL). Method bodies do not need
+// to know which — both implement the same interface.
+type {{.Entity}} struct {
+	repo.Repository[{{.Entity}}Model, string]
+}
+
+// New creates a direct-SQL repository (no cache layer).
+func New(db *gorm.DB) *{{.Entity}} {
+	return &{{.Entity}}{repo.New[{{.Entity}}Model, string](db)}
+}
+
+{{- if ne .Cache "none" }}
+// NewCached creates a repository with a cache layer in front of SQL.
+// Pass repo.WithTTL, repo.WithJitter, repo.WithTwoPhaseList, repo.WithAtomicSet
+// as opts to tune behaviour. The cache key prefix is "{{.EntityLower}}".
+func NewCached(
+	db *gorm.DB,
+	c cache.Cache[*{{.Entity}}Model],
+	opts ...repo.CachedOption,
+) *{{.Entity}} {
+	base := repo.New[{{.Entity}}Model, string](db)
+	return &{{.Entity}}{repo.NewCached[{{.Entity}}Model, string](base, c, "{{.EntityLower}}", opts...)}
+}
+{{- end }}
+
+// {{.Entity}}Model is the database table representation.
+// Mapping between domain and model lives here, not in the domain package.
+type {{.Entity}}Model struct {
+	ID        string `gorm:"primaryKey;column:id"`
+{{range .Fields}}	{{.Name}} {{.GoType}} `gorm:"column:{{.DBColumn}}"`
+{{end}}	CreatedAt int64  `gorm:"column:created_at;autoCreateTime:milli"`
+	UpdatedAt int64  `gorm:"column:updated_at;autoUpdateTime:milli"`
+}
+
+func ({{.Entity}}Model) TableName() string  { return "{{.EntityLower}}s" }
+func ({{.Entity}}Model) PrimaryKey() string { return "id" }
+func (m {{.Entity}}Model) GetPK() string    { return m.ID }
+
+// CursorValues returns values for all columns that may appear in OrderBy.
+func (m {{.Entity}}Model) CursorValues() map[string]any {
+	return map[string]any{
+		"id":         m.ID,
+		"created_at": m.CreatedAt,
+{{range .Fields}}		"{{.DBColumn}}": m.{{.Name}},
+{{end}}	}
+}
+
+// Find{{.Entity}} retrieves a {{.EntityLower}} by primary key.
+// Maps repo.ErrNotFound → apperr.Err{{.Entity}}NotFound; service propagates as-is.
+func (r *{{.Entity}}) Find{{.Entity}}(ctx context.Context, id string) (*domain.{{.Entity}}, error) {
+	m, err := r.FindByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, repo.ErrNotFound) {
+			return nil, apperr.Err{{.Entity}}NotFound
+		}
+		return nil, fmt.Errorf("repository: find {{.EntityLower}} %s: %w", id, err)
+	}
+	return m.toDomain(), nil
+}
+
+// Create{{.Entity}} persists a new {{.EntityLower}}.
+func (r *{{.Entity}}) Create{{.Entity}}(ctx context.Context, entity *domain.{{.Entity}}) error {
+	m := toModel(entity)
+	if err := r.Create(ctx, &m); err != nil {
+		if mapped := map{{.EntityLower}}RepoErr(err); mapped != nil {
+			return mapped
+		}
+		return fmt.Errorf("repository: create {{.EntityLower}}: %w", err)
+	}
+	return nil
+}
+
+// Update{{.Entity}} overwrites the persisted {{.EntityLower}}.
+// The explicit column list ensures only user-owned fields are updated;
+// system columns (id, created_at) are never clobbered by accident.
+func (r *{{.Entity}}) Update{{.Entity}}(ctx context.Context, entity *domain.{{.Entity}}) error {
+	m := toModel(entity)
+	if err := r.Update(ctx, &m, []string{
+		{{range .Fields}}"{{.DBColumn}}",
+		{{end}}"updated_at",
+	}); err != nil {
+		if mapped := map{{.EntityLower}}RepoErr(err); mapped != nil {
+			return mapped
+		}
+		return fmt.Errorf("repository: update {{.EntityLower}} %s: %w", entity.ID, err)
+	}
+	return nil
+}
+
+// Delete{{.Entity}} removes a {{.EntityLower}} by primary key.
+// Returns apperr.Err{{.Entity}}NotFound (→ HTTP 404) when no row matched.
+func (r *{{.Entity}}) Delete{{.Entity}}(ctx context.Context, id string) error {
+	result := r.DB(ctx).Delete(&{{.Entity}}Model{}, "id = ?", id)
+	if result.Error != nil {
+		if mapped := map{{.EntityLower}}RepoErr(result.Error); mapped != nil {
+			return mapped
+		}
+		return fmt.Errorf("repository: delete {{.EntityLower}} %s: %w", id, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return apperr.Err{{.Entity}}NotFound
+	}
+	return nil
+}
+
+// map{{.EntityLower}}RepoErr translates repo sentinels to {{.EntityLower}}-specific apperr codes.
+// Returns nil when err does not match any sentinel.
+func map{{.EntityLower}}RepoErr(err error) error {
+	switch {
+	case errors.Is(err, repo.ErrNotFound):
+		return apperr.Err{{.Entity}}NotFound
+	case errors.Is(err, repo.ErrDuplicateRecord):
+		return apperr.Err{{.Entity}}Duplicate
+	case errors.Is(err, repo.ErrForeignKeyViolation):
+		return apperr.Err{{.Entity}}ForeignKeyViolation
+	case errors.Is(err, repo.ErrConstraintViolation):
+		return apperr.Err{{.Entity}}ConstraintViolation
+	}
+	return nil
+}
+
+// List{{.Entity}}s returns a cursor-paginated page of {{.EntityLower}}s matching filters.
+func (r *{{.Entity}}) List{{.Entity}}s(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, *repo.CursorPage, error) {
+	models, page, err := r.List(ctx, p, filters...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("repository: list {{.EntityLower}}s: %w", err)
+	}
+	out := make([]*domain.{{.Entity}}, len(models))
+	for i := range models {
+		out[i] = models[i].toDomain()
+	}
+	return out, page, nil
+}
+
+// List{{.Entity}}sOffset returns an offset/limit-paginated page of {{.EntityLower}}s
+// plus the total row count.
+//
+// Implementation note: hits the embedded repository's DB accessor directly (Count + Offset/Limit)
+// instead of the cache layer. Random-access offsets aren't friendly to typical
+// cache invalidation patterns — for hot paths use List{{.Entity}}s (cursor pagination).
+func (r *{{.Entity}}) List{{.Entity}}sOffset(ctx context.Context, p repo.OffsetParams, filters ...repo.Filter) ([]*domain.{{.Entity}}, int64, error) {
+	db := r.DB(ctx).Model(&{{.Entity}}Model{})
+	for _, f := range filters {
+		db = f.Apply(db)
+	}
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("repository: count {{.EntityLower}}s: %w", err)
+	}
+	var models []{{.Entity}}Model
+	if err := db.Offset(p.Offset).Limit(p.Limit).Find(&models).Error; err != nil {
+		return nil, 0, fmt.Errorf("repository: list-offset {{.EntityLower}}s: %w", err)
+	}
+	out := make([]*domain.{{.Entity}}, len(models))
+	for i := range models {
+		out[i] = models[i].toDomain()
+	}
+	return out, total, nil
+}
+
+// List{{.Entity}}IDs returns cursor-paginated primary keys matching filters.
+// Useful for batch operations, foreign-key lookups, and event-driven fan-out
+// that does not need full entity payloads.
+func (r *{{.Entity}}) List{{.Entity}}IDs(ctx context.Context, p repo.CursorParams, filters ...repo.Filter) ([]string, *repo.CursorPage, error) {
+	ids, page, err := r.ListIDs(ctx, p, filters...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("repository: list {{.EntityLower}} ids: %w", err)
+	}
+	return ids, page, nil
+}
+
+func (m *{{.Entity}}Model) toDomain() *domain.{{.Entity}} {
+	return &domain.{{.Entity}}{
+		ID:        m.ID,
+{{range .Fields}}		{{.Name}}: m.{{.Name}},
+{{end}}		CreatedAt: time.UnixMilli(m.CreatedAt),
+		UpdatedAt: time.UnixMilli(m.UpdatedAt),
+	}
+}
+
+func toModel(e *domain.{{.Entity}}) {{.Entity}}Model {
+	return {{.Entity}}Model{
+		ID:        e.ID,
+{{range .Fields}}		{{.Name}}: e.{{.Name}},
+{{end}}		CreatedAt: e.CreatedAt.UnixMilli(),
+		UpdatedAt: e.UpdatedAt.UnixMilli(),
+	}
+}

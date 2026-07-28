@@ -1,0 +1,16 @@
+/**
+ * Drizzle table schema for <%= EntityLower %>s. Drives drizzle-kit migrations. The
+ * repository adapter operates over raw column names via a ModelMeta (Drizzle 0.38
+ * has no runtime reflection), so this schema is the source of truth for the DDL.
+ *
+ * Timestamps are stored as bigint epoch-milliseconds (the analogue of the Go
+ * library's autoCreateTime:milli / int64 columns).
+ */
+import { pgTable, varchar, text, integer, bigint, doublePrecision, boolean } from 'drizzle-orm/pg-core';
+
+export const <%= EntityLower %>s = pgTable('<%= EntityLower %>s', {
+  id: varchar('id', { length: 36 }).primaryKey(),
+<% for (const f of Fields) { var bt = baseType(f.GoType); var ml = parseMaxLength(f.Validate); %>  <%= f.Name %>: <% if (bt === 'string') { %><%= ml > 0 ? `varchar('${f.DBColumn}', { length: ${ml} })` : `text('${f.DBColumn}')` %><% } else if (bt === 'number') { %>doublePrecision('<%= f.DBColumn %>')<% } else if (bt === 'boolean') { %>boolean('<%= f.DBColumn %>')<% } else if (bt === 'Date') { %>bigint('<%= f.DBColumn %>', { mode: 'number' })<% } else { %>text('<%= f.DBColumn %>')<% } %><% if (!isNullable(f.GoType)) { %>.notNull()<% } %>,
+<% } %>  createdAt: bigint('created_at', { mode: 'number' }).notNull(),
+  updatedAt: bigint('updated_at', { mode: 'number' }).notNull(),
+});

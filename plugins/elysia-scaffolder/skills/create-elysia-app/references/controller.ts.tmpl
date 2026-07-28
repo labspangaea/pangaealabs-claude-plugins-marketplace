@@ -1,0 +1,60 @@
+/**
+ * Inbound adapter: the <%= Entity %> HTTP controller. Idiomatic Elysia instance
+ * (the "thin controller" of the hybrid architecture) — serializes HTTP only and
+ * delegates to the <%= Entity %>Service port. Errors are thrown (ApiError) and
+ * rendered by the server plugin's onError; success uses the response envelopes.
+ */
+import { Elysia } from 'elysia';
+import { data, list, withCursor } from '@labspangaea/ts-lib/response';
+import { cursorParamsFromQuery, asc, desc, isInvalidCursorError } from '@labspangaea/ts-lib/db/repo';
+import { ApiError, CodeErrEnum } from '@labspangaea/ts-lib/apperr';
+import type { <%= Entity %>Service } from '../../../port/<%= EntityLower %>-service.ts';
+import { <%= Entity %>Body, bodyToInput, toResponse } from './<%= EntityLower %>.dto.ts';
+
+export function <%= EntityLower %>Controller(svc: <%= Entity %>Service) {
+  return new Elysia({ prefix: '/api/v1/<%= EntityLower %>s' })
+    .get('/', async ({ query }) => {
+      const sp = new URLSearchParams(query as Record<string, string>);
+      const params = cursorParamsFromQuery(sp, 20, desc('created_at'), asc('id'));
+      let rows: Awaited<ReturnType<typeof svc.list>>['rows'];
+      let page: Awaited<ReturnType<typeof svc.list>>['page'];
+      try {
+        ({ rows, page } = await svc.list(params));
+      } catch (e) {
+        // A malformed `cursor` query param is a client error, not a 500.
+        if (isInvalidCursorError(e)) throw new ApiError(CodeErrEnum.BadRequest, 'invalid cursor');
+        throw e;
+      }
+      return list(
+        rows.map(toResponse),
+        withCursor({
+          next_cursor: page.next_cursor,
+          has_next: page.has_next,
+          limit: page.limit,
+        }),
+      );
+    })
+    .get('/:id', async ({ params }) => data(toResponse(await svc.find(params.id))))
+    .post(
+      '/',
+      async ({ body, set }) => {
+        const entity = await svc.create(bodyToInput(body));
+        set.status = 201;
+        return data(toResponse(entity));
+      },
+      { body: <%= Entity %>Body },
+    )
+    .put(
+      '/:id',
+      async ({ params, body }) => {
+        const entity = await svc.update(params.id, bodyToInput(body));
+        return data(toResponse(entity));
+      },
+      { body: <%= Entity %>Body },
+    )
+    .delete('/:id', async ({ params, set }) => {
+      await svc.remove(params.id);
+      set.status = 204;
+      return null;
+    });
+}

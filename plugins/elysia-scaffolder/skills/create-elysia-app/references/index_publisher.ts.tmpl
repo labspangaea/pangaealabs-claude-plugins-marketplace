@@ -1,0 +1,62 @@
+/**
+ * Composition root for the <%= Name %> publisher.
+ *
+ * Wires: config -> logger -> <%= Broker %> publisher -> <%= Entity %>Publisher adapter.
+ * A publisher service publishes events in response to business logic; this
+ * skeleton wires the publisher and stays alive until shutdown.
+ */
+import { createLogger } from '@labspangaea/ts-lib/logger';
+<% if (Broker === 'kafka') { %>import { Kafka } from 'kafkajs';
+import { newKafkaPublisher } from '@labspangaea/ts-lib/pubsub/kafka';
+<% } else if (Broker === 'rabbitmq') { %>import { connect } from 'amqplib';
+import { newRabbitMQPublisher } from '@labspangaea/ts-lib/pubsub/rabbitmq';
+<% } else { %>import { Redis } from 'ioredis';
+import { newRedisPublisher } from '@labspangaea/ts-lib/pubsub/redis';
+<% } %>import { loadConfig } from '../config/config.ts';
+import { <%= Entity %>Publisher } from './adapter/outbound/publisher/publisher.ts';
+
+async function main(): Promise<void> {
+  const cfg = loadConfig();
+  const logger = createLogger({
+    serviceName: cfg.serviceName,
+    version: cfg.version,
+    instanceId: cfg.instanceId,
+  });
+
+<% if (Broker === 'kafka') { %>  const kafka = new Kafka({ clientId: cfg.serviceName, brokers: cfg.kafkaBrokers });
+  const pub = newKafkaPublisher(kafka);
+<% } else if (Broker === 'rabbitmq') { %>  const conn = await connect(cfg.rabbitmqUrl);
+  const pub = await newRabbitMQPublisher(conn, cfg.exchange);
+<% } else { %>  const [bh, bp] = cfg.brokerRedisAddr.split(':');
+  const brokerRedis = new Redis({
+    host: bh ?? 'localhost',
+    port: Number(bp ?? '6379'),
+    password: cfg.brokerRedisPassword || undefined,
+    db: cfg.brokerRedisDb,
+  });
+  const pub = newRedisPublisher(brokerRedis);
+<% } %>
+  const publisher = new <%= Entity %>Publisher(pub);
+  void publisher; // wired; call publisher.publish<%= Entity %>(topic, entity) from business logic
+  logger.info({ topic: cfg.topic }, 'publisher ready');
+
+  let shuttingDown = false;
+  const shutdown = async (signal: string): Promise<void> => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info({ signal }, 'shutdown signal received');
+    await pub.close();
+    logger.info('publisher shutdown success');
+    process.exit(0);
+  };
+  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+
+  await new Promise<void>(() => {}); // stay alive until a signal
+}
+
+main().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('fatal: failed to start <%= Name %> publisher', err);
+  process.exit(1);
+});
