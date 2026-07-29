@@ -1,22 +1,25 @@
 ---
 name: design-fundamentals
 description: >
-  Apply and critique graphic-design fundamentals — colour theory, typography, layout, grid systems,
-  Gestalt principles, visual hierarchy — on any visual work: a poster, social post, slide deck,
-  thumbnail, packaging, logo, landing page, dashboard or app screen. Two modes: CRITIQUE an existing
-  design (name what is wrong against a structured review pass, with concrete fixes ranked by impact)
-  or DIRECT a new one (a colour scheme with a 60/30/10 split and measured contrast ratios, a type
-  pairing with a modular scale, a grid and alignment strategy). Carries the numbers most design
-  advice omits — WCAG contrast floors, the 45–75 character measure, 120–150% leading, the 8pt grid —
-  and flags popular-but-unsupported claims instead of repeating them. Use this whenever someone
-  wants design feedback or design direction, even casually — e.g. "why does this poster look off",
-  "critique my slide deck", "pick a colour palette for my cafe menu", "what font pairs with
-  Montserrat", "make this flyer look more professional", "is the hierarchy on my landing page
-  working", "these two colours feel wrong together", "review the visual design of this screenshot".
-  Trigger on any request to review, improve, or make choices about how something LOOKS, even when
-  the user names no principle. Do NOT use to write frontend code or CSS (that is `frontend-design` /
-  `impeccable`), to render markdown into a PDF (that is docsmith's `make-pdf`), to generate images
-  or logos, or to choose chart-series colours (that is `dataviz`).
+  Say why a design looks wrong, and what to change. Use this whenever something visual "looks off",
+  "looks cheap", "feels amateurish", or "doesn't look professional" and the person cannot name why —
+  and whenever someone needs colours, fonts or a layout chosen for them. Runs a measured review over
+  colour, type, layout, grouping and hierarchy, then reports concrete fixes ranked by impact with a
+  severity each; or turns a brief into a buildable spec — palette with hex and 60/30/10, a type
+  pairing with real sizes off a scale, a grid. Checks the contrast maths people skip, including
+  component borders and focus rings (3:1) and not just text (4.5:1). Applies to posters, packaging,
+  logos, menus, signage, slide decks, social posts, and to how landing pages, dashboards and app
+  screens LOOK. Reach for it on phrasings like "why does this poster look cheap", "our deck cover
+  feels amateurish", "these two brand colours fight each other", "what pairs with Montserrat
+  ExtraBold", "pick a palette and fonts for my cafe menu", "our pricing page looks untrustworthy",
+  "the negative space in our logo isn't reading", "users say our dashboard is hard to scan", "give
+  this junior useful design feedback" — even when no design principle is named, and even though a
+  design answer could be improvised without it. Improvising is exactly the problem: unaided answers
+  skip the contrast measurement, invent sizes instead of deriving them, and repeat folklore like the
+  golden ratio being inherently beautiful. Prefer this skill for any question about how something
+  looks. Do NOT use it to write or edit frontend code, CSS or components (that is `frontend-design` /
+  `impeccable`) — building a page is not reviewing one; nor to render markdown into a PDF (docsmith's
+  `make-pdf`), generate images or logos, or pick chart-series colours (`dataviz`).
 ---
 
 # dkv — design fundamentals

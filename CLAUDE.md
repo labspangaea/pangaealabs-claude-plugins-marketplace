@@ -172,7 +172,25 @@ and `--model`. `run_eval` spawns a real `claude -p` per query×run (live, costs 
    every should-trigger query **false-negatives**. The in-place run is worthless signal.
 
 2. **Isolation needs BOTH a plugin-free config AND a cwd far from the repo** — there are two
-   separate shadowing vectors:
+   separate shadowing vectors.
+
+   > **Why the config vector is broader than it looks (learned 2026-07-29, cost ~45 min of invalid
+   > runs).** It is tempting to reason "the skill under test isn't installed, so nothing can shadow
+   > it, so I can skip `CLAUDE_CONFIG_DIR`." **That is wrong.** Shadowing comes from *any* installed
+   > skill that competes for the same queries, not from the same-named one. A dkv trigger eval run
+   > against the normal config scored 1/10 and 0/10 recall on two very different descriptions —
+   > because `impeccable`, `frontend-design`, `high-end-visual-design`, `design-taste-frontend`,
+   > `stitch-design-taste`, `brandkit` and friends are installed and get selected for design
+   > queries instead of the stub. The detector counts only the stub token, so every correct
+   > selection records as a miss. A docsmith **control** run (its own description + its own eval
+   > set, where `CLAUDE.md` records 7/10) scored **0/10** in the same conditions, which is what
+   > proved the runs invalid rather than the descriptions bad. Always run the control first — if a
+   > known-good description doesn't reproduce its recorded score, stop and fix the environment
+   > before reading any numbers.
+   >
+   > Note `/login` may be unavailable in some environments (it is not a slash command in every
+   > build), in which case the isolated config cannot be authed and **the triggering eval simply
+   > cannot be run there.** Say so rather than reporting the uncontrolled numbers.
    - **Config:** point `CLAUDE_CONFIG_DIR` at a fresh dir (no installed plugins). A fresh dir
      is **not authed** (the keychain token doesn't carry over) — run, interactively, once:
      `CLAUDE_CONFIG_DIR=<dir> claude /login`.

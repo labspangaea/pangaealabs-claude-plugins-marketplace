@@ -1,0 +1,194 @@
+{
+  "model": "sonnet",
+  "runs": 2,
+  "passed": 9,
+  "total": 20,
+  "confusion": {
+    "TP": 0,
+    "TN": 9,
+    "FP": 1,
+    "FN": 10
+  },
+  "rows": [
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "render this report to a professional pdf \u2014 actually give me both a deck and a book version from the same source"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "i've got a markdown file with our Q2 review notes (~/work/q2-review.md) \u2014 can you turn it into a polished slide deck PDF in the BGN brand?"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "make me a handbook-style PDF book out of ~/docs/onboarding.md, with chapters, a cover, and callout boxes for tips and warnings"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "turn these meeting notes into a nice presentation pdf for the team tomorrow, something that looks designed not generic"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "can you produce an on-brand Badan Gizi Nasional deck from this content about the MBG program coverage?"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "I need a good-looking PDF of my markdown and it should include a diagram of the data pipeline \u2014 use d2 for the diagram"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "build a claudecode-style slide deck from intro.md and export it to pdf"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "make a professional pdf handbook from my notes.md \u2014 needs a title page and a table of contents"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "one markdown source, render it to all of our docsmith templates as PDFs please"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "convert draft.md into a polished 16:9 slide pdf using our design system"
+    },
+    {
+      "pass": false,
+      "should_trigger": false,
+      "did_trigger": true,
+      "rate": 1.0,
+      "triggers": 2,
+      "runs": 2,
+      "query": "create a D2 diagram of our microservices architecture and save the svg"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "merge these two existing PDFs into one file and add page numbers at the bottom"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "extract the text from this scanned PDF invoice so I can paste the line items into a sheet"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "just convert report.md to a plain quick PDF, no styling, I don't care how it looks"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "help me figure out what slides should go in our sales pitch deck \u2014 what's a good narrative order?"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "fix the CSS on our marketing website's hero section, the buttons overflow on mobile"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "compress this 40MB PDF down so I can email it under the 25MB limit"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "what's the difference between marp and reveal.js for making slides?"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "translate this PDF report from Indonesian to English and keep the formatting"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "rename all the .md files in this folder to kebab-case"
+    }
+  ]
+}
