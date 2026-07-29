@@ -1,7 +1,9 @@
 # Pangaea Labs — Claude Code Plugins Marketplace
 
 A [Claude Code](https://claude.com/claude-code) plugin marketplace by
-**[Pangaea Digital Labs](https://www.pangaea.id/)**. Add it once, then install any plugin below.
+**[Pangaea Digital Labs](https://www.pangaea.id/)** — **5 plugins, 14 skills, 3 subagents** across
+document production, QA test design, graphic-design review, and backend service scaffolding.
+Add the marketplace once, then install whichever you need.
 
 ## Add the marketplace
 
@@ -20,6 +22,17 @@ npx github:labspangaea/pangaealabs-claude-plugins-marketplace
 See **[docs/install.md](docs/install.md)** for the cross-agent flow, flags, and portability model.
 
 ## Plugins
+
+| Plugin | What it gives you | Skills | Needs |
+|---|---|---|---|
+| **[`docsmith`](#docsmith--markdown--professional-on-brand-pdfs)** | markdown → on-brand PDFs across 5 design-system templates | 1 + 1 agent | pandoc · tectonic · marp-cli · rsvg · Chrome |
+| **[`testcraft`](#testcraft--user-flows--test-cases--offline-console)** | user flows → importer-ready test-case suite + offline HTML console | 2 + 2 agents | python3 |
+| **[`dkv`](#dkv--graphic-design-fundamentals-as-a-review-method)** | design critique & direction for print and static graphics | 1 | python3 *(optional)* |
+| **[`go-scaffolder`](#go-scaffolder--scaffold-production-ready-go-services)** | production-ready Go services, hexagonal, 5 HTTP frameworks | 5 | Go 1.26+ · `go-lsp` MCP |
+| **[`elysia-scaffolder`](#elysia-scaffolder--scaffold-production-ready-elysiajsbun-services)** | the ElysiaJS/Bun counterpart, wired to `@labspangaea/ts-lib` | 5 | Bun 1.1+ · `ts-lsp` MCP |
+
+Each is independent — install one or all five. The `npx` installer warns about a missing toolchain
+but never blocks; only the scaffolders hard-require theirs.
 
 ### `docsmith` — markdown → professional, on-brand PDFs
 
@@ -101,8 +114,10 @@ mode so frontends can integrate against the contract before backend logic is fin
 
 ---
 
-_Maintaining a plugin in this repo? See **[CLAUDE.md](CLAUDE.md)** (monitors, evals, the release
-command, and the optimizer gotchas)._
+_Maintaining a plugin in this repo? See **[CLAUDE.md](CLAUDE.md)** — the layout, docsmith's
+background monitors, the three signal systems (monitors vs triggering eval vs output eval, routinely
+confused), the release command, and the triggering-eval isolation traps that produce confidently
+wrong numbers if you skip them._
 
 ## License
 
