@@ -1,8 +1,10 @@
 # CLAUDE.md — pangaealabs-claude-plugins-marketplace
 
 Maintainer/agent guidance for this repo. This is a **Claude Code plugin marketplace**
-by Pangaea Labs. Today it ships two plugins: **`docsmith`** (markdown → on-brand PDFs)
-and **`testcraft`** (user flows → test-case suite + offline HTML console).
+by Pangaea Labs. Today it ships five plugins: **`docsmith`** (markdown → on-brand PDFs),
+**`testcraft`** (user flows → test-case suite + offline HTML console), **`dkv`**
+(graphic-design fundamentals → design critique + direction), and the two scaffolders
+**`go-scaffolder`** / **`elysia-scaffolder`**.
 
 ## Layout
 
@@ -21,6 +23,11 @@ and **`testcraft`** (user flows → test-case suite + offline HTML console).
 | `plugins/testcraft/` | second plugin — **user flows → test cases**; everything under here installs to users |
 | `plugins/testcraft/skills/{testcase-importer,userflow-to-testcases}/` | the two user-facing skills (each `SKILL.md` + `scripts/` + `references/`) |
 | `plugins/testcraft/agents/` | `testcase-architect`, `testcase-vapt-auditor` subagents (self-contained — no project-`CLAUDE.md` dependency) |
+| `plugins/dkv/` | third plugin — **graphic-design fundamentals**; knowledge + one script, no assets/agents |
+| `plugins/dkv/skills/design-fundamentals/scripts/contrast.py` | WCAG ratios + verdict per threshold. **`ui` (3:1, non-text) is the case reviews miss** — a label can pass at 13:1 while its border fails at 2:1. Has `--selfcheck`. |
+| `plugins/dkv/skills/design-fundamentals/` | the only user-facing skill (`SKILL.md` router + rubric) |
+| `plugins/dkv/skills/design-fundamentals/references/` | `color.md`, `typography.md`, `layout.md`, `gestalt.md`, `principles.md` — section-numbered so `SKILL.md` cites `§N`. **`principles.md` is an index, not a peer doc** — contrast/hierarchy/repetition live where they're operationalised; don't restate them there. |
+| `plugins/{go-scaffolder,elysia-scaffolder}/` | the two service scaffolders (5 skills each) |
 | `dev/` | **dev/eval workspaces — NOT shipped** (moved out of `plugins/` on purpose) |
 | `dev/docsmith-workspace/trigger-evals.json` | the skill-triggering eval set (20 queries) |
 
@@ -46,6 +53,27 @@ Severity_Reasoning, Transition, Title, Steps / Test Data, Expected Result + Down
 Fix` — is the interchange format between both skills and the console; the bundled
 `validate_cases.py` is the importer-ready gate. No monitors/evals ship here — testcraft's eval
 workspaces live in its originating project, not this repo.
+
+## `dkv` (third plugin — design theory → critique + direction)
+
+`plugins/dkv/` ships one skill, `design-fundamentals`, and no code. `SKILL.md` is a router + review
+rubric; five section-numbered reference files hold the theory, and only the relevant one or two are
+ever read.
+
+**The sourcing convention is load-bearing — don't strip it when editing.** Unmarked statements are
+ordinary craft convention (each file says so at the top). Two things are marked inline:
+
+- **`⚠ contested`** — popular but weakly supported, with what's actually known. There are exactly
+  four: φ as a law of beauty (Zeising/Devlin), pink lowering heart rate (Baker-Miller, failed
+  replication), the 80% brand-recognition figure (miscited Hoadley 1990), and 60/30/10's empirical
+  status. Removing these tags is how the plugin becomes just another confident design-folklore
+  repeater, which is the exact failure mode it exists to avoid.
+- **citations** — wherever a specific number does the work (WCAG ratios, 45–75 measure,
+  NN/g scan patterns, Müller-Brockmann, Paoletti).
+
+`gestalt.md` covers the full canonical set of ten grouping laws, including Prägnanz, common region
+and uniform connectedness — §11's strength ordering (connectedness > region > proximity >
+similarity) is the part a critique actually needs, so keep it if the file is ever trimmed.
 
 ## The `npx` installer (`installer/` — cross-agent install, NOT the Claude plugin)
 
@@ -144,7 +172,25 @@ and `--model`. `run_eval` spawns a real `claude -p` per query×run (live, costs 
    every should-trigger query **false-negatives**. The in-place run is worthless signal.
 
 2. **Isolation needs BOTH a plugin-free config AND a cwd far from the repo** — there are two
-   separate shadowing vectors:
+   separate shadowing vectors.
+
+   > **Why the config vector is broader than it looks (learned 2026-07-29, cost ~45 min of invalid
+   > runs).** It is tempting to reason "the skill under test isn't installed, so nothing can shadow
+   > it, so I can skip `CLAUDE_CONFIG_DIR`." **That is wrong.** Shadowing comes from *any* installed
+   > skill that competes for the same queries, not from the same-named one. A dkv trigger eval run
+   > against the normal config scored 1/10 and 0/10 recall on two very different descriptions —
+   > because `impeccable`, `frontend-design`, `high-end-visual-design`, `design-taste-frontend`,
+   > `stitch-design-taste`, `brandkit` and friends are installed and get selected for design
+   > queries instead of the stub. The detector counts only the stub token, so every correct
+   > selection records as a miss. A docsmith **control** run (its own description + its own eval
+   > set, where `CLAUDE.md` records 7/10) scored **0/10** in the same conditions, which is what
+   > proved the runs invalid rather than the descriptions bad. Always run the control first — if a
+   > known-good description doesn't reproduce its recorded score, stop and fix the environment
+   > before reading any numbers.
+   >
+   > Note `/login` may be unavailable in some environments (it is not a slash command in every
+   > build), in which case the isolated config cannot be authed and **the triggering eval simply
+   > cannot be run there.** Say so rather than reporting the uncontrolled numbers.
    - **Config:** point `CLAUDE_CONFIG_DIR` at a fresh dir (no installed plugins). A fresh dir
      is **not authed** (the keychain token doesn't carry over) — run, interactively, once:
      `CLAUDE_CONFIG_DIR=<dir> claude /login`.

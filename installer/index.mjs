@@ -300,6 +300,20 @@ function maybeToolchainNote(skills) {
     }
   }
 
+  // dkv: knowledge-only except for contrast.py, which needs python3 on PATH.
+  // The skill still works without it — the reviewer just has to do the WCAG arithmetic by hand,
+  // and doing it by hand is exactly how the non-text contrast case gets skipped. Warn, don't block.
+  if (inPlugin("dkv")) {
+    const r = spawnSync("python3", ["--version"], { encoding: "utf8" });
+    if (r.status !== 0) {
+      p.log.warn(
+        "dkv is knowledge-only apart from scripts/contrast.py, which needs python3 on PATH " +
+          "(not found). Everything else works without it; you just lose the measured contrast " +
+          "check, which is the part reviews most often skip."
+      );
+    }
+  }
+
   // elysia-scaffolder: generates ElysiaJS/Bun services against the public @labspangaea/ts-lib
   if (inPlugin("elysia-scaffolder")) {
     const r = spawnSync("bun", ["--version"], { encoding: "utf8" });

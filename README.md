@@ -52,6 +52,25 @@ doc (state machines → per-transition cases with downstream impact → matrix �
 
 ▸ **The pipeline, canonical schema & bundled scripts → [testcraft README](plugins/testcraft/README.md)**
 
+### `dkv` — graphic-design fundamentals as a review method
+
+Critique an existing design or direct a new one, across **colour, typography, layout, grid, and
+Gestalt**. `/design-fundamentals` either runs a structured review pass over a poster / packaging /
+menu / logo / deck and reports impact-ranked fixes with a severity each, or turns a brief into a
+buildable spec — palette with hex + 60/30/10 + **measured contrast ratios**, a type pairing on a
+modular scale, and a grid strategy. Validated against the literature rather than assembled from
+received wisdom: it carries the numbers most design advice omits (WCAG floors for text **and**
+non-text, the 45–75 character measure, the 8pt grid) and flags the folklore — the golden ratio as a
+law of beauty, Baker-Miller pink, the 80% brand-recognition figure — instead of repeating it.
+Scoped to **print and static graphics**; websites and app UI stay with `impeccable` /
+`frontend-design`.
+
+```bash
+/plugin install dkv@pangaealabs-claude-plugins-marketplace
+```
+
+▸ **The five reference files, the contested claims & sourcing → [dkv README](plugins/dkv/README.md)**
+
 ### `go-scaffolder` — scaffold production-ready Go services
 
 Generate a complete Go service (`api` · `consumer` · `publisher`) wired to `go-lib` in one

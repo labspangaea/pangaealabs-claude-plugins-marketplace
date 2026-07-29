@@ -24,6 +24,14 @@
       "description": "Turn an app's user flows into a complete, importer-ready test-case suite and an offline HTML console. Two chained skills: userflow-to-testcases authors cases FROM a flow doc (PDF/markdown/spec/screenshots) by modeling actor+resource state machines — per-transition cases with cross-flow downstream impact, an actor x resource matrix, end-to-end journeys, and a security/abuse (VAPT) pass — and testcase-importer normalizes any existing case data (xls/xlsx, CSV/TSV, PDF tables, pasted/markdown) into the canonical CSV and renders a single-file, filterable, offline console. Adds two subagents (testcase-architect, testcase-vapt-auditor) for heavy/parallel authoring and the adversarial pass. Every case is tagged Type (POS/NEG/VAPT) x Outcome (TN/TP/FP/FN!) with a dual-scale priority and one-line severity reasoning."
     },
     {
+      "name": "dkv",
+      "source": "./plugins/dkv",
+      "skills": [
+        "./skills/design-fundamentals"
+      ],
+      "description": "Design review and direction for print and static graphic design — posters, flyers, packaging, labels, menus, signage, book and album covers, logos and wordmarks, slide decks, social posts. Says why something looks wrong and what to change. The design-fundamentals skill runs in two modes: CRITIQUE an existing piece against a structured review pass with impact-ranked fixes and per-finding severity, or DIRECT a new one with a proportioned palette (hex + 60/30/10 + measured contrast ratios), a type pairing on a modular scale, and a grid strategy. Carries the numbers most design advice omits (WCAG contrast floors for text AND non-text, the 45-75 character measure, 120-150% leading, the 8pt grid) and marks popular-but-unsupported claims (the golden ratio as a law of beauty, Baker-Miller pink, the 80% brand-recognition figure) rather than repeating them. Deliberately stops at the interface layer: websites, app UI, dashboards and components belong to impeccable / frontend-design. Knowledge plus one small script (contrast.py); needs python3."
+    },
+    {
       "name": "go-scaffolder",
       "source": "./plugins/go-scaffolder",
       "skills": [

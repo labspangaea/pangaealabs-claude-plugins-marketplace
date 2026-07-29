@@ -1,0 +1,194 @@
+{
+  "model": "sonnet",
+  "runs": 2,
+  "passed": 10,
+  "total": 20,
+  "confusion": {
+    "TP": 1,
+    "TN": 9,
+    "FP": 1,
+    "FN": 9
+  },
+  "rows": [
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "sending a pitch deck to an investor tomorrow morning and the cover slide feels amateurish but i genuinely cannot say why. ~/decks/seriesA/cover.png"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "our new sourdough poster went up in the shop and it just looks cheap next to the one the previous designer made. same photos, same logo, same printer. cant work out whats different. its at ~/Desktop/poster-v3.png"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "opening a matcha place in canggu, need a colour palette and two fonts for the printed menu board. warm and minimal, customers are mostly tourists and expats"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "what pairs well with Montserrat ExtraBold for headlines? doing a gym rebrand and everything i try looks either boring or like a football club badge"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "made a 6 slide instagram carousel for our bakery launch but slides 3 and 4 feel like theyre from a different brand than the rest. files are in ~/Downloads/carousel/"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "these two brand colours #2E5E4E and #7A6A58 fight each other on the packaging mockup and i cant work out if its a hue problem or a value problem"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "the negative space in our new logo isnt reading as a coffee bean, people just see a blob. is that fixable or is the concept dead"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "why does our pricing page look untrustworthy? two separate clients have now said it 'looks like a scam site'. its just a comparison table and three cards, nothing weird"
+    },
+    {
+      "pass": false,
+      "should_trigger": true,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "reviewing a junior designer's conference badge layout and i want to give feedback thats actually useful instead of just 'looks good to me'. what should i be checking for"
+    },
+    {
+      "pass": true,
+      "should_trigger": true,
+      "did_trigger": true,
+      "rate": 0.5,
+      "triggers": 1,
+      "runs": 2,
+      "query": "our saas dashboard keeps getting 'hard to scan' feedback from users. i think its a visual hierarchy problem but our designer left in march and i dont know how to diagnose it"
+    },
+    {
+      "pass": false,
+      "should_trigger": false,
+      "did_trigger": true,
+      "rate": 1.0,
+      "triggers": 2,
+      "runs": 2,
+      "query": "build me a react pricing page with three tiers, a monthly/annual toggle and tailwind, matching the tokens in src/styles/theme.ts"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "turn docs/q3-report.md into a slide deck pdf using our brand template, 16:9"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "picking colours for a stacked bar chart with 7 categories for the annual report \u2014 needs to stay distinguishable in greyscale print"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "my flex container wont wrap the cards on mobile, they just squish down to 40px wide. css is in components/CardGrid.module.css"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "write the hero headline and subheadline for our new landing page. we do payroll software for restaurants, main pain point is tip distribution"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "add dark mode to the marketing site \u2014 we already have css custom properties for all the colours, just need the toggle and the dark values"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "whats the tailwind class for a 1px border in slate-700 with 50% opacity"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "generate a logo for my coffee roastery, something with a mountain and clean lines"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "convert the product photos in ~/shop/raw/ to webp and resize them to 800px on the long edge"
+    },
+    {
+      "pass": true,
+      "should_trigger": false,
+      "did_trigger": false,
+      "rate": 0.0,
+      "triggers": 0,
+      "runs": 2,
+      "query": "our lighthouse accessibility score dropped from 94 to 71 after the last deploy, can you find whats failing and fix it"
+    }
+  ]
+}
