@@ -12,11 +12,14 @@ Add dkv: graphic-design fundamentals as a working review method.
 - One skill, `design-fundamentals`, in two modes — CRITIQUE an existing design (structured review
   pass, impact-ranked fixes, per-finding severity) or DIRECT a new one (palette with hex +
   60/30/10 + measured contrast ratios, type pairing on a modular scale, grid strategy). Covers
-  graphic design and UI; explicitly defers frontend code to `frontend-design`/`impeccable`, PDF
-  rendering to docsmith's `make-pdf`, and chart colours to `dataviz`.
+  print and static graphic design — posters, packaging, menus, signage, logos, decks, social posts.
+  Deliberately stops at the interface layer: websites, app UI, dashboards and components stay with
+  `impeccable`/`frontend-design`. Also defers PDF rendering to docsmith's `make-pdf` and
+  chart colours to `dataviz`.
 - Five reference files behind a router (`color`, `typography`, `layout`, `gestalt`, `principles`),
-  section-numbered so `SKILL.md` cites `§N` instead of loading whole files. Pure knowledge — no
-  scripts, no assets, no agents, no installer changes.
+  section-numbered so `SKILL.md` cites `§N` instead of loading whole files. Plus one script,
+  `contrast.py` (WCAG ratios + the verdict per threshold, including the non-text 3:1 case reviews
+  skip); the installer warns if `python3` is absent. No assets, no agents, no monitors.
 - Validated against the literature rather than assembled from received wisdom. Carries the numbers
   most design advice omits — the WCAG contrast floor, colour-blind-safe palettes (Okabe–Ito), the
   45–75 character measure, 120–150% leading, Müller-Brockmann grid provenance, the 8pt grid — and

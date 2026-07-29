@@ -15,9 +15,13 @@ five reference files, and one small script — no dependencies beyond Python 3.
   60/30/10 assignment and **measured contrast ratios**; a type pairing with roles and real sizes off
   a modular scale; a grid and alignment strategy; and the reasoning behind the placement.
 
-It covers graphic design *and* UI — poster, social post, slide deck, thumbnail, packaging, logo,
-landing page, dashboard, app screen. It does **not** write frontend code, render PDFs, or generate
-images.
+Scope is **print and static graphic design** — posters, flyers, packaging, labels, menus, signage,
+banners, book and album covers, logos and wordmarks, slide decks, social posts, thumbnails.
+
+It deliberately stops at the interface layer. Websites, app and product UI, dashboards and
+components belong to `impeccable` / `frontend-design`, which cover critique as well as building —
+two skills fighting over the same prompt helps nobody. dkv also does not render PDFs (docsmith's
+`make-pdf`), generate images, or pick chart-series colours (`dataviz`).
 
 ## What it covers
 
@@ -73,5 +77,5 @@ why does this poster look off?                    → critique
 critique the visual design of this screenshot     → critique
 pick a palette and fonts for a coffee shop menu   → direction
 what pairs with Montserrat Extra Bold?            → direction
-is the hierarchy on this landing page working?    → critique
+this packaging looks own-brand, what's wrong?     → critique
 ```

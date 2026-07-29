@@ -7,19 +7,20 @@ description: >
   colour, type, layout, grouping and hierarchy, then reports concrete fixes ranked by impact with a
   severity each; or turns a brief into a buildable spec — palette with hex and 60/30/10, a type
   pairing with real sizes off a scale, a grid. Checks the contrast maths people skip, including
-  component borders and focus rings (3:1) and not just text (4.5:1). Applies to posters, packaging,
-  logos, menus, signage, slide decks, social posts, and to how landing pages, dashboards and app
-  screens LOOK. Reach for it on phrasings like "why does this poster look cheap", "our deck cover
-  feels amateurish", "these two brand colours fight each other", "what pairs with Montserrat
-  ExtraBold", "pick a palette and fonts for my cafe menu", "our pricing page looks untrustworthy",
-  "the negative space in our logo isn't reading", "users say our dashboard is hard to scan", "give
-  this junior useful design feedback" — even when no design principle is named, and even though a
-  design answer could be improvised without it. Improvising is exactly the problem: unaided answers
-  skip the contrast measurement, invent sizes instead of deriving them, and repeat folklore like the
-  golden ratio being inherently beautiful. Prefer this skill for any question about how something
-  looks. Do NOT use it to write or edit frontend code, CSS or components (that is `frontend-design` /
-  `impeccable`) — building a page is not reviewing one; nor to render markdown into a PDF (docsmith's
-  `make-pdf`), generate images or logos, or pick chart-series colours (`dataviz`).
+  borders and other non-text elements (3:1), not just text (4.5:1). Scope is **print and static
+  graphic design**: posters, flyers, packaging, labels, menus, signage, banners, book and album
+  covers, logos and wordmarks, slide decks, social posts and thumbnails. Reach for it on phrasings
+  like "why does this poster look cheap", "our deck cover feels amateurish", "these two brand
+  colours fight each other", "what pairs with Montserrat ExtraBold", "pick a palette and fonts for
+  my cafe menu", "the negative space in our logo isn't reading", "this packaging looks like a
+  supermarket own-brand", "give this junior useful feedback on their flyer" — even when no design
+  principle is named, and even though a design answer could be improvised without it. Improvising is
+  exactly the problem: unaided answers skip the contrast measurement, invent sizes instead of
+  deriving them, and repeat folklore like the golden ratio being inherently beautiful. Do NOT use
+  for websites, web pages, app or product UI, dashboards, or components — `impeccable` and
+  `frontend-design` own the interface layer, and they cover critique as well as building. Nor to
+  render markdown into a PDF (docsmith's `make-pdf`), generate images or logos, or pick chart-series
+  colours (`dataviz`).
 ---
 
 # dkv — design fundamentals
@@ -92,8 +93,8 @@ When there is an existing design: an image, screenshot, deck, URL, or a descript
    *decision you are reviewing*, not a mistake you are catching. Disagree if you have grounds, but
    argue with the reasoning rather than reporting it as an accident.
 3. **Name what the piece is** — medium, audience, and what it is trying to make the viewer do. A
-   critique that ignores the brief just imposes taste; a dense data dashboard and a luxury perfume
-   poster fail completely different tests.
+   critique that ignores the brief just imposes taste; a dense wholesale price list and a luxury
+   perfume poster fail completely different tests.
 4. **Run the review pass** below, reading the reference sections it points to.
 5. **Report.** Lead with the two or three highest-impact problems, then the rest. A critique nobody
    acts on is worthless, and a flat list of fifteen findings does not get acted on.
