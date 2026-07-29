@@ -21,9 +21,11 @@ Usage:
     python3 contrast.py --pairs pairs.tsv                # fg<TAB>bg<TAB>kind<TAB>label
     python3 contrast.py --selfcheck
 """
+import re
 import sys
 
 THRESHOLDS = {"body": 4.5, "large": 3.0, "ui": 3.0, "aaa": 7.0}
+_HEX_HEAD = re.compile(r"#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b")
 
 
 def _luminance(hex_colour: str) -> float:
@@ -64,6 +66,10 @@ def _selfcheck() -> None:
     # and one that passes
     _, _, ok = check("#F8CDD7", "#270710", "body")
     assert ok, "light-on-dark body pair should pass"
+    # regression: hex colours start with '#', so the comment-skip must not eat them
+    assert _HEX_HEAD.match("#191010"), "6-digit hex must not read as a comment"
+    assert _HEX_HEAD.match("#abc"), "3-digit hex must not read as a comment"
+    assert not _HEX_HEAD.match("# a note"), "real comments must still be skipped"
     print("selfcheck ok")
 
 
@@ -78,7 +84,11 @@ def main(argv: list) -> int:
         with open(path) as fh:
             for line in fh:
                 line = line.rstrip("\n")
-                if not line.strip() or line.lstrip().startswith("#"):
+                if not line.strip():
+                    continue
+                # A comment starts with '#' — but so does every hex colour, which is
+                # this file's whole point. Only skip a '#' line that isn't a colour.
+                if line.lstrip().startswith("#") and not _HEX_HEAD.match(line.lstrip()):
                     continue
                 parts = line.split("\t")
                 fg, bg = parts[0], parts[1]

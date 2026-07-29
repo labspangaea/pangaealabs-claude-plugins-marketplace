@@ -15,3 +15,6 @@ dev/*/iteration-*/
 .impeccable/
 # ad-hoc rendered demo PDFs at repo root
 *-optimized.pdf
+
+# playwright MCP scratch output
+.playwright-mcp/
