@@ -71,6 +71,12 @@ func outputPath(basename string, fx Fixture) string {
 		return filepath.Join("internal", "service", "factory_default.go")
 	case basename == "service.go.tmpl":
 		return filepath.Join("internal", "service", fx.EntityLower+".go")
+	case basename == "service_stub.go.tmpl":
+		return filepath.Join("internal", "service", "stub", fx.EntityLower+".go")
+	case basename == "service_factory_stub.go.tmpl":
+		return filepath.Join("internal", "service", "factory_stub.go")
+	case basename == "seed.go.tmpl":
+		return filepath.Join("cmd", "seed", "main.go")
 	case basename == "apperr.go.tmpl":
 		return filepath.Join("internal", "apperr", fx.EntityLower+".go")
 	case basename == "subscriber.go.tmpl":
@@ -89,6 +95,10 @@ func outputPath(basename string, fx Fixture) string {
 		return "Dockerfile"
 	case basename == ".gitignore.tmpl":
 		return ".gitignore"
+	case basename == ".env.tmpl":
+		return ".env"
+	case basename == "docker-compose.yml.tmpl":
+		return "docker-compose.yml"
 	case strings.HasPrefix(basename, "main_"):
 		return filepath.Join("cmd", fx.Name, "main.go")
 	}
@@ -137,6 +147,14 @@ func funcMap() template.FuncMap {
 			}
 			return false
 		},
+		"hasNullableField": func(fields []FieldDef) bool {
+			for _, f := range fields {
+				if strings.HasPrefix(f.GoType, "*") {
+					return true
+				}
+			}
+			return false
+		},
 		"seedValue": func(goType string, idx int) string {
 			switch goType {
 			case "string":
@@ -161,9 +179,19 @@ func funcMap() template.FuncMap {
 					return "ptr.Of(true)"
 				}
 				return "ptr.Of(false)"
+			case "time.Time":
+				return "time.Now().UTC()"
+			case "*time.Time":
+				return "ptr.Of(time.Now().UTC())"
 			default:
 				return `""`
 			}
+		},
+		"dbDriver": func(database string) string {
+			if database == "gorm-mysql" {
+				return "gorm.io/driver/mysql"
+			}
+			return "gorm.io/driver/postgres"
 		},
 		"dbOpen": func(database string) string {
 			if database == "gorm-mysql" {

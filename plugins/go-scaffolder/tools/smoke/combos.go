@@ -68,6 +68,32 @@ var b1Ready = map[string]bool{
 	"main_publisher_kafka.go.tmpl":    true,
 	"main_publisher_rabbitmq.go.tmpl": true,
 	"main_publisher_redis.go.tmpl":    true,
+
+	// Stub mode. Rendered for every api combo and exercised by the
+	// `go build -tags=stub` pass — see runBuilds in main.go.
+	"service_stub.go.tmpl":         true,
+	"service_factory_stub.go.tmpl": true,
+
+	// Dev-environment files. seed is real Go and compiles with the rest;
+	// the rest are non-Go, so rendering them IS the check — it catches the
+	// template-execution failures (missing funcMap entry, renamed field,
+	// bad conditional) that are the whole reason this runner exists.
+	"seed.go.tmpl":            true,
+	".env.tmpl":               true,
+	".gitignore.tmpl":         true,
+	"Dockerfile.tmpl":         true,
+	"docker-compose.yml.tmpl": true,
+}
+
+// buildTagsFor returns the build-tag sets combo c must compile under. "" means
+// no tags (the production build).
+//
+// Only api scaffolds ship a stub backend, so only they get the second pass.
+func buildTagsFor(c Combo) []string {
+	if c.Type == "api" {
+		return []string{"", "stub"}
+	}
+	return []string{""}
 }
 
 // templatesFor returns the basenames of every template needed to render combo c.
@@ -80,9 +106,18 @@ func templatesFor(c Combo) []string {
 		"port_service.go.tmpl",
 		"service.go.tmpl",
 		"config.go.tmpl",
+		// Dev-environment files. Every scaffold emits these, so every combo
+		// renders them — a broken conditional here ships a project that cannot
+		// be started even though every .go file compiles.
+		".env.tmpl",
+		".gitignore.tmpl",
+		"Dockerfile.tmpl",
+		"docker-compose.yml.tmpl",
 	}
 	if c.Database != "none" && c.Type != "publisher" {
 		ts = append(ts, "repository.go.tmpl", "apperr.go.tmpl")
+		// cmd/seed is real Go and builds with everything else.
+		ts = append(ts, "seed.go.tmpl")
 	}
 	switch c.Type {
 	case "api":
@@ -90,15 +125,18 @@ func templatesFor(c Combo) []string {
 		if c.Database == "none" {
 			ts = append(ts, "apperr.go.tmpl")
 		}
-		// service_factory_default supplies New{Entity}Service, which every
-		// main_api_* calls.
+		// The three service-wiring files. factory_default (//go:build !stub)
+		// supplies New{Entity}Service for production builds; factory_stub and the
+		// stub package (//go:build stub) supply it under -tags=stub.
 		//
-		// Its //go:build stub siblings (service_stub, service_factory_stub) are
-		// deliberately excluded: rendering service_stub alone would create an
-		// internal/service/stub package whose only file is build-constrained out,
-		// and `go build ./...` fails outright on a package with no buildable
-		// files. Verifying stub mode needs its own `-tags=stub` pass.
-		ts = append(ts, "service_factory_default.go.tmpl")
+		// Rendering the stub package does not disturb the production build:
+		// `go build ./...` skips a package whose files are all excluded by build
+		// constraints rather than erroring, so both passes work off one render.
+		ts = append(ts,
+			"service_factory_default.go.tmpl",
+			"service_factory_stub.go.tmpl",
+			"service_stub.go.tmpl",
+		)
 		// Handler templates are framework-agnostic (huma derives the spec from
 		// Go types); only main_api_*.go.tmpl varies per framework adapter.
 		ts = append(ts,

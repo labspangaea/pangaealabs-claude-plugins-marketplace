@@ -166,11 +166,27 @@ func main() {
 			// tidy failures are reported by the subsequent build, so a noisy tidy
 			// error here would just duplicate the diagnostic. Intentionally ignored.
 			tidyOut, _ := exec.Command("go", "-C", outDir, "mod", "tidy").CombinedOutput()
-			cmd := exec.Command("go", "-C", outDir, "build", "./...")
-			out, buildErr := cmd.CombinedOutput()
-			if buildErr != nil {
-				results[i].stderr = string(tidyOut) + string(out)
-				results[i].err = buildErr
+
+			// api combos build twice. Production (no tag) excludes the stub
+			// package; -tags=stub swaps factory_default for factory_stub and
+			// pulls in internal/service/stub. Only the second pass type-checks
+			// the stub against port.{Entity}Service, so a stub that drifts out
+			// of sync with the port is invisible to the first.
+			for _, tags := range buildTagsFor(c) {
+				args := []string{"-C", outDir, "build"}
+				if tags != "" {
+					args = append(args, "-tags="+tags)
+				}
+				out, buildErr := exec.Command("go", append(args, "./...")...).CombinedOutput()
+				if buildErr != nil {
+					label := ""
+					if tags != "" {
+						label = fmt.Sprintf("[-tags=%s] ", tags)
+					}
+					results[i].stderr = string(tidyOut) + label + string(out)
+					results[i].err = buildErr
+					break
+				}
 			}
 		}(i, ci)
 	}
