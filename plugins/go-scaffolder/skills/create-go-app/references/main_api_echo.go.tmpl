@@ -199,7 +199,7 @@ func main() {
 		})
 	}
 
-	api := humaecho.New(router, humaConfig)
+	api := humaecho.NewV4(router, humaConfig)
 	h := httphandler.New{{.Entity}}(svc)
 	h.RegisterRoutes(api)
 	httphandler.NewHealth(cfg.Version).RegisterRoutes(api)
