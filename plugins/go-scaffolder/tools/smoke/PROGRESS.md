@@ -44,14 +44,51 @@ on any template not in `b1Ready` are skipped with a clear log message.
 - [x] `main_publisher_kafka.go.tmpl` (rewritten as minimal lifecycle: logger + telemetry + publisher + signal — dropped broken `repository`/`service.New(repo, pub)` calls)
 - [x] `main_publisher_rabbitmq.go.tmpl` (same minimal shape; uses `amqp091.Dial` + `rabbitmq.NewPublisher` which returns error)
 - [x] `main_publisher_redis.go.tmpl` (same; constructs `*goredis.Client` then `pubsubredis.NewPublisher`)
+- [x] `port_service.go.tmpl` (pure substitution)
+- [x] `service_factory_default.go.tmpl` (`//go:build !stub`)
+- [x] `service_factory_stub.go.tmpl` (`//go:build stub`) — only type-checked by the `-tags=stub` pass
+- [x] `service_stub.go.tmpl` (`//go:build stub`) — ditto
+- [x] `seed.go.tmpl` (real Go; builds as `cmd/seed`)
+- [x] `.env.tmpl`, `.gitignore.tmpl`, `Dockerfile.tmpl`, `docker-compose.yml.tmpl` (non-Go; rendering is the check)
 
 ### Pending
 
-**None.** All 21 templates are B1-ready. Future template edits trigger smoke automatically; failures surface as `hookSpecificOutput.additionalContext` in the next turn.
+**None** — every template in `references/` is rendered by at least one combo.
+
+To confirm rather than trust this, print the union of `templatesFor` over all
+combos and diff it against the directory listing; the two should match exactly.
+A template that ships but is never rendered is invisible to the runner no matter
+how green the matrix looks.
+
+## What each combo checks
+
+1. **Render** every template the combo needs. For the four non-Go files
+   (`.env`, `.gitignore`, `Dockerfile`, `docker-compose.yml`) this is the whole
+   check — there is nothing to compile, but it still catches the failure that
+   actually happens: a template-execution error from a missing funcMap entry, a
+   renamed field, or a malformed conditional.
+2. **`go build ./...`** — the production build. The stub package is present but
+   excluded by build constraints; `./...` skips such packages rather than
+   erroring, so one render serves both passes.
+3. **`go build -tags=stub ./...`** — api combos only. This is the only pass that
+   type-checks `internal/service/stub` and `factory_stub` against
+   `port.{Entity}Service`, so a stub that drifts from the port is invisible
+   without it.
+
+Compile-only by design. Runtime behaviour against real postgres/mysql/redis is
+`/go-scaffolder:integration-test-go-app`'s job.
+
+### Keeping the two funcMaps in sync
+
+`tools/smoke/render.go` and `tools/render-file/main.go` must register identical
+template functions — they are documented to produce identical output for the same
+params, and the skills use `render-file` while the matrix uses `smoke`. Drift is
+silent until a template happens to call the missing function. Adding a function
+to one means adding it to the other.
 
 ## Combo coverage
 
-**16/16 combos active.** All 21 templates converted. Coverage breakdown:
+**16/16 combos active.** Coverage breakdown:
 
 Representative 13 (one combo per major axis):
 - api: nethttp+postgres+none, nethttp+postgres+redis, gin+postgres+memory, chi+mysql+couchbase, mux+postgres+none, echo+postgres+redis, nethttp+nodb+none
