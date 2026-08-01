@@ -9,7 +9,9 @@ import (
 	"syscall"
 
 	"github.com/rabbitmq/amqp091-go"
-{{- if ne .Database "none" }}
+{{- if isBun .Database }}
+	repo "github.com/labspangaea/go-lib/db/bunrepo"
+{{- else if ne .Database "none" }}
 	"github.com/labspangaea/go-lib/db"
 {{- end }}
 	"github.com/labspangaea/go-lib/logger"
@@ -80,7 +82,27 @@ func main() {
 		ctx = logger.WithLogger(ctx, log)
 	}
 
-{{- if ne .Database "none" }}
+{{- if isBun .Database }}
+
+	bunDB, err := repo.Open(cfg.DatabaseDSN,
+		repo.WithMaxOpenConns(cfg.DBMaxOpen),
+		repo.WithSlowThreshold(cfg.DBSlowThreshold),
+		repo.WithLogLevel(cfg.DBLogLevel),
+	)
+	if err != nil {
+		log.Error("database connection failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+	defer bunDB.Close()
+
+	// Create the table if absent. Idempotent — safe to call on every startup.
+	// For production environments using explicit migration tools (Atlas, Goose,
+	// dbmate), remove this block and run migrations out-of-band before deploy.
+	if err := repository.Migrate(ctx, bunDB); err != nil {
+		log.Error("schema migration failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+{{- else if ne .Database "none" }}
 
 	gormDB, err := db.Open(
 {{- if eq .Database "gorm-postgres" }}postgres.Open(cfg.DatabaseDSN){{else if eq .Database "gorm-mysql" }}mysql.Open(cfg.DatabaseDSN){{end}},
@@ -132,7 +154,7 @@ func main() {
 		dbrepo.WithTwoPhaseList(),
 	)
 {{- else }}
-	{{.EntityLower}}Repo := repository.New(gormDB)
+	{{.EntityLower}}Repo := repository.New({{if isBun .Database}}bunDB{{else}}gormDB{{end}})
 {{- end }}
 	svc := service.New({{.EntityLower}}Repo)
 {{- else }}

@@ -19,7 +19,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+{{- if isBun .Database}}
+	repo "github.com/labspangaea/go-lib/db/bunrepo"
+{{- else}}
 	"github.com/labspangaea/go-lib/db/repo"
+{{- end}}
 {{- if hasNullableField .Fields }}
 	"github.com/labspangaea/go-lib/ptr"
 {{- end }}

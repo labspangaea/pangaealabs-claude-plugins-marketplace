@@ -1,20 +1,28 @@
 ---
 name: create-go-repository
-description: Generate domain struct, port interface, GORM repository adapter, and apperr error codes for one entity in an existing Go project wired to go-lib. **Use this skill whenever someone wants to add a new entity's data layer, create a repository for a domain model, generate a GORM model + port interface, or scaffold the persistence layer without generating the full application** — phrasings like "I need a repo for X", "create the domain and repository for Y", "add Z to the database layer", "scaffold the GORM model for Order". Owns the schema-parsing rules other skills delegate to. Do NOT use to scaffold a fresh Go project (use `/go-scaffolder:create-go-app`), to add the business-logic layer (use `/go-scaffolder:create-go-service`), or to expose endpoints over HTTP (use `/go-scaffolder:create-go-handler` — its Mode A generates the upstream repository automatically).
+description: Generate domain struct, port interface, repository adapter (GORM or bun), and apperr error codes for one entity in an existing Go project wired to go-lib. **Use this skill whenever someone wants to add a new entity's data layer, create a repository for a domain model, generate a GORM or bun model + port interface, or scaffold the persistence layer without generating the full application** — phrasings like "I need a repo for X", "create the domain and repository for Y", "add Z to the database layer", "scaffold the GORM model for Order", "make me a bun repository for Invoice", "add a SQL-first repo without GORM". Owns the schema-parsing rules other skills delegate to. Do NOT use to scaffold a fresh Go project (use `/go-scaffolder:create-go-app`), to add the business-logic layer (use `/go-scaffolder:create-go-service`), or to expose endpoints over HTTP (use `/go-scaffolder:create-go-handler` — its Mode A generates the upstream repository automatically).
 allowed-tools: [bash, read, write, edit, grep, glob, mcp__go-lsp__go_diagnose, AskUserQuestion]
 model: sonnet
 ---
 
 # Skill: create-go-repository
 
-Generate domain struct, port interface, GORM repository adapter, and apperr error codes for one entity. Use this skill whenever someone wants to add a new entity's data layer to an existing Go project, create a repository for a domain model, generate a GORM model and port interface, or scaffold the persistence layer without generating the full application. Trigger even if the user just says "I need a repo for X" or "create the domain and repository for Y".
+Generate domain struct, port interface, repository adapter, and apperr error codes for one entity. Use this skill whenever someone wants to add a new entity's data layer to an existing Go project, create a repository for a domain model, generate a GORM or bun model and port interface, or scaffold the persistence layer without generating the full application. Trigger even if the user just says "I need a repo for X" or "create the domain and repository for Y".
 
 ## Parameters
 
 | Parameter | Required | Default | Values |
 |-----------|----------|---------|--------|
-| `database` | no | `gorm-postgres` | `gorm-postgres` · `gorm-mysql` · `none` |
-| `cache` | no | `none` | `none` · `redis` · `memory` · `couchbase` |
+| `database` | no | `gorm-postgres` | `gorm-postgres` · `gorm-mysql` · `bun-postgres` · `bun-mysql` · `none` |
+| `cache` | no | `none` | `none` · `redis` · `memory` · `couchbase` (forced to `none` when `database` is `bun-*`) |
+
+**Match the project you are adding to.** Read an existing
+`internal/adapter/outbound/repository/*.go` before asking — if it imports
+`go-lib/db/bunrepo` the project is on bun, if `go-lib/db/repo` it is on GORM.
+Mixing both in one service compiles, but leaves two repository idioms and both ORMs
+in the binary, which is rarely what anyone wants. When the project already has a
+repository, treat its flavour as the default and only ask if the user hints
+otherwise.
 
 ## Prerequisites
 
@@ -81,16 +89,41 @@ AskUserQuestion({
   options: [
     { label: "PostgreSQL via GORM (Recommended)", description: "gorm-postgres — default for new repositories" },
     { label: "MySQL via GORM",                    description: "gorm-mysql" },
-    { label: "None",                              description: "No persistence — generate domain + port only, skip the GORM adapter" }
+    { label: "PostgreSQL via bun",                description: "bun-postgres — SQL-first query builder, no GORM in the binary" },
+    { label: "MySQL via bun",                     description: "bun-mysql" }
   ]
 })
 ```
 
-Map the selected label to the `database` parameter (`gorm-postgres` / `gorm-mysql` / `none`). When the user picks `None`, skip Step 3 entirely — there is no repository to cache.
+Map the selected label to the `database` parameter. `none` (domain + port only, no
+adapter) reaches the parameter through the auto-added "Other" free-text entry —
+only four options fit on screen. When the user picks `none`, skip Step 3 entirely:
+there is no repository to cache.
+
+### What changes between GORM and bun
+
+Only the adapter and its library. The domain struct, the port interface, and the
+apperr codes are byte-identical either way, because `go-lib/db/bunrepo` mirrors
+`go-lib/db/repo`'s exported surface — `CursorParams`, `OffsetParams`, `CursorPage`,
+`SortKey`, `FilterSet`, the filter constructors, and the error sentinels all keep
+their names. The port imports it aliased so its method signatures do not move:
+
+```go
+repo "github.com/labspangaea/go-lib/db/bunrepo"
+```
+
+The one type that genuinely differs is `Filter` — it applies to a
+`*bun.SelectQuery` rather than a `*gorm.DB`. That is why the two cannot share an
+import.
 
 ## Step 3 — Cache wrapper choice
 
-Skip this question when `database == none` (nothing to cache).
+Skip this question when `database == none` (nothing to cache) **or when `database`
+is `bun-*`, setting `cache=none`.** The cache decorator (`repo.CachedRepo`) is
+generic over a repository exposing `DB(ctx) *gorm.DB`, so it cannot wrap a bun
+repository — asking would collect an answer that cannot be honoured. If the user
+wants both bun and a cache, say so plainly and let them pick which one matters
+more.
 
 If `cache` was not supplied as a parameter, ask:
 
@@ -157,7 +190,7 @@ Parse the schema into `{{.Fields}}`. Always strip system fields (`id`, `created_
 | `.Name` | PascalCase Go identifier | `PetID`, `ShipDate` |
 | `.GoType` | Go type string | `string`, `*int64`, `bool`, `time.Time` |
 | `.JSONName` | snake_case json tag | `pet_id`, `ship_date` |
-| `.DBColumn` | snake_case gorm column | `pet_id`, `ship_date` |
+| `.DBColumn` | snake_case column name (`gorm:"column:…"` / `bun:"…"`) | `pet_id`, `ship_date` |
 | `.Validate` | validate tag content | `required`, `required,max=255`, `` |
 
 ### Extract fields from existing domain (Mode B)
@@ -168,11 +201,16 @@ Read the Go struct and build `{{.Fields}}` using the type table above. Ignore `I
 
 ## Step 5 — System fields (always injected)
 
-| Field | Domain type | GORM model type | GORM tag |
-|-------|-------------|-----------------|----------|
-| `ID` | `string` | `string` | `gorm:"primaryKey;column:id"` |
-| `CreatedAt` | `time.Time` | `int64` | `gorm:"column:created_at;autoCreateTime:milli"` |
-| `UpdatedAt` | `time.Time` | `int64` | `gorm:"column:updated_at;autoUpdateTime:milli"` |
+| Field | Domain type | Model type | GORM tag | bun tag |
+|-------|-------------|------------|----------|---------|
+| `ID` | `string` | `string` | `gorm:"primaryKey;column:id"` | `bun:"id,pk"` |
+| `CreatedAt` | `time.Time` | `int64` | `gorm:"column:created_at;autoCreateTime:milli"` | `bun:"created_at,notnull"` |
+| `UpdatedAt` | `time.Time` | `int64` | `gorm:"column:updated_at;autoUpdateTime:milli"` | `bun:"updated_at,notnull"` |
+
+bun has no `autoCreateTime` equivalent, so the bun template sets both timestamps in
+code and guards `IsZero()` before calling `UnixMilli()`. Keep that guard if you hand-
+edit the adapter: `UnixMilli()` on a zero `time.Time` is `-6795364578871`, and bun
+writes it to the row as-is rather than substituting a server timestamp.
 
 ---
 
@@ -180,13 +218,17 @@ Read the Go struct and build `{{.Fields}}` using the type table above. Ignore `I
 
 Templates live at `${CLAUDE_SKILL_DIR}/../create-go-app/references/`. Substitute `{{.Entity}}`, `{{.EntityLower}}`, `{{.Module}}`, `{{.Fields}}` into each.
 
+The repository template is chosen by `database`: `repository.go.tmpl` for `gorm-*`,
+`repository_bun.go.tmpl` for `bun-*`. Both render to the same path — they are
+alternatives, never both.
+
 **Mode A — generate all 4:**
 
 | Template | Output path |
 |----------|-------------|
 | `domain.go.tmpl` | `internal/domain/{{.EntityLower}}.go` |
 | `port.go.tmpl` | `internal/port/{{.EntityLower}}.go` |
-| `repository.go.tmpl` | `internal/adapter/outbound/repository/{{.EntityLower}}.go` |
+| `repository.go.tmpl` **or** `repository_bun.go.tmpl` | `internal/adapter/outbound/repository/{{.EntityLower}}.go` |
 | `apperr.go.tmpl` | `internal/apperr/{{.EntityLower}}.go` |
 
 **Mode B — generate 3 (domain already exists):**
@@ -194,7 +236,7 @@ Templates live at `${CLAUDE_SKILL_DIR}/../create-go-app/references/`. Substitute
 | Template | Output path |
 |----------|-------------|
 | `port.go.tmpl` | `internal/port/{{.EntityLower}}.go` |
-| `repository.go.tmpl` | `internal/adapter/outbound/repository/{{.EntityLower}}.go` |
+| `repository.go.tmpl` **or** `repository_bun.go.tmpl` | `internal/adapter/outbound/repository/{{.EntityLower}}.go` |
 | `apperr.go.tmpl` | `internal/apperr/{{.EntityLower}}.go` |
 
 ### Apperr base offset
@@ -205,16 +247,21 @@ If an output file already exists, ask the user before overwriting.
 
 ### Key patterns enforced by the templates
 
-- `orderModel` implements `TableName()`, `PrimaryKey()`, `GetPK()`, `CursorValues()` (required by `repo.Model[ID]`)
+- `orderModel` implements `TableName()`, `PrimaryKey()`, `GetPK()`, `CursorValues()` (required by `repo.Model[ID]`). On the bun path the model *also* carries `bun.BaseModel` with a `bun:"table:…"` tag — bun reads the table name and primary key from tags, not from those methods, so both are needed and must agree
 - `CursorValues()` returns every column that may appear in `OrderBy`
 - Repository embeds `repo.Repository[model, string]` (interface) — accepts either `*repo.BaseRepo` (via `New`) or `*repo.CachedRepo` (via `NewCached`)
 - `mapEntityRepoErr` private helper centralises repo-sentinel → apperr mapping (replaces per-method switch)
-- `repo.ErrNotFound` → `apperr.ErrXxxNotFound` (never `gorm.ErrRecordNotFound` directly)
+- `repo.ErrNotFound` → `apperr.ErrXxxNotFound` (never `gorm.ErrRecordNotFound` or `sql.ErrNoRows` directly)
 - apperr constants start at `iota + 1000` to avoid collisions with library codes
 - `Update{{Entity}}` passes an explicit `[]string` column list to `repo.Repository.Update` — only user-defined field columns and `"updated_at"` are listed, so `id` and `created_at` are never clobbered by an update call
 - `List{{Entity}}IDs` is generated in both the port interface and the repository adapter — thin wrapper over the embedded `repo.Repository.ListIDs`, exposed so services can perform batch/fan-out operations without loading full entities
 
-### Cache constructor — emit only when `cache != none`
+Bun-specific additions: `repository_bun.go.tmpl` also emits a package-level
+`Migrate(ctx, db)` (bun has no `AutoMigrate`, so the composition root calls this
+instead), and implements `List{{.Entity}}sOffset` with bun's `ScanAndCount`, which
+returns the page and the total in one round trip.
+
+### Cache constructor — emit only when `cache != none` (`gorm-*` only)
 
 `repository.go.tmpl` includes a `NewCached(db, c, opts...)` constructor and a `cache` package import. When `cache == none`:
 
@@ -234,7 +281,32 @@ This skill writes only the entity files. It does **not** edit `cmd/{name}/main.g
 
 For `cache=redis` / `cache=memory` / `cache=couchbase`, read the snippet that matches the chosen backend from `${CLAUDE_SKILL_DIR}/../create-go-app/references/cache-backends.md` and print it inline, substituting `{{.Entity}}` and `{{.EntityLower}}` for the active entity. That file is the single source of truth — the `main_api_*` templates render the same wiring, and `/go-scaffolder:create-go-app` Step 6 points to the same doc.
 
-For `cache=none`, no snippet is needed — keep using `repository.New(gormDB)`.
+For `cache=none`, no snippet is needed — keep using `repository.New(gormDB)`, or
+`repository.New(bunDB)` on the bun path.
+
+For `bun-*`, the composition root also needs the connection opened through
+`bunrepo` and the table created via the generated `Migrate`:
+
+```go
+repo "github.com/labspangaea/go-lib/db/bunrepo"
+
+bunDB, err := repo.Open(cfg.DatabaseDSN,
+    repo.WithMaxOpenConns(cfg.DBMaxOpen),
+    repo.WithSlowThreshold(cfg.DBSlowThreshold),
+    repo.WithLogLevel(cfg.DBLogLevel),
+)
+if err != nil { /* log + os.Exit(1) */ }
+defer bunDB.Close()
+
+if err := repository.Migrate(ctx, bunDB); err != nil { /* log + os.Exit(1) */ }
+
+orderRepo := repository.New(bunDB)
+```
+
+Tell the user to check `DATABASE_DSN` when switching an existing PostgreSQL service
+to bun: `pgdriver` needs the URL form (`postgres://user:pass@host:5432/db?sslmode=disable`)
+and does not parse GORM's `host=… port=… user=…` DSN. The failure surfaces at
+startup, not at build time.
 
 The user must also ensure `Config` has the relevant fields (`CacheTTL`, `CacheJitterFactor`, plus per-backend connection fields). Tell them to mirror the `config.go.tmpl` cache section from `/create-go-app`.
 

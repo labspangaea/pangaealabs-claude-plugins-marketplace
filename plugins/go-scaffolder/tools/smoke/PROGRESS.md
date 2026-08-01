@@ -29,6 +29,9 @@ on any template not in `b1Ready` are skipped with a clear log message.
 - [x] `service.go.tmpl` (pure substitution; revisit if publisher injection is added)
 - [x] `subscriber.go.tmpl` (pure substitution)
 - [x] `repository.go.tmpl`
+- [x] `repository_bun.go.tmpl` (bun/SQL-first adapter; same output path as `repository.go.tmpl`, selected by `database=bun-*`)
+- [x] `port_service.go.tmpl` (pure substitution)
+- [x] `service_factory_default.go.tmpl` (`//go:build !stub`)
 - [x] `config.go.tmpl`
 - [x] `main_api_nethttp.go.tmpl` (huma adapter via `humago`)
 - [x] `main_api_gin.go.tmpl` (huma adapter via `humagin`)
@@ -88,7 +91,7 @@ to one means adding it to the other.
 
 ## Combo coverage
 
-**16/16 combos active.** Coverage breakdown:
+**20/20 combos active.** Coverage breakdown:
 
 Representative 13 (one combo per major axis):
 - api: nethttp+postgres+none, nethttp+postgres+redis, gin+postgres+memory, chi+mysql+couchbase, mux+postgres+none, echo+postgres+redis, nethttp+nodb+none
@@ -99,6 +102,36 @@ Coverage-extension 3 (paths not exercised by the representative set):
 - api+nethttp+mysql+none — mysql driver under nethttp
 - consumer+kafka+postgres+memory — memory cache under a consumer
 - consumer+rabbitmq+nodb+none — consumer without a database
+
+bun 4 (the SQL-first repository flavour):
+- api+gin+bun-postgres+none, api+nethttp+bun-postgres+none, api+chi+bun-mysql+none
+- consumer+kafka+bun-postgres+none
+
+nethttp is covered separately from the other frameworks because its composition
+root uses numbered step comments, so its DB block takes its own patch rather than
+the shared one. Cache is always `none` on bun combos — the cache decorator lives in
+`go-lib/db/repo` and is GORM-typed, so the skills refuse that pairing; a bun+cache
+combo here would test a configuration the scaffolder never emits.
+
+### Building bun combos before `go-lib` publishes
+
+The bun templates import `github.com/labspangaea/go-lib/db/bunrepo`. `go mod tidy`
+resolves `go-lib@latest` (= `main`), so until that package merges upstream every
+bun combo fails with a missing-package error. Point the runner at a local checkout:
+
+```
+GOLIB_LOCAL=~/projects/go-lib go run . -all
+```
+
+That adds a `replace` directive to the scratch `go.mod` and nothing else. Leave the
+variable unset to reproduce exactly what an end user gets.
+
+### Known failure
+
+`api-echo-postgres-redis` fails on `go build` — huma's `humaecho` adapter now
+requires `echo/v5` while `main_api_echo.go.tmpl` still imports `echo/v4`. This is
+upstream dependency drift, unrelated to any combo above, and needs its own change
+(an echo major-version bump affects generated services' own echo usage).
 
 To add more combos: append to `var combos` in `combos.go`, run smoke against any
 template that affects the new combo to confirm it builds. No template changes

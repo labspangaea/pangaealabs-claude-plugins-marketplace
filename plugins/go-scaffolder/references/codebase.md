@@ -596,6 +596,92 @@ defer db.Close(gormDB) // MUST defer
 
 ---
 
+## `db/bunrepo/`
+
+SQL-first counterpart of `db/repo`, backed by [bun](https://bun.uptrace.dev).
+Selected by `database=bun-postgres` / `bun-mysql`. Keeps GORM out of the module
+graph entirely — a bun scaffold has no `gorm.io/*` in `go.mod` or in the binary.
+
+**The exported surface is deliberately the same as `db/repo`** for everything the
+port / service / handler layers touch, so generated code differs by one import
+line. Consumers alias it:
+
+```go
+repo "github.com/labspangaea/go-lib/db/bunrepo"
+```
+
+Identical in name and behaviour: `CursorParams`, `OffsetParams`, `CursorPage`,
+`SortKey`, `Asc`, `Descending`, `NewCursorParams`, `NewOffsetParams`,
+`CursorParamsFromRequest`, `FilterSet` (+ `Add`/`AddIf`/`Build`), `Eq`, `Like`,
+`FullText`, `In`, `IsNull`, `NotNull`, `Raw`, `Model[ID]`, `Repository[T, ID]`,
+`BaseRepo`, `New`, and the four error sentinels. Cursor tokens are wire-compatible
+between the two packages.
+
+### What differs
+
+```go
+// Filter applies to a bun query, not a *gorm.DB. This is the reason the two
+// packages cannot share an import.
+type Filter interface {
+    Apply(q *bun.SelectQuery) *bun.SelectQuery
+}
+
+// Connection — replaces db.Open. Driver picked from the DSN scheme.
+func Open(dsn string, opts ...Option) (*bun.DB, error)
+func WithMaxOpenConns(n int) Option
+func WithSlowThreshold(d time.Duration) Option
+func WithLogLevel(level string) Option   // "silent" | "error" | "warn" | "info"
+
+// Driver errors are translated explicitly — bun has no TranslateError.
+func MapError(err error) error
+```
+
+| Concern | `db/repo` | `db/bunrepo` |
+|---|---|---|
+| Open | `db.Open(dialector, ...)` + `db.Close(gormDB)` | `bunrepo.Open(dsn, ...)` + `defer bunDB.Close()` |
+| Migrate | `gormDB.AutoMigrate(&Model{})` | generated `repository.Migrate(ctx, db)` → `NewCreateTable().IfNotExists()` |
+| PostgreSQL DSN | `host=… port=… user=…` | `postgres://…` URL form (pgdriver cannot parse the other) |
+| Log level | `gormlogger.LogLevel` | plain string |
+| Cache decorator | `repo.NewCached(...)` | **none** |
+| Offset pagination | `DB(ctx).Model(...).Count(...)` then `Offset/Limit` | `DB(ctx).NewSelect()...ScanAndCount(ctx)` — page + total in one round trip |
+
+`DB(ctx)` returns `*bun.DB` and ignores ctx: bun binds the context at execution
+(`Scan(ctx)` / `Exec(ctx)`), not on the handle. The parameter exists for signature
+parity — always pass ctx to the terminal call.
+
+`Update` does not treat zero rows affected as a miss on its own. MySQL reports 0
+when an UPDATE sets every column to the value it already held, so a bare
+`RowsAffected == 0` check would 404 an idempotent update; the zero-rows path falls
+through to an existence check first.
+
+### Model contract
+
+bun reads the table name and primary key from **struct tags**, not from the
+`TableName()` / `PrimaryKey()` methods. Both are required and must agree:
+
+```go
+type orderModel struct {
+    bun.BaseModel `bun:"table:orders"`
+
+    ID        string `bun:"id,pk"`
+    Name      string `bun:"name"`
+    CreatedAt int64  `bun:"created_at,notnull"`
+}
+
+func (orderModel) TableName() string  { return "orders" }
+func (orderModel) PrimaryKey() string { return "id" }
+func (m orderModel) GetPK() string    { return m.ID }
+func (m orderModel) CursorValues() map[string]any {
+    return map[string]any{"id": m.ID, "created_at": m.CreatedAt}
+}
+```
+
+There is no `autoCreateTime` equivalent — timestamps are set in code, and
+`UnixMilli()` must be guarded by `IsZero()` (a zero `time.Time` yields
+`-6795364578871`, which bun writes verbatim).
+
+---
+
 ## `distlock/`
 
 ### Interfaces

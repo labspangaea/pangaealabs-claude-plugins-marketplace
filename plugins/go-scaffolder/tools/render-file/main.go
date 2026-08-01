@@ -208,6 +208,29 @@ func funcMap() template.FuncMap {
 			return 0
 		},
 
+		// isBun reports whether the database param selects the bun (SQL-first)
+		// repository flavour rather than GORM. Templates branch on this to swap
+		// the db/repo import for db/bunrepo and the driver wiring in main.go.
+		"isBun": func(database string) bool {
+			return strings.HasPrefix(database, "bun-")
+		},
+
+		// dbEngine reduces a database param to the server it talks to, dropping
+		// the ORM half. "gorm-postgres" and "bun-postgres" both yield "postgres".
+		// Used wherever only the engine matters — the compose service, the DSN,
+		// the healthcheck — so those blocks did not have to double when bun
+		// arrived. The ORM half is isBun's job.
+		"dbEngine": func(database string) string {
+			switch {
+			case strings.HasSuffix(database, "-postgres"):
+				return "postgres"
+			case strings.HasSuffix(database, "-mysql"):
+				return "mysql"
+			default:
+				return "none"
+			}
+		},
+
 		// dbDriver returns the gorm driver import path for the given database param.
 		"dbDriver": func(database string) string {
 			switch database {
