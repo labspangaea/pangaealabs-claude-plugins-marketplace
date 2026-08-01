@@ -316,9 +316,21 @@ The user must also ensure `Config` has the relevant fields (`CacheTTL`, `CacheJi
 
 After writing every file:
 
-1. Run `mcp__go-lsp__go_diagnose` on each generated `.go` file. Fix all errors.
-2. Run `go build ./...` from the project root. Fix all errors.
-3. Do not report done until both checks pass clean.
+1. For `database=bun-*` in a project that does not already import `db/bunrepo`,
+   pin go-lib before building — the package is not on go-lib's default branch yet,
+   so `go mod tidy` alone resolves `@latest` and fails with "does not contain
+   package". A pseudo-version is a commit digest, so it resolves through the public
+   proxy from any pushed branch; no merge and no `replace` directive are needed:
+
+   ```bash
+   go get github.com/labspangaea/go-lib@v0.0.0-20260801171603-0264a6cfede0
+   ```
+
+   Drop this step once `db/bunrepo` lands on go-lib main. Keep the pin identical to
+   the one in `/go-scaffolder:create-go-app`'s post-generation step.
+2. Run `mcp__go-lsp__go_diagnose` on each generated `.go` file. Fix all errors.
+3. Run `go build ./...` from the project root. Fix all errors.
+4. Do not report done until both checks pass clean.
 
 ---
 

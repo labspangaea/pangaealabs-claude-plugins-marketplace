@@ -113,25 +113,39 @@ the shared one. Cache is always `none` on bun combos — the cache decorator liv
 `go-lib/db/repo` and is GORM-typed, so the skills refuse that pairing; a bun+cache
 combo here would test a configuration the scaffolder never emits.
 
-### Building bun combos before `go-lib` publishes
+### How bun combos resolve `go-lib`
 
-The bun templates import `github.com/labspangaea/go-lib/db/bunrepo`. `go mod tidy`
-resolves `go-lib@latest` (= `main`), so until that package merges upstream every
-bun combo fails with a missing-package error. Point the runner at a local checkout:
+The bun templates import `github.com/labspangaea/go-lib/db/bunrepo`, which is not
+on go-lib's default branch yet. `go mod tidy` alone resolves `@latest` and fails
+with "does not contain package".
+
+That does **not** mean anything has to merge first. A Go pseudo-version is a commit
+digest with a timestamp prefix, so it resolves through the public proxy from any
+pushed commit regardless of branch. `writeGoMod` pins `golibBunVersion` (in
+`combos.go`) for bun combos, and the same pin appears in `create-go-app/SKILL.md`'s
+post-generation step so scaffolded projects and smoke runs resolve identically.
+
+Both can drop to a plain `@latest` tidy once `db/bunrepo` merges.
+
+### Changing go-lib and a template together
+
+Commit the go-lib change, push it, then move the pin:
 
 ```
-GOLIB_LOCAL=~/projects/go-lib go run . -all
+# in a scratch module
+go get github.com/labspangaea/go-lib@<sha>
+grep go-lib go.mod          # copy the pseudo-version it records
 ```
 
-That adds a `replace` directive to the scratch `go.mod` and nothing else. Leave the
-variable unset to reproduce exactly what an end user gets.
+Update `golibBunVersion` in `combos.go` and the matching `go get` line in
+`create-go-app/SKILL.md`, then re-run the matrix.
 
-### Known failure
+There is deliberately no local-checkout override. One would let a template be
+validated against go-lib source nobody else can fetch, and a smoke run that
+passes on unfetchable source is worse than one that fails — it reports green for
+a combination no user can reproduce. Pushing first costs one commit and keeps
+what the matrix proves identical to what a scaffolded project gets.
 
-`api-echo-postgres-redis` fails on `go build` — huma's `humaecho` adapter now
-requires `echo/v5` while `main_api_echo.go.tmpl` still imports `echo/v4`. This is
-upstream dependency drift, unrelated to any combo above, and needs its own change
-(an echo major-version bump affects generated services' own echo usage).
 
 To add more combos: append to `var combos` in `combos.go`, run smoke against any
 template that affects the new combo to confirm it builds. No template changes

@@ -1,6 +1,9 @@
 package main
 
-import "slices"
+import (
+	"slices"
+	"strings"
+)
 
 // Combo describes one (type, framework, broker, database, cache) tuple
 // the smoke runner verifies. Adding a new combo: append a row, update PROGRESS.md.
@@ -9,9 +12,29 @@ type Combo struct {
 	Type          string // api · consumer · publisher
 	HTTPFramework string // api: nethttp · gin · chi · mux · echo
 	Broker        string // consumer/publisher: kafka · rabbitmq · redis
-	Database      string // gorm-postgres · gorm-mysql · none
+	Database      string // gorm-postgres · gorm-mysql · bun-postgres · bun-mysql · none
 	Cache         string // none · redis · memory · couchbase
 }
+
+// isBunDB mirrors the isBun template function. Kept in sync by hand — the
+// template funcMap lives in render.go and cannot be called from combo routing.
+func isBunDB(database string) bool { return strings.HasPrefix(database, "bun-") }
+
+// golibBunVersion pins go-lib for bun combos.
+//
+// A Go pseudo-version is a commit digest with a timestamp prefix, so it resolves
+// through the public proxy from any pushed commit — the commit does not need to
+// be on the default branch. That is what lets bun scaffolds build today even
+// though db/bunrepo is still on go-lib's feat/bunrepo branch.
+//
+// Keep this identical to the pin quoted in create-go-app/SKILL.md's
+// post-generation step; both exist so a scaffolded project and a smoke run
+// resolve the same go-lib. Once db/bunrepo merges to main, both can drop to a
+// plain `go mod tidy` against @latest.
+//
+// To move the pin: `go get github.com/labspangaea/go-lib@<sha>` in a scratch
+// module and copy the version `go.mod` records.
+const golibBunVersion = "v0.0.0-20260801171603-0264a6cfede0"
 
 var combos = []Combo{
 	{ID: "api-nethttp-postgres-none", Type: "api", HTTPFramework: "nethttp", Database: "gorm-postgres", Cache: "none"},
@@ -32,6 +55,18 @@ var combos = []Combo{
 	{ID: "api-nethttp-mysql-none", Type: "api", HTTPFramework: "nethttp", Database: "gorm-mysql", Cache: "none"},
 	{ID: "consumer-kafka-postgres-memory", Type: "consumer", Broker: "kafka", Database: "gorm-postgres", Cache: "memory"},
 	{ID: "consumer-rabbitmq-nodb-none", Type: "consumer", Broker: "rabbitmq", Database: "none", Cache: "none"},
+
+	// bun (SQL-first) combos. Cache is always none — go-lib's cache decorator
+	// wraps a GORM repository and cannot decorate a bun one, so the skills force
+	// cache=none whenever database is bun-*. A bun+cache combo here would be
+	// testing a configuration the scaffolder refuses to emit.
+	//
+	// nethttp is covered because its composition root is the one that differs
+	// (numbered step comments), so it takes a separate patch from the other four.
+	{ID: "api-gin-bunpg-none", Type: "api", HTTPFramework: "gin", Database: "bun-postgres", Cache: "none"},
+	{ID: "api-nethttp-bunpg-none", Type: "api", HTTPFramework: "nethttp", Database: "bun-postgres", Cache: "none"},
+	{ID: "api-chi-bunmysql-none", Type: "api", HTTPFramework: "chi", Database: "bun-mysql", Cache: "none"},
+	{ID: "consumer-kafka-bunpg-none", Type: "consumer", Broker: "kafka", Database: "bun-postgres", Cache: "none"},
 }
 
 // b1Ready is the explicit allowlist of templates safe for the smoke runner.
@@ -53,6 +88,7 @@ var b1Ready = map[string]bool{
 
 	// Converted templates.
 	"repository.go.tmpl":              true,
+	"repository_bun.go.tmpl":          true, // bun flavour of the same output path
 	"config.go.tmpl":                  true,
 	"main_api_nethttp.go.tmpl":        true,
 	"main_api_gin.go.tmpl":            true,
@@ -115,7 +151,13 @@ func templatesFor(c Combo) []string {
 		"docker-compose.yml.tmpl",
 	}
 	if c.Database != "none" && c.Type != "publisher" {
-		ts = append(ts, "repository.go.tmpl", "apperr.go.tmpl")
+		// Both repository templates render to the same path; the database param
+		// picks which one. They are never generated together.
+		if isBunDB(c.Database) {
+			ts = append(ts, "repository_bun.go.tmpl", "apperr.go.tmpl")
+		} else {
+			ts = append(ts, "repository.go.tmpl", "apperr.go.tmpl")
+		}
 		// cmd/seed is real Go and builds with everything else.
 		ts = append(ts, "seed.go.tmpl")
 	}
