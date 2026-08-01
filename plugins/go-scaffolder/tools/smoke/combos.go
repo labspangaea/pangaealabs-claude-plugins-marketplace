@@ -43,11 +43,13 @@ var combos = []Combo{
 // Combos depending on any non-listed template are skipped by the runner.
 var b1Ready = map[string]bool{
 	// Pure substitution — no combo conditionals needed.
-	"apperr.go.tmpl":     true,
-	"domain.go.tmpl":     true,
-	"port.go.tmpl":       true,
-	"service.go.tmpl":    true,
-	"subscriber.go.tmpl": true,
+	"apperr.go.tmpl":                  true,
+	"domain.go.tmpl":                  true,
+	"port.go.tmpl":                    true,
+	"port_service.go.tmpl":            true,
+	"service.go.tmpl":                 true,
+	"service_factory_default.go.tmpl": true,
+	"subscriber.go.tmpl":              true,
 
 	// Converted templates.
 	"repository.go.tmpl":              true,
@@ -70,7 +72,15 @@ var b1Ready = map[string]bool{
 
 // templatesFor returns the basenames of every template needed to render combo c.
 func templatesFor(c Combo) []string {
-	ts := []string{"domain.go.tmpl", "port.go.tmpl", "service.go.tmpl", "config.go.tmpl"}
+	// port_service is unconditional: service.go carries a compile-time assertion
+	// that *{Entity} satisfies port.{Entity}Service, for every service type.
+	ts := []string{
+		"domain.go.tmpl",
+		"port.go.tmpl",
+		"port_service.go.tmpl",
+		"service.go.tmpl",
+		"config.go.tmpl",
+	}
 	if c.Database != "none" && c.Type != "publisher" {
 		ts = append(ts, "repository.go.tmpl", "apperr.go.tmpl")
 	}
@@ -80,6 +90,15 @@ func templatesFor(c Combo) []string {
 		if c.Database == "none" {
 			ts = append(ts, "apperr.go.tmpl")
 		}
+		// service_factory_default supplies New{Entity}Service, which every
+		// main_api_* calls.
+		//
+		// Its //go:build stub siblings (service_stub, service_factory_stub) are
+		// deliberately excluded: rendering service_stub alone would create an
+		// internal/service/stub package whose only file is build-constrained out,
+		// and `go build ./...` fails outright on a package with no buildable
+		// files. Verifying stub mode needs its own `-tags=stub` pass.
+		ts = append(ts, "service_factory_default.go.tmpl")
 		// Handler templates are framework-agnostic (huma derives the spec from
 		// Go types); only main_api_*.go.tmpl varies per framework adapter.
 		ts = append(ts,
