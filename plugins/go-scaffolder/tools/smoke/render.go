@@ -65,6 +65,10 @@ func outputPath(basename string, fx Fixture) string {
 		return filepath.Join("internal", "domain", fx.EntityLower+".go")
 	case basename == "port.go.tmpl":
 		return filepath.Join("internal", "port", fx.EntityLower+".go")
+	case basename == "port_service.go.tmpl":
+		return filepath.Join("internal", "port", fx.EntityLower+"_service.go")
+	case basename == "service_factory_default.go.tmpl":
+		return filepath.Join("internal", "service", "factory_default.go")
 	case basename == "service.go.tmpl":
 		return filepath.Join("internal", "service", fx.EntityLower+".go")
 	case basename == "apperr.go.tmpl":
@@ -218,6 +222,12 @@ func renderCombo(refsDir, outDir string, c Combo) (skipReason string, err error)
 // public module (github.com/labspangaea/go-lib), so we do NOT pin a version or
 // add a replace directive — the caller runs `go mod tidy`, which discovers the
 // go-lib import from the rendered source and fetches it from the public proxy.
+//
+// To smoke a template against an unreleased go-lib change, push that change and
+// pin its commit digest — a Go pseudo-version resolves through the public proxy
+// from any pushed commit, on any branch. There is deliberately no local-checkout
+// override: it would let a template be validated against go-lib source nobody
+// else can fetch, which is the one result a smoke run must never report as pass.
 func writeGoMod(outDir, module string) error {
 	body := fmt.Sprintf(`module %s
 
