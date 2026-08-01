@@ -303,7 +303,16 @@ test_api() {
     if [[ $rc -eq 0 ]]; then
       openapi_ver=$(echo "$spec" | jq -r '.openapi // empty')
       paths_ok=$(echo "$spec" | jq '.paths | (has("/api/v1/orders") and has("/api/v1/orders/{id}") and has("/healthz"))')
-      schemas_ok=$(echo "$spec" | jq '.components.schemas | (has("Order") and has("CreateRequest") and has("UpdateRequest") and has("ErrorBody"))')
+      # Schema names come from the Go types huma reflects over, so they track
+      # httphandler_dto.go.tmpl. POST and PUT share one {Entity}Body — the only
+      # difference at the HTTP layer is the path-bound id, already lifted into
+      # Update{Entity}Input — so there is no separate Create/Update request
+      # schema to assert on.
+      #
+      # Both pagination envelopes are asserted because the handler exposes
+      # cursor and offset from one route, chosen by query param; losing either
+      # silently halves the API surface while every CRUD assertion still passes.
+      schemas_ok=$(echo "$spec" | jq '.components.schemas | (has("Order") and has("OrderBody") and has("ErrorBody") and has("CursorPagination") and has("OffsetPagination"))')
       if [[ ! "$openapi_ver" =~ ^3\. ]]; then
         fail_step "openapi-json" "$combo" "expected OpenAPI 3.x, got version=$openapi_ver"
         rc=1
