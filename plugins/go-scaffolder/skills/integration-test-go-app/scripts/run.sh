@@ -41,8 +41,13 @@ PORT=18080
 # format — see DSN templates below. bun combos are always cache=none; the cache
 # decorator is GORM-typed, so the scaffolder refuses that pairing.
 #
-# Combos that need services not in docker-compose (couchbase, kafka, rabbitmq) are
-# intentionally absent. Add new combos to combos.go + here when those services land.
+# Couchbase is the one cache backend with no runtime combo: it needs a service
+# that is not in docker-compose, and unlike the others it does not come up ready
+# to use — the cluster has to be initialised and a bucket created before
+# anything can connect. See dev/handoff-couchbase-runtime.md.
+#
+# Add new combos to combos.go and here together; a combo listed in only one of
+# them is either uncompiled or unrun.
 
 COMBOS=(
   "api-nethttp-postgres-redis|postgres|redis"
