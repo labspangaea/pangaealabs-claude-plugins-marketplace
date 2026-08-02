@@ -7,21 +7,28 @@
 package main
 
 import (
+{{- if isBun .Database }}
+	"context"
+{{- end }}
 	"fmt"
 	"log"
 	"os"
-{{- if hasFieldType "time.Time" .Fields }}
+{{- if or (isBun .Database) (hasFieldType "time.Time" .Fields) }}
 	"time"
 {{- end }}
 
 	"github.com/google/uuid"
-{{- if eq .Database "gorm-postgres" }}
+{{- if isBun .Database }}
+	repo "github.com/labspangaea/go-lib/db/bunrepo"
+{{- else if eq .Database "gorm-postgres" }}
 	"gorm.io/driver/postgres"
 {{- else if eq .Database "gorm-mysql" }}
 	"gorm.io/driver/mysql"
 {{- end }}
+{{- if not (isBun .Database) }}
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
+{{- end }}
 {{- if hasNullableField .Fields }}
 
 	"github.com/labspangaea/go-lib/ptr"
@@ -35,6 +42,23 @@ func main() {
 	if dsn == "" {
 		log.Fatal("DATABASE_DSN is required")
 	}
+{{- if isBun .Database }}
+
+	ctx := context.Background()
+
+	db, err := repo.Open(dsn, repo.WithLogLevel("info"))
+	if err != nil {
+		log.Fatalf("db open: %v", err)
+	}
+	defer db.Close()
+
+	if err := repository.Migrate(ctx, db); err != nil {
+		log.Fatalf("migrate: %v", err)
+	}
+
+	// bun has no autoCreateTime equivalent — timestamps are set explicitly.
+	now := time.Now().UnixMilli()
+{{- else }}
 
 	db, err := gorm.Open({{dbOpen .Database}}, &gorm.Config{
 		Logger: gormlogger.Default.LogMode(gormlogger.Info),
@@ -46,6 +70,7 @@ func main() {
 	if err := db.AutoMigrate(&repository.{{.Entity}}Model{}); err != nil {
 		log.Fatalf("migrate: %v", err)
 	}
+{{- end }}
 
 	records := []repository.{{.Entity}}Model{
 {{- range $i, $_ := (seq 25) }}
@@ -54,13 +79,25 @@ func main() {
 {{- range $.Fields }}
 			{{.Name}}: {{seedValue .GoType $i}},
 {{- end }}
+{{- if isBun $.Database }}
+			CreatedAt: now,
+			UpdatedAt: now,
+{{- end }}
 		},
 {{- end }}
 	}
+
+{{- if isBun .Database }}
+
+	if _, err := db.NewInsert().Model(&records).Exec(ctx); err != nil {
+		log.Fatalf("seed: %v", err)
+	}
+{{- else }}
 
 	result := db.Create(&records)
 	if result.Error != nil {
 		log.Fatalf("seed: %v", result.Error)
 	}
+{{- end }}
 	fmt.Printf("seeded %d {{.EntityLower}} records\n", len(records))
 }

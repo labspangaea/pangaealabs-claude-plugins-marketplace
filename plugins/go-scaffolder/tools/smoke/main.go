@@ -158,7 +158,7 @@ func main() {
 			}
 
 			module := "smoke/" + c.ID
-			if err := writeGoMod(outDir, module); err != nil {
+			if err := writeGoMod(outDir, module, c); err != nil {
 				results[i].err = err
 				return
 			}
@@ -298,7 +298,7 @@ func runRenderMode(comboID, outDir string) {
 	}
 
 	module := "smoke/" + c.ID
-	if err := writeGoMod(outDir, module); err != nil {
+	if err := writeGoMod(outDir, module, c); err != nil {
 		die("write go.mod: %v", err)
 	}
 

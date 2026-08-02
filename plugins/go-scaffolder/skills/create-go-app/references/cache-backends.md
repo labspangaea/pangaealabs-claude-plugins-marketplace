@@ -81,9 +81,25 @@ col := cluster.Bucket(cfg.CouchbaseBucket).DefaultCollection()
 )
 ```
 
+## Not available on the bun path
+
+Everything in this file requires `database` to be `gorm-*`. `repo.CachedRepo` is
+generic over a repository that exposes `DB(ctx) *gorm.DB`, so it cannot decorate a
+repository built on `go-lib/db/bunrepo` — there is no bun equivalent of
+`NewCached`. Both scaffolding skills therefore force `cache=none` whenever
+`database` is `bun-postgres` or `bun-mysql`, and skip the cache question entirely.
+
+A service that needs both a cache wrapper and bun has to choose one today. If that
+comes up often enough to be worth building, the missing piece is a `CachedRepo` in
+`db/bunrepo` reimplementing TTL, jitter, and invalidate-on-write over
+`go-lib/cache.Cache[T]`.
+
 ## `cache=none`
 
-Use `repository.New(gormDB)` directly. No cache imports, no `NewCached` constructor in the generated `repository.go`, no `Cache*`/`Redis*`/`Memory*`/`Couchbase*` fields in `Config`. Then pass to the service:
+Use `repository.New(gormDB)` directly — or `repository.New(bunDB)` on the bun path,
+where this is the only option. No cache imports, no `NewCached` constructor in the
+generated `repository.go`, no `Cache*`/`Redis*`/`Memory*`/`Couchbase*` fields in
+`Config`. Then pass to the service:
 
 ```go
 svc := service.New({{.EntityLower}}Repo) // works for both New(...) and NewCached(...)

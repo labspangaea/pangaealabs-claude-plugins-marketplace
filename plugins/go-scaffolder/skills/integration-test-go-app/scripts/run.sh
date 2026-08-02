@@ -34,8 +34,12 @@ PORT=18080
 
 # --- Combo selection -----------------------------------------------------------
 # Each entry: combo-id|driver|cache-mode
-#   driver: postgres | mysql
+#   driver: postgres | mysql | bun-postgres | bun-mysql
 #   cache-mode: redis | memory | none   (which cache features the runtime tests should expect)
+#
+# The driver names the ORM as well as the engine because the two differ in DSN
+# format — see DSN templates below. bun combos are always cache=none; the cache
+# decorator is GORM-typed, so the scaffolder refuses that pairing.
 #
 # Combos that need services not in docker-compose (couchbase, kafka, rabbitmq) are
 # intentionally absent. Add new combos to combos.go + here when those services land.
@@ -46,11 +50,31 @@ COMBOS=(
   "api-mux-postgres-none|postgres|none"
   "api-echo-postgres-redis|postgres|redis"
   "api-nethttp-mysql-none|mysql|none"
+  "api-gin-bunpg-none|bun-postgres|none"
+  "api-chi-bunmysql-none|bun-mysql|none"
 )
 
 # DSN templates — service names match docker-compose service names.
+#
+# postgres has two forms and they are not interchangeable: GORM's driver takes
+# the key=value form, bun's pgdriver only parses the URL form. Handing pgdriver
+# the key=value string fails at connect time, not build time, so the mistake
+# surfaces as a startup error rather than anything the compiler catches.
+#
+# mysql needs no split — both ORMs go through go-sql-driver/mysql.
 DSN_POSTGRES="host=localhost user=admin password=admin dbname=appdb port=5432 sslmode=disable"
+DSN_BUN_POSTGRES="postgres://admin:admin@localhost:5432/appdb?sslmode=disable"
 DSN_MYSQL="admin:admin@tcp(localhost:3306)/appdb?parseTime=true&loc=Local"
+
+# engine_of <driver> — strips the ORM half, leaving the database engine.
+# Used wherever only the server matters (dropping tables, picking a container).
+engine_of() {
+  case "$1" in
+    postgres | bun-postgres) echo postgres ;;
+    mysql | bun-mysql) echo mysql ;;
+    *) echo "unknown" ;;
+  esac
+}
 
 # --- Helpers -------------------------------------------------------------------
 
@@ -127,7 +151,7 @@ test_api() {
   fi
 
   # 3. Drop existing orders table so each run is reproducible.
-  case "$driver" in
+  case "$(engine_of "$driver")" in
     postgres)
       docker exec go-scaffolder-postgres psql -U admin -d appdb \
         -c 'DROP TABLE IF EXISTS orders CASCADE;' >/dev/null 2>&1 || true
@@ -148,8 +172,14 @@ test_api() {
   fi
   local dsn
   case "$driver" in
-    postgres) dsn="$DSN_POSTGRES" ;;
-    mysql)    dsn="$DSN_MYSQL" ;;
+    postgres)     dsn="$DSN_POSTGRES" ;;
+    bun-postgres) dsn="$DSN_BUN_POSTGRES" ;;
+    mysql | bun-mysql) dsn="$DSN_MYSQL" ;;
+    *)
+      fail_step "dsn" "$combo" "unknown driver: $driver"
+      kill_pid "$pid"
+      return 1
+      ;;
   esac
   # DOCS_ENABLED=true exposes /openapi.{json,yaml} and /docs so we can assert
   # huma's OpenAPI surface in step 11.

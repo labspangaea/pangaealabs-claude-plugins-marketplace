@@ -81,7 +81,7 @@ func outputPath(basename string, fx Fixture) string {
 		return filepath.Join("internal", "apperr", fx.EntityLower+".go")
 	case basename == "subscriber.go.tmpl":
 		return filepath.Join("internal", "adapter", "inbound", "subscriber", "handler.go")
-	case basename == "repository.go.tmpl":
+	case basename == "repository.go.tmpl", basename == "repository_bun.go.tmpl":
 		return filepath.Join("internal", "adapter", "outbound", "repository", fx.EntityLower+".go")
 	case basename == "config.go.tmpl":
 		return filepath.Join("config", "config.go")
@@ -199,6 +199,19 @@ func funcMap() template.FuncMap {
 			}
 			return "postgres.Open(dsn)"
 		},
+		"isBun": func(database string) bool {
+			return strings.HasPrefix(database, "bun-")
+		},
+		"dbEngine": func(database string) string {
+			switch {
+			case strings.HasSuffix(database, "-postgres"):
+				return "postgres"
+			case strings.HasSuffix(database, "-mysql"):
+				return "mysql"
+			default:
+				return "none"
+			}
+		},
 	}
 }
 
@@ -251,15 +264,24 @@ func renderCombo(refsDir, outDir string, c Combo) (skipReason string, err error)
 // add a replace directive — the caller runs `go mod tidy`, which discovers the
 // go-lib import from the rendered source and fetches it from the public proxy.
 //
-// To smoke a template against an unreleased go-lib change, push that change and
-// pin its commit digest — a Go pseudo-version resolves through the public proxy
-// from any pushed commit, on any branch. There is deliberately no local-checkout
-// override: it would let a template be validated against go-lib source nobody
-// else can fetch, which is the one result a smoke run must never report as pass.
-func writeGoMod(outDir, module string) error {
+// The bun combos are the exception: they pin golibBunVersion so a smoke run and
+// a scaffolded project resolve the same go-lib. db/bunrepo is on main now, so
+// @latest would work — the pin buys reproducibility, not reachability, and
+// keeps an unrelated go-lib commit from turning the matrix red between runs.
+//
+// There is deliberately no local-checkout override. One that pointed at a
+// working tree would let a template be validated against go-lib source nobody
+// else can fetch, which is the one result a smoke run must never report as
+// pass. Push the go-lib change and move the pin instead.
+func writeGoMod(outDir, module string, c Combo) error {
 	body := fmt.Sprintf(`module %s
 
 go 1.26.2
 `, module)
+
+	if isBunDB(c.Database) {
+		body += fmt.Sprintf("\nrequire github.com/labspangaea/go-lib %s\n", golibBunVersion)
+	}
+
 	return os.WriteFile(filepath.Join(outDir, "go.mod"), []byte(body), 0o644)
 }

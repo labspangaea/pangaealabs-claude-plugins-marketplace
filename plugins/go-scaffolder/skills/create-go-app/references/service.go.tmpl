@@ -8,7 +8,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+{{- if isBun .Database}}
+	repo "github.com/labspangaea/go-lib/db/bunrepo"
+{{- else}}
 	"github.com/labspangaea/go-lib/db/repo"
+{{- end}}
 	"github.com/labspangaea/go-lib/logger"
 
 	"{{.Module}}/internal/domain"

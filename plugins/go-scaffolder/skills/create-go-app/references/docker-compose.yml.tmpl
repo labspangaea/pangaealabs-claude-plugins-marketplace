@@ -1,6 +1,6 @@
 services:
 {{- if ne .Database "none" }}
-{{- if eq .Database "gorm-postgres" }}
+{{- if eq (dbEngine .Database) "postgres" }}
   postgres:
     image: postgres:16-alpine
     environment:
@@ -16,7 +16,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-{{- else if eq .Database "gorm-mysql" }}
+{{- else if eq (dbEngine .Database) "mysql" }}
   mysql:
     image: mysql:8-debian
     environment:
@@ -67,9 +67,11 @@ services:
     env_file: .env
 {{- if ne .Database "none" }}
     environment:
-{{- if eq .Database "gorm-postgres" }}
+{{- if eq .Database "bun-postgres" }}
+      DATABASE_DSN: postgres://postgres:postgres@postgres:5432/{{.EntityLower}}_db?sslmode=disable
+{{- else if eq .Database "gorm-postgres" }}
       DATABASE_DSN: host=postgres port=5432 user=postgres password=postgres dbname={{.EntityLower}}_db sslmode=disable
-{{- else if eq .Database "gorm-mysql" }}
+{{- else if eq (dbEngine .Database) "mysql" }}
       DATABASE_DSN: mysql:mysql@tcp(mysql:3306)/{{.EntityLower}}_db?charset=utf8mb4&parseTime=True&loc=Local
 {{- end }}
 {{- if eq .Cache "redis" }}
@@ -78,10 +80,10 @@ services:
       COUCHBASE_URL: couchbase://couchbase
 {{- end }}
     depends_on:
-{{- if eq .Database "gorm-postgres" }}
+{{- if eq (dbEngine .Database) "postgres" }}
       postgres:
         condition: service_healthy
-{{- else if eq .Database "gorm-mysql" }}
+{{- else if eq (dbEngine .Database) "mysql" }}
       mysql:
         condition: service_healthy
 {{- end }}

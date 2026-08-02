@@ -8,7 +8,11 @@ import (
 	"context"
 
 	"github.com/danielgtaylor/huma/v2"
+{{- if isBun .Database}}
+	repo "github.com/labspangaea/go-lib/db/bunrepo"
+{{- else}}
 	"github.com/labspangaea/go-lib/db/repo"
+{{- end}}
 	humares "github.com/labspangaea/go-lib/httpx/humaresponse"
 
 	"{{.Module}}/internal/domain"

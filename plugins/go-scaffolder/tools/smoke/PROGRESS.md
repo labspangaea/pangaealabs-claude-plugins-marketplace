@@ -29,6 +29,9 @@ on any template not in `b1Ready` are skipped with a clear log message.
 - [x] `service.go.tmpl` (pure substitution; revisit if publisher injection is added)
 - [x] `subscriber.go.tmpl` (pure substitution)
 - [x] `repository.go.tmpl`
+- [x] `repository_bun.go.tmpl` (bun/SQL-first adapter; same output path as `repository.go.tmpl`, selected by `database=bun-*`)
+- [x] `port_service.go.tmpl` (pure substitution)
+- [x] `service_factory_default.go.tmpl` (`//go:build !stub`)
 - [x] `config.go.tmpl`
 - [x] `main_api_nethttp.go.tmpl` (huma adapter via `humago`)
 - [x] `main_api_gin.go.tmpl` (huma adapter via `humagin`)
@@ -88,7 +91,7 @@ to one means adding it to the other.
 
 ## Combo coverage
 
-**16/16 combos active.** Coverage breakdown:
+**20/20 combos active.** Coverage breakdown:
 
 Representative 13 (one combo per major axis):
 - api: nethttp+postgres+none, nethttp+postgres+redis, gin+postgres+memory, chi+mysql+couchbase, mux+postgres+none, echo+postgres+redis, nethttp+nodb+none
@@ -99,6 +102,47 @@ Coverage-extension 3 (paths not exercised by the representative set):
 - api+nethttp+mysql+none — mysql driver under nethttp
 - consumer+kafka+postgres+memory — memory cache under a consumer
 - consumer+rabbitmq+nodb+none — consumer without a database
+
+bun 4 (the SQL-first repository flavour):
+- api+gin+bun-postgres+none, api+nethttp+bun-postgres+none, api+chi+bun-mysql+none
+- consumer+kafka+bun-postgres+none
+
+nethttp is covered separately from the other frameworks because its composition
+root uses numbered step comments, so its DB block takes its own patch rather than
+the shared one. Cache is always `none` on bun combos — the cache decorator lives in
+`go-lib/db/repo` and is GORM-typed, so the skills refuse that pairing; a bun+cache
+combo here would test a configuration the scaffolder never emits.
+
+### How bun combos resolve `go-lib`
+
+The bun templates import `github.com/labspangaea/go-lib/db/bunrepo`, which is on
+go-lib main — so `go mod tidy` against `@latest` resolves it fine.
+
+`writeGoMod` pins `golibBunVersion` (in `combos.go`) anyway, and the same pin
+appears in `create-go-app/SKILL.md`'s post-generation step, so a smoke run and a
+scaffolded project agree on one go-lib. Without it the matrix could turn red
+because an unrelated go-lib commit landed between two runs, which is a slow and
+confusing way to learn nothing about your templates.
+
+### Changing go-lib and a template together
+
+Commit the go-lib change, push it, then move the pin:
+
+```
+# in a scratch module
+go get github.com/labspangaea/go-lib@<sha>
+grep go-lib go.mod          # copy the pseudo-version it records
+```
+
+Update `golibBunVersion` in `combos.go` and the matching `go get` line in
+`create-go-app/SKILL.md`, then re-run the matrix.
+
+There is deliberately no local-checkout override. One would let a template be
+validated against go-lib source nobody else can fetch, and a smoke run that
+passes on unfetchable source is worse than one that fails — it reports green for
+a combination no user can reproduce. Pushing first costs one commit and keeps
+what the matrix proves identical to what a scaffolded project gets.
+
 
 To add more combos: append to `var combos` in `combos.go`, run smoke against any
 template that affects the new combo to confirm it builds. No template changes

@@ -22,10 +22,14 @@ The wider entry-point skill (`SKILL.md`) keeps only a short "highlights" preview
 | Logger init | MUST | `logger.New(...)` → `logger.WithLogger(ctx, log)` at composition root | all |
 | Logger retrieval | MUST | `l := logger.FromContext(ctx)` inside methods — **never inject as struct field** | all |
 | Telemetry | MUST | copy exact `telemetry.Setup(...)` bootstrap from main template — the env-driven option assembly (`OTelProtocol` / `OTelInsecure` / `OTelHeaders`) plus the optional `OTelLogBridgeEnabled` rebuild branch; `defer otelShutdown(ctx)`; non-fatal | all |
-| DB postgres | MUST | `db.Open(postgres.Open(cfg.DatabaseDSN), ...)` + `defer db.Close(gormDB)` | api, consumer |
-| DB mysql | MUST | same as postgres — swap to `gorm.io/driver/mysql` + `mysql.Open` | api, consumer |
+| DB postgres (gorm) | MUST | `db.Open(postgres.Open(cfg.DatabaseDSN), ...)` + `defer db.Close(gormDB)` | api, consumer |
+| DB mysql (gorm) | MUST | same as postgres — swap to `gorm.io/driver/mysql` + `mysql.Open` | api, consumer |
+| DB bun (either engine) | MUST | `bunrepo.Open(cfg.DatabaseDSN, bunrepo.WithMaxOpenConns(...), WithSlowThreshold(...), WithLogLevel(cfg.DBLogLevel))` imported as `repo`, + `defer bunDB.Close()`. No `go-lib/db` import, no gorm driver import, no `gormlogger` level mapping — `bunrepo` takes the level as a string | api, consumer |
+| DB bun migration | MUST | `repository.Migrate(ctx, bunDB)` — bun has no `AutoMigrate`; the generated repository exports `Migrate` wrapping `NewCreateTable().IfNotExists()` | api, consumer |
+| DB bun DSN | MUST | PostgreSQL uses the URL form (`postgres://user:pass@host:5432/db?sslmode=disable`); `pgdriver` cannot parse GORM's `host=… port=…` DSN, and the failure appears at startup rather than build time | api, consumer |
 | DB none | MUST | omit DB block and `repository/` folder; remove repo arg from `service.New` | all |
-| Cache none | MUST | call `repository.New(gormDB)`; omit cache backend init, omit cache fields from config, omit `NewCached` and `cache` import from `repository.go` | api, consumer |
+| Cache none | MUST | call `repository.New(gormDB)` (or `repository.New(bunDB)`); omit cache backend init, omit cache fields from config, omit `NewCached` and `cache` import from the repository | api, consumer |
+| Cache with bun | MUST NOT | pair `database=bun-*` with any cache backend — `repo.CachedRepo` is generic over a repository exposing `DB(ctx) *gorm.DB` and cannot decorate a bun repository. The skills force `cache=none` for `bun-*` | api, consumer |
 | Cache != none | MUST | construct backend client → `cache.Cache[*{{.Entity}}Model]` → call `repository.NewCached(gormDB, c, repo.WithTTL(cfg.CacheTTL), repo.WithJitter(cfg.CacheJitterFactor), repo.WithTwoPhaseList())` | api, consumer |
 | Cache key prefix | MUST | the `repository.NewCached` constructor passes `"{{.EntityLower}}"` as the prefix; do **not** also set `WithKeyPrefix` on the cache backend (would double-prefix) | api, consumer |
 | Cache backend type param | MUST | construct as `<backend>.New[*{{.Entity}}Model](...)` — the model pointer, not the domain type — `CachedRepo` caches the SQL row | api, consumer |
@@ -60,8 +64,8 @@ The wider entry-point skill (`SKILL.md`) keeps only a short "highlights" preview
 
 | Concern | Severity | Rule | Applies to |
 |---------|----------|------|-----------|
-| BaseRepo embedding | MUST | `*repo.BaseRepo[model, ID]` embedded in repository struct; `New` delegates to `repo.New[...]` | api, consumer |
-| Model interface | MUST | GORM model must implement `TableName()`, `PrimaryKey()`, `GetPK()`, `CursorValues()` | api, consumer |
+| BaseRepo embedding | MUST | `*repo.BaseRepo[model, ID]` embedded in repository struct; `New` delegates to `repo.New[...]`. The bun flavour embeds the `repo.Repository[model, ID]` interface from `db/bunrepo` — same shape, different package | api, consumer |
+| Model interface | MUST | model must implement `TableName()`, `PrimaryKey()`, `GetPK()`, `CursorValues()`. bun models additionally carry `bun.BaseModel` with a `bun:"table:…"` tag and `bun:"id,pk"` — bun reads the table and PK from tags, not from the methods, so the two must agree | api, consumer |
 | CursorValues | MUST | return values for every column that may appear in `OrderBy`; `filterCursorValues` trims to active sort keys | api, consumer |
 
 ## Service layer

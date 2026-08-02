@@ -19,8 +19,8 @@ Scaffold a production-ready Go application that wires `go-lib`.
 | `name` | **yes** | — | kebab-case string |
 | `http_framework` | no | `gin` | `nethttp` · `gin` · `chi` · `mux` · `echo` |
 | `broker` | no | `kafka` | `kafka` · `rabbitmq` · `redis` |
-| `database` | no | `gorm-postgres` | `gorm-postgres` · `gorm-mysql` · `none` |
-| `cache` | no | `none` | `none` · `redis` · `memory` · `couchbase` |
+| `database` | no | `gorm-postgres` | `gorm-postgres` · `gorm-mysql` · `bun-postgres` · `bun-mysql` · `none` |
+| `cache` | no | `none` | `none` · `redis` · `memory` · `couchbase` (forced to `none` when `database` is `bun-*`) |
 
 ## Preflight — run before collecting any inputs
 
@@ -98,12 +98,42 @@ AskUserQuestion({
   options: [
     { label: "PostgreSQL via GORM (Recommended)", description: "gorm-postgres — default for new services" },
     { label: "MySQL via GORM",                    description: "gorm-mysql" },
-    { label: "None",                              description: "No persistence layer; skip repository wiring" }
+    { label: "PostgreSQL via bun",                description: "bun-postgres — SQL-first query builder, no GORM in the binary" },
+    { label: "MySQL via bun",                     description: "bun-mysql" }
   ]
 })
 ```
 
-**Step 6 — cache** (if `database != none` and not supplied; skip when `database == none`):
+`none` (no persistence layer) is still a valid value — it reaches the parameter
+through the auto-added "Other" free-text entry. Only four options fit on screen, so
+the four persistence-backed choices are surfaced.
+
+### Choosing GORM or bun
+
+Both produce the same port interface, the same service layer, and the same handler —
+the choice is confined to the repository adapter and the composition root. What
+differs:
+
+| | `gorm-*` | `bun-*` |
+|---|---|---|
+| Library | `go-lib/db/repo` | `go-lib/db/bunrepo` |
+| Cache wrapper | redis · memory · couchbase | **not available** |
+| Query style | GORM's chainable API | SQL-first builder |
+| PostgreSQL DSN | `host=… port=… user=…` | `postgres://…` URL form |
+
+Default to GORM unless the user asks for bun by name, wants a lightweight
+dependency graph, or wants explicit SQL. Say so plainly if they pick bun and also
+want a cache — that combination does not exist yet (see Step 6).
+
+**Step 6 — cache** (if `database` is `gorm-*` and not supplied):
+
+**Skip this question entirely when `database` is `bun-*` or `none`, and set
+`cache=none`.** For `none` there is nothing to cache. For `bun-*` the cache
+decorator (`repo.CachedRepo` in `go-lib/db/repo`) is generic over a repository
+exposing `DB(ctx) *gorm.DB`, so it cannot wrap a bun repository — offering the
+question would collect an answer that cannot be honoured. If the user explicitly
+asks for bun *and* a cache, tell them the pairing isn't supported yet and let them
+choose: GORM with a cache, or bun without one.
 
 ```
 AskUserQuestion({
@@ -131,7 +161,7 @@ When the user picks an option above, the user-friendly label is the surface and 
 | 1 | API / Consumer / Publisher | `api` / `consumer` / `publisher` |
 | 3 | gin / nethttp / chi / echo / Other(`mux`) | `gin` / `nethttp` / `chi` / `echo` / `mux` |
 | 4 | Kafka / RabbitMQ / Redis | `kafka` / `rabbitmq` / `redis` |
-| 5 | PostgreSQL via GORM / MySQL via GORM / None | `gorm-postgres` / `gorm-mysql` / `none` |
+| 5 | PostgreSQL via GORM / MySQL via GORM / PostgreSQL via bun / MySQL via bun / Other(`none`) | `gorm-postgres` / `gorm-mysql` / `bun-postgres` / `bun-mysql` / `none` |
 | 6 | None / Redis / In-memory / Couchbase | `none` / `redis` / `memory` / `couchbase` |
 
 | Item | Default |
@@ -164,11 +194,16 @@ Parse the schema into `{{.Fields}}` (see Template Variables below) before substi
 
 ### System fields — always injected, never from user schema
 
-| Field | Domain type | GORM model type | GORM tag |
-|-------|-------------|-----------------|----------|
-| `ID` | `string` | `string` | `gorm:"primaryKey;column:id"` |
-| `CreatedAt` | `time.Time` | `int64` | `gorm:"column:created_at;autoCreateTime:milli"` |
-| `UpdatedAt` | `time.Time` | `int64` | `gorm:"column:updated_at;autoUpdateTime:milli"` |
+| Field | Domain type | Model type | GORM tag | bun tag |
+|-------|-------------|------------|----------|---------|
+| `ID` | `string` | `string` | `gorm:"primaryKey;column:id"` | `bun:"id,pk"` |
+| `CreatedAt` | `time.Time` | `int64` | `gorm:"column:created_at;autoCreateTime:milli"` | `bun:"created_at,notnull"` |
+| `UpdatedAt` | `time.Time` | `int64` | `gorm:"column:updated_at;autoUpdateTime:milli"` | `bun:"updated_at,notnull"` |
+
+bun has no `autoCreateTime` equivalent, so on the bun path the timestamps are set
+in code: `service.go` stamps both when zero, and `toModel` guards `IsZero()` before
+calling `UnixMilli()`. That guard is not cosmetic — `UnixMilli()` on a zero
+`time.Time` yields `-6795364578871`, which bun would write to the row verbatim.
 
 Strip these from the parsed field list if the user included them.
 
@@ -246,6 +281,9 @@ $RENDER -template "$SKILL_REFS/service_factory_default.go.tmpl"  -params "$PARAM
 $RENDER -template "$SKILL_REFS/service_factory_stub.go.tmpl"     -params "$PARAMS" -output internal/service/factory_stub.go
 $RENDER -template "$SKILL_REFS/apperr.go.tmpl"                   -params "$PARAMS" -output internal/apperr/order.go
 $RENDER -template "$SKILL_REFS/repository.go.tmpl"               -params "$PARAMS" -output internal/adapter/outbound/repository/order.go
+# …or, when Database is bun-postgres / bun-mysql, render the bun adapter to the
+# SAME path instead. The two are alternatives, never both:
+# $RENDER -template "$SKILL_REFS/repository_bun.go.tmpl"         -params "$PARAMS" -output internal/adapter/outbound/repository/order.go
 $RENDER -template "$SKILL_REFS/httphandler.go.tmpl"              -params "$PARAMS" -output internal/adapter/inbound/httphandler/order.go
 $RENDER -template "$SKILL_REFS/httphandler_dto.go.tmpl"          -params "$PARAMS" -output internal/adapter/inbound/httphandler/order_dto.go
 $RENDER -template "$SKILL_REFS/main_api_gin.go.tmpl"             -params "$PARAMS" -output cmd/order-service/main.go
@@ -268,6 +306,8 @@ The render-file tool registers extra functions used by the dev-env templates:
 | `hasFieldType` | `hasFieldType(goType string, fields []FieldDef) bool` | `seed.go.tmpl` — conditional `time` import |
 | `hasNullableField` | `hasNullableField(fields []FieldDef) bool` | `seed.go.tmpl` — conditional `ptr` import (only emitted when ≥1 nullable/`*T` field, since `seedValue` only references `ptr.Of(...)` for those) |
 | `dbOpen` | `dbOpen(database string) string` | `config.go.tmpl` — `postgres.Open` vs `mysql.Open` |
+| `isBun` | `isBun(database string) bool` | every template that imports `db/repo` — swaps in `db/bunrepo`; `main_*` — swaps the DB-open block |
+| `dbEngine` | `dbEngine(database string) string` → `postgres` · `mysql` · `none` | `docker-compose.yml.tmpl`, `.env.tmpl` — the server, with the ORM half dropped, so those blocks did not double when bun arrived |
 | `isRequired` | `isRequired(validate string) bool` | `httphandler_dto.go.tmpl` — `,omitempty` on optional fields |
 | `parseMaxLength` | `parseMaxLength(validate string) int` | `httphandler_dto.go.tmpl` — `maxLength:"N"` struct tag |
 
@@ -327,7 +367,7 @@ internal/adapter/outbound/
 
 ---
 
-## Cache Backend Wiring (only when `cache != none`)
+## Cache Backend Wiring (only when `cache != none`, which implies `database` is `gorm-*`)
 
 When `cache != none`, the per-backend `main.go` block is injected between the DB-open call and `repository.NewCached`. The exact code recipes per backend (`redis` / `memory` / `couchbase`) and the `cache=none` fallthrough live at `${CLAUDE_SKILL_DIR}/references/cache-backends.md` — read that file when emitting the cache wiring.
 
@@ -339,9 +379,9 @@ The same recipes are also rendered by `/go-scaffolder:create-go-repository` Step
 
 | `type` | `database` | Files generated |
 |--------|-----------|----------------|
-| `api` | `gorm-postgres` or `gorm-mysql` | all + `repository/`, `apperr/` |
+| `api` | `gorm-*` or `bun-*` | all + `repository/`, `apperr/` |
 | `api` | `none` | all except `repository/`; `apperr/` included |
-| `consumer` | `gorm-postgres` or `gorm-mysql` | all + `repository/`, `apperr/`, `subscriber/` |
+| `consumer` | `gorm-*` or `bun-*` | all + `repository/`, `apperr/`, `subscriber/` |
 | `consumer` | `none` | all except `repository/` and `apperr/`; `subscriber/` included |
 | `publisher` | any | all + `publisher/`; no `repository/` |
 
@@ -362,12 +402,12 @@ The same recipes are also rendered by `/go-scaffolder:create-go-repository` Step
 | `api` | `cmd/{name}/main.go` | `main_api_{http_framework}.go.tmpl` | — |
 | `api` | `internal/adapter/inbound/httphandler/{entity}.go` | `httphandler.go.tmpl` | — |
 | `api` | `internal/adapter/inbound/httphandler/{entity}_dto.go` | `httphandler_dto.go.tmpl` | — |
-| `api` | `internal/adapter/outbound/repository/{entity}.go` | `repository.go.tmpl` | database ≠ `none` |
+| `api` | `internal/adapter/outbound/repository/{entity}.go` | `repository.go.tmpl` (gorm) · `repository_bun.go.tmpl` (bun) | database ≠ `none` |
 | `api` | `internal/apperr/{entity}.go` | `apperr.go.tmpl` | — |
 | `consumer` | `internal/apperr/{entity}.go` | `apperr.go.tmpl` | database ≠ `none` (repository.go.tmpl references `apperr.ErrXxxNotFound`) |
 | `consumer` | `cmd/{name}/main.go` | `main_consumer_{broker}.go.tmpl` | — |
 | `consumer` | `internal/adapter/inbound/subscriber/handler.go` | `subscriber.go.tmpl` | — |
-| `consumer` | `internal/adapter/outbound/repository/{entity}.go` | `repository.go.tmpl` | database ≠ `none` |
+| `consumer` | `internal/adapter/outbound/repository/{entity}.go` | `repository.go.tmpl` (gorm) · `repository_bun.go.tmpl` (bun) | database ≠ `none` |
 | `publisher` | `cmd/{name}/main.go` | `main_publisher_{broker}.go.tmpl` | — |
 | `publisher` | `internal/adapter/outbound/publisher/publisher.go` | *(write inline)* | — |
 | `api` | `internal/adapter/inbound/httphandler/health.go` | `health.go.tmpl` | — |
@@ -396,7 +436,7 @@ The same recipes are also rendered by `/go-scaffolder:create-go-repository` Step
 | `.Name` | PascalCase Go identifier | `ProductCode`, `UserID` |
 | `.GoType` | Go type string | `string`, `int64`, `*int64`, `bool`, `float64`, `time.Time` |
 | `.JSONName` | snake_case json/query tag | `product_code` |
-| `.DBColumn` | snake_case gorm column | `product_code` |
+| `.DBColumn` | snake_case column name (`gorm:"column:…"` / `bun:"…"`) | `product_code` |
 | `.Validate` | constraint descriptor used by template functions (`isRequired`, `parseMaxLength`) | `required`, `required,max=255`, `` (empty = optional) |
 
 Templates use `{{range .Fields}}` to iterate. Use `{{if eq .GoType "string"}}` to conditionally include string-only filters.
@@ -413,6 +453,13 @@ Local style + error-wrapping rules baked into the templates live at `${CLAUDE_SK
 
 ```bash
 go mod init {module_path}
+
+# database=bun-* ONLY — skip this line for gorm-* and none.
+# Pins go-lib to the commit this scaffold was generated against, so the project
+# builds the same way today and six months from now. db/bunrepo is on go-lib
+# main, so a plain `go mod tidy` also works — drop this line if you would rather
+# float to @latest.
+go get github.com/labspangaea/go-lib@v0.0.0-20260802024135-5c4f756eb258
 
 go mod tidy       # fetches go-lib (github.com/labspangaea/go-lib) and deps from the public proxy — no replace directive, no token.
 gofmt -w .        # MUST run — templates emit hand-aligned struct fields; without this step every editor save produces noisy diffs.

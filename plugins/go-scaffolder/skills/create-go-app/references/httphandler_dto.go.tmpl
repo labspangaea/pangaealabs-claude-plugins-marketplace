@@ -1,7 +1,9 @@
 package httphandler
 
 import (
-	"github.com/labspangaea/go-lib/db/repo"
+{{if isBun .Database}}	repo "github.com/labspangaea/go-lib/db/bunrepo"
+{{- else}}	"github.com/labspangaea/go-lib/db/repo"
+{{- end}}
 
 	"{{.Module}}/internal/domain"
 )

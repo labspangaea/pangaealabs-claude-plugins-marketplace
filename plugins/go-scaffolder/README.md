@@ -16,7 +16,9 @@ Scaffold production-ready Go services wired to `go-lib` (the team's hexagonal-ar
 - `type`: `api` · `consumer` · `publisher`
 - `http_framework`: `nethttp` · `gin` · `chi` · `mux` · `echo`
 - `broker`: `kafka` · `rabbitmq` · `redis`
-- `database`: `gorm-postgres` · `gorm-mysql` · `none`
+- `database`: `gorm-postgres` · `gorm-mysql` · `bun-postgres` · `bun-mysql` · `none`
+  (bun is the SQL-first flavour, backed by `go-lib/db/bunrepo`; it keeps GORM out of
+  the binary but has no cache wrapper, so `bun-*` implies `cache=none`)
 - `cache`: `none` · `redis` · `memory` · `couchbase`
 
 The orchestrator collects missing parameters via sequential Q&A.
