@@ -53,7 +53,12 @@ COMBOS=(
   "api-gin-bunpg-none|bun-postgres|none"
   "api-chi-bunmysql-none|bun-mysql|none"
   "consumer-redis-postgres-none|postgres|none"
+  "consumer-kafka-postgres-none|postgres|none"
+  "consumer-kafka-bunpg-none|bun-postgres|none"
+  "consumer-rabbitmq-postgres-redis|postgres|redis"
   "publisher-redis-nodb-none|none|none"
+  "publisher-kafka-nodb-none|none|none"
+  "publisher-rabbitmq-nodb-none|none|none"
 )
 
 # DSN templates — service names match docker-compose service names.
@@ -77,6 +82,72 @@ type_of() {
     consumer-*) echo consumer ;;
     publisher-*) echo publisher ;;
     *) echo unknown ;;
+  esac
+}
+
+# broker_of <combo-id> — redis | kafka | rabbitmq, read off the id.
+# Combo ids are <type>-<broker>-... for consumers and publishers.
+broker_of() {
+  case "$1" in
+    *-kafka-*) echo kafka ;;
+    *-rabbitmq-*) echo rabbitmq ;;
+    *-redis-*) echo redis ;;
+    *) echo unknown ;;
+  esac
+}
+
+# broker_env <broker> — prints the env assignments that point a generated
+# service at that broker. Each broker reads a different config field, but the
+# topic and group always come from KAFKA_TOPIC / KAFKA_CONSUMER_GROUP; config.go
+# reuses those names for every broker.
+broker_env() {
+  case "$1" in
+    redis)    printf 'BROKER_REDIS_ADDR=localhost:6379 BROKER_REDIS_PASSWORD=admin BROKER_REDIS_DB=0' ;;
+    kafka)    printf 'KAFKA_BROKERS=localhost:9092' ;;
+    rabbitmq) printf 'RABBITMQ_URL=amqp://admin:admin@localhost:5672/' ;;
+  esac
+}
+
+# publish_test_message <broker> <topic> <payload-json>
+# Injects one message using whatever tooling that broker ships, matching the
+# wire format go-lib's consumer expects. Returns non-zero if the message could
+# not be handed to the broker at all.
+publish_test_message() {
+  local broker="$1" topic="$2" payload="$3"
+
+  case "$broker" in
+    redis)
+      # go-lib's redis adapter wraps the message in a JSON envelope whose
+      # Payload is []byte, so it base64-encodes on the wire.
+      local envelope
+      envelope=$(printf '{"id":"itest-msg-1","key":"k1","payload":"%s"}' "$(printf '%s' "$payload" | base64)")
+      docker exec go-scaffolder-redis redis-cli -a admin --no-auth-warning \
+        PUBLISH "$topic" "$envelope" >/dev/null 2>&1
+      ;;
+    kafka)
+      # kafka carries the raw payload as the record value — no envelope.
+      printf '%s\n' "$payload" | docker exec -i go-scaffolder-kafka \
+        /opt/kafka/bin/kafka-console-producer.sh \
+        --bootstrap-server localhost:9092 --topic "$topic" >/dev/null 2>&1
+      ;;
+    rabbitmq)
+      # Published through the management API rather than shipping an AMQP
+      # client to inject one message. The scaffold uses cfg.Topic as both the
+      # exchange name and the routing key, and cfg.ConsumerGroup as the queue.
+      #
+      # routed:false means the exchange accepted it but no queue was bound —
+      # i.e. the consumer had not finished declaring its topology. That is a
+      # real failure and worth reporting as one, because the message is gone
+      # and the handler will never see it.
+      local resp
+      resp=$(curl -s -u admin:admin -H 'content-type:application/json' -X POST \
+        "http://localhost:15672/api/exchanges/%2f/$topic/publish" \
+        -d "{\"properties\":{},\"routing_key\":\"$topic\",\"payload\":$(printf '%s' "$payload" | jq -Rs .),\"payload_encoding\":\"string\"}" 2>/dev/null)
+      [[ "$(echo "$resp" | jq -r '.routed // false')" == "true" ]]
+      ;;
+    *)
+      return 1
+      ;;
   esac
 }
 
@@ -578,35 +649,62 @@ test_consumer() {
   local out_dir="$OUT_BASE/$combo"
   local log_file="$LOG_BASE/$combo.log"
   local rc=0 pid=""
+  local broker
+  broker=$(broker_of "$combo")
+  # Unique per run so a leftover binding or an uncommitted offset from an
+  # earlier run cannot make this one look green.
   local topic="orders-itest-$$"
+  local group="itest-$$"
 
   log ""
   hr
-  log "==> $combo (consumer, broker=redis)"
+  log "==> $combo (consumer, broker=$broker)"
   hr
 
   render_and_build "$combo" "$log_file" "$out_dir" || return 1
 
-  local dsn=""
+  # Reset the table by engine, but choose the DSN by driver: engine_of strips
+  # the ORM half on purpose, and gorm's and bun's postgres DSNs are not
+  # interchangeable — pgdriver cannot parse the key=value form.
   case "$(engine_of "$driver")" in
     postgres)
       docker exec go-scaffolder-postgres psql -U admin -d appdb \
         -c 'DROP TABLE IF EXISTS orders CASCADE;' >/dev/null 2>&1 || true
-      dsn="$DSN_POSTGRES"
       ;;
     mysql)
       docker exec go-scaffolder-mysql mysql -uadmin -padmin appdb \
         -e 'DROP TABLE IF EXISTS orders;' >/dev/null 2>&1 || true
-      dsn="$DSN_MYSQL"
       ;;
   esac
 
-  DATABASE_DSN="$dsn" \
-  BROKER_REDIS_ADDR=localhost:6379 BROKER_REDIS_PASSWORD=admin BROKER_REDIS_DB=0 \
-  REDIS_ADDR=localhost:6379 REDIS_PASSWORD=admin REDIS_DB=0 \
-  KAFKA_TOPIC="$topic" KAFKA_CONSUMER_GROUP="itest" \
-  SERVICE_NAME="$combo" SERVICE_BACKEND=real \
-  "$out_dir/bin/svc" >>"$log_file" 2>&1 &
+  local dsn=""
+  case "$driver" in
+    postgres)     dsn="$DSN_POSTGRES" ;;
+    bun-postgres) dsn="$DSN_BUN_POSTGRES" ;;
+    mysql | bun-mysql) dsn="$DSN_MYSQL" ;;
+    none)         dsn="" ;;
+    *)
+      fail_step "dsn" "$combo" "unknown driver: $driver"
+      return 1
+      ;;
+  esac
+
+  # Create the topic before the consumer subscribes. Auto-create only fires on
+  # first produce, and by then kafka-go has already cached "topic does not
+  # exist" for the group — the subscription then sits idle through a message it
+  # should have received.
+  if [[ "$broker" == "kafka" ]]; then
+    docker exec go-scaffolder-kafka /opt/kafka/bin/kafka-topics.sh \
+      --bootstrap-server localhost:9092 --create --if-not-exists \
+      --topic "$topic" --partitions 1 --replication-factor 1 >/dev/null 2>&1 || true
+  fi
+
+  env DATABASE_DSN="$dsn" \
+    REDIS_ADDR=localhost:6379 REDIS_PASSWORD=admin REDIS_DB=0 \
+    KAFKA_TOPIC="$topic" KAFKA_CONSUMER_GROUP="$group" \
+    SERVICE_NAME="$combo" SERVICE_BACKEND=real \
+    $(broker_env "$broker") \
+    "$out_dir/bin/svc" >>"$log_file" 2>&1 &
   pid=$!
 
   if ! wait_for_log "$log_file" "consumer starting"; then
@@ -615,39 +713,48 @@ test_consumer() {
     return 1
   fi
 
-  # Redis SUBSCRIBE is not retroactive: a message published before the
-  # subscription is registered is simply dropped. The log line above says the
-  # process reached Subscribe, not that redis has processed it, so give the
-  # server a moment to register before publishing into the void.
-  sleep 2
+  # "consumer starting" means the process reached Subscribe, not that the broker
+  # finished registering it — and none of these three brokers is retroactive for
+  # a fresh subscription, so a message published too early is simply discarded.
+  # Kafka additionally has to complete a group join before it is assigned the
+  # partition, which is the slowest of the three.
+  case "$broker" in
+    kafka) sleep 8 ;;
+    *)     sleep 3 ;;
+  esac
 
-  # The on-wire envelope is a JSON pubsub.Message whose Payload is []byte, so it
-  # base64-encodes. Inner payload is the {Entity}Event the handler unmarshals.
-  local payload envelope
-  payload=$(printf '{"id":"evt-1","name":"integration"}' | base64)
-  envelope=$(printf '{"id":"itest-msg-1","key":"k1","payload":"%s"}' "$payload")
-  if ! docker exec go-scaffolder-redis redis-cli -a admin --no-auth-warning \
-      PUBLISH "$topic" "$envelope" >/dev/null 2>&1; then
-    fail_step "publish" "$combo" "redis-cli PUBLISH failed"
+  if ! publish_test_message "$broker" "$topic" '{"id":"evt-1","name":"integration"}'; then
+    fail_step "publish" "$combo" "could not deliver a message via $broker (topic=$topic)"
     kill_pid "$pid"
     return 1
   fi
 
-  if ! wait_for_log "$log_file" "processing message" 15; then
+  local consume_wait=15
+  [[ "$broker" == "kafka" ]] && consume_wait=30
+  if ! wait_for_log "$log_file" "processing message" "$consume_wait"; then
     fail_step "consume" "$combo" "message never reached the handler: $(tail -20 "$log_file")"
     rc=1
-  elif ! grep -q "itest-msg-1" "$log_file"; then
+  elif [[ "$broker" == "redis" ]] && ! grep -q "itest-msg-1" "$log_file"; then
+    # Only redis carries a caller-supplied id on the wire. Kafka derives it from
+    # partition/offset and rabbitmq leaves it empty unless a publisher sets one,
+    # so there is no id to match there.
     fail_step "consume-msg-id" "$combo" "handler logged a message but not the id we published"
     rc=1
   fi
 
   # Graceful shutdown: SIGTERM must unwind the subscription, not strand it.
-  kill_pid "$pid"
-  pid=""
-  if [[ $rc -eq 0 ]] && ! wait_for_log "$log_file" "consumer shutdown complete" 10; then
-    fail_step "consumer-shutdown" "$combo" "no clean shutdown after SIGTERM: $(tail -10 "$log_file")"
+  #
+  # Signal first and wait for the service to say it finished, only then reap.
+  # kill_pid escalates to SIGKILL after 5s, and leaving a kafka consumer group
+  # takes longer than that — killing first would make every kafka combo look
+  # like it failed to shut down cleanly when it simply had not finished.
+  kill -TERM "$pid" 2>/dev/null || true
+  if [[ $rc -eq 0 ]] && ! wait_for_log "$log_file" "consumer shutdown complete" 30; then
+    fail_step "consumer-shutdown" "$combo" "no clean shutdown 30s after SIGTERM: $(tail -10 "$log_file")"
     rc=1
   fi
+  kill_pid "$pid"
+  pid=""
 
   if [[ $rc -eq 0 ]]; then
     log "  [pass] $combo"
@@ -669,18 +776,20 @@ test_publisher() {
   local out_dir="$OUT_BASE/$combo"
   local log_file="$LOG_BASE/$combo.log"
   local rc=0 pid=""
+  local broker
+  broker=$(broker_of "$combo")
 
   log ""
   hr
-  log "==> $combo (publisher, broker=redis)"
+  log "==> $combo (publisher, broker=$broker)"
   hr
 
   render_and_build "$combo" "$log_file" "$out_dir" || return 1
 
-  BROKER_REDIS_ADDR=localhost:6379 BROKER_REDIS_PASSWORD=admin BROKER_REDIS_DB=0 \
-  KAFKA_TOPIC="orders-itest-$$" \
-  SERVICE_NAME="$combo" SERVICE_BACKEND=real \
-  "$out_dir/bin/svc" >>"$log_file" 2>&1 &
+  env KAFKA_TOPIC="orders-itest-$$" \
+    SERVICE_NAME="$combo" SERVICE_BACKEND=real \
+    $(broker_env "$broker") \
+    "$out_dir/bin/svc" >>"$log_file" 2>&1 &
   pid=$!
 
   # No startup banner to wait on, so settle briefly then assert it is alive.
@@ -696,11 +805,14 @@ test_publisher() {
     return 1
   fi
 
-  kill_pid "$pid"
-  if ! wait_for_log "$log_file" "publisher shutdown complete" 10; then
-    fail_step "publisher-shutdown" "$combo" "no clean shutdown after SIGTERM: $(tail -10 "$log_file")"
+  # Same ordering as the consumer: signal, wait for the service to confirm, then
+  # reap. Reaping first can SIGKILL a shutdown that was still in progress.
+  kill -TERM "$pid" 2>/dev/null || true
+  if ! wait_for_log "$log_file" "publisher shutdown complete" 30; then
+    fail_step "publisher-shutdown" "$combo" "no clean shutdown 30s after SIGTERM: $(tail -10 "$log_file")"
     rc=1
   fi
+  kill_pid "$pid"
 
   if [[ $rc -eq 0 ]]; then
     log "  [pass] $combo"
@@ -739,8 +851,8 @@ main() {
     exit 2
   fi
 
-  log "Bringing up postgres + mysql + redis (if not already up)..."
-  if ! docker compose -f "$COMPOSE_FILE" up -d --wait postgres mysql redis 2>&1 | tail -5; then
+  log "Bringing up postgres + mysql + redis + kafka + rabbitmq (if not already up)..."
+  if ! docker compose -f "$COMPOSE_FILE" up -d --wait postgres mysql redis kafka rabbitmq 2>&1 | tail -5; then
     log "ERROR: docker compose up failed"
     exit 2
   fi

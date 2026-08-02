@@ -129,9 +129,9 @@ jobs:
 
       # run.sh brings the stack up itself with `--wait`, but doing it here keeps
       # a slow mysql first-boot out of the per-combo healthz timeout.
-      - name: Start postgres + mysql + redis
+      - name: Start postgres + mysql + redis + kafka + rabbitmq
         working-directory: plugins/go-scaffolder
-        run: docker compose up -d --wait postgres mysql redis
+        run: docker compose up -d --wait postgres mysql redis kafka rabbitmq
 
       - name: Runtime suite
         working-directory: plugins/go-scaffolder/skills/integration-test-go-app/scripts
