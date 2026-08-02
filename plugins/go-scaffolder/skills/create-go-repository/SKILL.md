@@ -317,13 +317,12 @@ The user must also ensure `Config` has the relevant fields (`CacheTTL`, `CacheJi
 After writing every file:
 
 1. For `database=bun-*` in a project that does not already import `db/bunrepo`,
-   pin go-lib before building — the package is not on go-lib's default branch yet,
-   so `go mod tidy` alone resolves `@latest` and fails with "does not contain
-   package". A pseudo-version is a commit digest, so it resolves through the public
-   proxy from any pushed branch; no merge and no `replace` directive are needed:
+   pin go-lib so the project builds identically over time. `db/bunrepo` is on
+   go-lib main, so a plain `go mod tidy` also resolves it — pin only if the
+   project wants a fixed go-lib rather than floating to `@latest`:
 
    ```bash
-   go get github.com/labspangaea/go-lib@v0.0.0-20260801171603-0264a6cfede0
+   go get github.com/labspangaea/go-lib@v0.0.0-20260802024135-5c4f756eb258
    ```
 
    Drop this step once `db/bunrepo` lands on go-lib main. Keep the pin identical to

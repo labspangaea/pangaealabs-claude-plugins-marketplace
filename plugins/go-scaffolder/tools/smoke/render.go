@@ -264,11 +264,10 @@ func renderCombo(refsDir, outDir string, c Combo) (skipReason string, err error)
 // add a replace directive — the caller runs `go mod tidy`, which discovers the
 // go-lib import from the rendered source and fetches it from the public proxy.
 //
-// The bun combos are the exception: db/bunrepo is not on go-lib's default branch
-// yet, and `go mod tidy` resolves @latest. They pin golibBunVersion instead — a
-// pseudo-version is just a commit digest, so it resolves through the public
-// proxy from any pushed commit, on any branch. Drop the pin once db/bunrepo
-// lands on main.
+// The bun combos are the exception: they pin golibBunVersion so a smoke run and
+// a scaffolded project resolve the same go-lib. db/bunrepo is on main now, so
+// @latest would work — the pin buys reproducibility, not reachability, and
+// keeps an unrelated go-lib commit from turning the matrix red between runs.
 //
 // There is deliberately no local-checkout override. One that pointed at a
 // working tree would let a template be validated against go-lib source nobody

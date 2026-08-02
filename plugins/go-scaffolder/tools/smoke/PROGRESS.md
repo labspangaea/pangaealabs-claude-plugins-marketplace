@@ -115,17 +115,14 @@ combo here would test a configuration the scaffolder never emits.
 
 ### How bun combos resolve `go-lib`
 
-The bun templates import `github.com/labspangaea/go-lib/db/bunrepo`, which is not
-on go-lib's default branch yet. `go mod tidy` alone resolves `@latest` and fails
-with "does not contain package".
+The bun templates import `github.com/labspangaea/go-lib/db/bunrepo`, which is on
+go-lib main — so `go mod tidy` against `@latest` resolves it fine.
 
-That does **not** mean anything has to merge first. A Go pseudo-version is a commit
-digest with a timestamp prefix, so it resolves through the public proxy from any
-pushed commit regardless of branch. `writeGoMod` pins `golibBunVersion` (in
-`combos.go`) for bun combos, and the same pin appears in `create-go-app/SKILL.md`'s
-post-generation step so scaffolded projects and smoke runs resolve identically.
-
-Both can drop to a plain `@latest` tidy once `db/bunrepo` merges.
+`writeGoMod` pins `golibBunVersion` (in `combos.go`) anyway, and the same pin
+appears in `create-go-app/SKILL.md`'s post-generation step, so a smoke run and a
+scaffolded project agree on one go-lib. Without it the matrix could turn red
+because an unrelated go-lib commit landed between two runs, which is a slow and
+confusing way to learn nothing about your templates.
 
 ### Changing go-lib and a template together
 

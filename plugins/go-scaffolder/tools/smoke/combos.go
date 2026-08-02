@@ -22,19 +22,16 @@ func isBunDB(database string) bool { return strings.HasPrefix(database, "bun-") 
 
 // golibBunVersion pins go-lib for bun combos.
 //
-// A Go pseudo-version is a commit digest with a timestamp prefix, so it resolves
-// through the public proxy from any pushed commit — the commit does not need to
-// be on the default branch. That is what lets bun scaffolds build today even
-// though db/bunrepo is still on go-lib's feat/bunrepo branch.
+// db/bunrepo is on go-lib main, so `go mod tidy` against @latest would now
+// resolve it. This stays pinned so a smoke run and a scaffolded project agree
+// on one go-lib rather than drifting apart as main moves — the matrix should
+// fail because a template changed, not because an unrelated go-lib commit
+// landed between two runs.
 //
-// Keep this identical to the pin quoted in create-go-app/SKILL.md's
-// post-generation step; both exist so a scaffolded project and a smoke run
-// resolve the same go-lib. Once db/bunrepo merges to main, both can drop to a
-// plain `go mod tidy` against @latest.
-//
-// To move the pin: `go get github.com/labspangaea/go-lib@<sha>` in a scratch
+// Keep identical to the pin quoted in create-go-app/SKILL.md's post-generation
+// step. To move it: `go get github.com/labspangaea/go-lib@<sha>` in a scratch
 // module and copy the version `go.mod` records.
-const golibBunVersion = "v0.0.0-20260801171603-0264a6cfede0"
+const golibBunVersion = "v0.0.0-20260802024135-5c4f756eb258"
 
 var combos = []Combo{
 	{ID: "api-nethttp-postgres-none", Type: "api", HTTPFramework: "nethttp", Database: "gorm-postgres", Cache: "none"},

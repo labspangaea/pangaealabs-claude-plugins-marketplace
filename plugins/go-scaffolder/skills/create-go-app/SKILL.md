@@ -455,12 +455,11 @@ Local style + error-wrapping rules baked into the templates live at `${CLAUDE_SK
 go mod init {module_path}
 
 # database=bun-* ONLY — skip this line for gorm-* and none.
-# go-lib's db/bunrepo is not on the default branch yet, so `go mod tidy` alone
-# would resolve @latest and fail with "does not contain package". Pin the commit
-# first: a Go pseudo-version is a commit digest, so it resolves through the
-# public proxy from any pushed branch — no merge, no replace directive, no token.
-# Drop this line once db/bunrepo lands on go-lib main.
-go get github.com/labspangaea/go-lib@v0.0.0-20260801171603-0264a6cfede0
+# Pins go-lib to the commit this scaffold was generated against, so the project
+# builds the same way today and six months from now. db/bunrepo is on go-lib
+# main, so a plain `go mod tidy` also works — drop this line if you would rather
+# float to @latest.
+go get github.com/labspangaea/go-lib@v0.0.0-20260802024135-5c4f756eb258
 
 go mod tidy       # fetches go-lib (github.com/labspangaea/go-lib) and deps from the public proxy — no replace directive, no token.
 gofmt -w .        # MUST run — templates emit hand-aligned struct fields; without this step every editor save produces noisy diffs.
