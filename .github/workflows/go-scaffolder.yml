@@ -1,0 +1,151 @@
+name: go-scaffolder
+
+# Both suites are maintainer tools that were only ever run by hand, which is how
+# a fully-red runtime suite sat on main unnoticed: its OpenAPI assertion had been
+# failing every combo since the DTO templates consolidated their request types.
+# Nothing reported that, because nothing ran it.
+#
+# Path-filtered on purpose. This repo ships five plugins; a docsmith or dkv PR
+# has no business spending ten minutes compiling Go scaffolds.
+on:
+  pull_request:
+    paths:
+      - 'plugins/go-scaffolder/**'
+      - '.github/workflows/go-scaffolder.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/go-scaffolder/**'
+      - '.github/workflows/go-scaffolder.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: go-scaffolder-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Renders every template across the combo matrix and compiles each scaffold,
+  # in both build modes. No services needed, so this is the fast gate.
+  compile-matrix:
+    name: compile matrix (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # The templates emit plain Go and the runner shells out to `go` only, so
+        # cross-OS differences show up in the scaffolds rather than the runner.
+        os: [ubuntu-latest]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          # Tracks the runner's own go.mod so CI cannot drift from local runs.
+          go-version-file: plugins/go-scaffolder/tools/smoke/go.mod
+          cache-dependency-path: plugins/go-scaffolder/tools/smoke/go.sum
+
+      - name: Runner builds and vets clean
+        working-directory: plugins/go-scaffolder/tools/smoke
+        run: |
+          go build ./...
+          go vet ./...
+
+      - name: Template coverage is total
+        working-directory: plugins/go-scaffolder
+        run: |
+          # A template that ships but is never rendered is invisible to the
+          # matrix no matter how green it looks, so assert the union of
+          # templatesFor equals the directory listing rather than trusting it.
+          ls -A skills/create-go-app/references | grep '\.tmpl$' | sort > /tmp/shipped.txt
+
+          cat > tools/smoke/coverage_test.go <<'EOF'
+          package main
+
+          import (
+          	"fmt"
+          	"sort"
+          	"testing"
+          )
+
+          func TestPrintRenderedTemplates(t *testing.T) {
+          	seen := map[string]bool{}
+          	for _, c := range combos {
+          		for _, x := range templatesFor(c) {
+          			seen[x] = true
+          		}
+          	}
+          	out := make([]string, 0, len(seen))
+          	for k := range seen {
+          		out = append(out, k)
+          	}
+          	sort.Strings(out)
+          	for _, k := range out {
+          		fmt.Println(k)
+          	}
+          }
+          EOF
+          (cd tools/smoke && go test -run TestPrintRenderedTemplates -v) \
+            | grep -E '\.tmpl$' | sort > /tmp/rendered.txt
+          rm -f tools/smoke/coverage_test.go
+
+          if ! diff -u /tmp/shipped.txt /tmp/rendered.txt; then
+            echo "::error::templates ship but are never rendered by any combo (see diff above)"
+            exit 1
+          fi
+          echo "all $(wc -l < /tmp/shipped.txt | tr -d ' ') templates are rendered by at least one combo"
+
+      - name: Compile matrix
+        working-directory: plugins/go-scaffolder/tools/smoke
+        run: go run . -all
+
+      - name: Upload failed scaffolds
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-scratch
+          path: plugins/go-scaffolder/tools/smoke/scratch/
+          retention-days: 7
+
+  # Boots each generated api service against real postgres/mysql/redis and
+  # asserts CRUD, both pagination modes, cache keys, request_id logging and the
+  # OpenAPI surface. Slower, and the only job that can catch a scaffold that
+  # compiles but does not work.
+  runtime-suite:
+    name: runtime suite
+    runs-on: ubuntu-latest
+    needs: compile-matrix
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: plugins/go-scaffolder/tools/smoke/go.mod
+          cache-dependency-path: plugins/go-scaffolder/tools/smoke/go.sum
+
+      - name: Install jq
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq jq
+
+      # run.sh brings the stack up itself with `--wait`, but doing it here keeps
+      # a slow mysql first-boot out of the per-combo healthz timeout.
+      - name: Start postgres + mysql + redis
+        working-directory: plugins/go-scaffolder
+        run: docker compose up -d --wait postgres mysql redis
+
+      - name: Runtime suite
+        working-directory: plugins/go-scaffolder/skills/integration-test-go-app/scripts
+        run: ./run.sh
+
+      - name: Upload service logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-logs
+          path: plugins/go-scaffolder/skills/integration-test-go-app/logs/
+          retention-days: 7
+
+      - name: Tear down
+        if: always()
+        working-directory: plugins/go-scaffolder
+        run: docker compose down -v
