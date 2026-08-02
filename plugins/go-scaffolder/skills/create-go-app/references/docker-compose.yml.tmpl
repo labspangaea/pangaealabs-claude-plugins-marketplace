@@ -54,11 +54,43 @@ services:
     ports:
       - "8091-8096:8091-8096"
       - "11210:11210"
+    # Unlike postgres/mysql/redis, the image starts an UNINITIALISED cluster:
+    # no cluster, no bucket, nothing gocb can connect to. Run the real
+    # entrypoint in the background and do the one-time init behind it. The
+    # credentials and bucket name must match .env — that is what the service
+    # reads. On a restart with a warm volume both calls fail with "already
+    # initialized" / "already exists", which `|| true` swallows.
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /entrypoint.sh couchbase-server &
+        # No -f: once the cluster IS initialised /pools answers 401, so a
+        # failure-on-HTTP-error gate never opens on a warm volume and this
+        # loop spins forever. Any response at all means the server is up.
+        until curl -s -o /dev/null http://localhost:8091/pools; do sleep 2; done
+        couchbase-cli cluster-init -c localhost \
+          --cluster-username Administrator --cluster-password password \
+          --services data,index,query \
+          --cluster-ramsize 512 --cluster-index-ramsize 256 || true
+        couchbase-cli bucket-create -c localhost -u Administrator -p password \
+          --bucket {{.EntityLower}}_db --bucket-type couchbase \
+          --bucket-ramsize 256 --wait || true
+        wait
+    # No volume on purpose: this is a cache, so losing it on `down` costs
+    # nothing and re-init is ~12s. It also keeps the volumes block below from
+    # having to render for a cache=couchbase, database=none scaffold.
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8091/pools"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
+      # Polls the BUCKET, not the process. An uninitialised node answers
+      # /pools with 200 while the bucket 404s, so a /pools check goes green
+      # with nothing to connect to — and then goes permanently red once the
+      # cluster IS initialised, because /pools starts requiring auth.
+      test: ["CMD-SHELL", "curl -sf -u Administrator:password http://localhost:8091/pools/default/buckets/{{.EntityLower}}_db >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      # Boot slack belongs in start_period, not retries — retries also sets how
+      # long a live bucket can be gone before the container is called unhealthy.
+      start_period: 90s
+      retries: 6
 {{- end }}
 
   {{.Name}}:
