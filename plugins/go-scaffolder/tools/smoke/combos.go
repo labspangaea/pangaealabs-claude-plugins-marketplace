@@ -20,19 +20,6 @@ type Combo struct {
 // template funcMap lives in render.go and cannot be called from combo routing.
 func isBunDB(database string) bool { return strings.HasPrefix(database, "bun-") }
 
-// golibBunVersion pins go-lib for bun combos.
-//
-// db/bunrepo is on go-lib main, so `go mod tidy` against @latest would now
-// resolve it. This stays pinned so a smoke run and a scaffolded project agree
-// on one go-lib rather than drifting apart as main moves — the matrix should
-// fail because a template changed, not because an unrelated go-lib commit
-// landed between two runs.
-//
-// Keep identical to the pin quoted in create-go-app/SKILL.md's post-generation
-// step. To move it: `go get github.com/labspangaea/go-lib@<sha>` in a scratch
-// module and copy the version `go.mod` records.
-const golibBunVersion = "v0.0.0-20260802024135-5c4f756eb258"
-
 var combos = []Combo{
 	{ID: "api-nethttp-postgres-none", Type: "api", HTTPFramework: "nethttp", Database: "gorm-postgres", Cache: "none"},
 	{ID: "api-nethttp-postgres-redis", Type: "api", HTTPFramework: "nethttp", Database: "gorm-postgres", Cache: "redis"},

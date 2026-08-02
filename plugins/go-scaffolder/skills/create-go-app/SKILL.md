@@ -454,13 +454,6 @@ Local style + error-wrapping rules baked into the templates live at `${CLAUDE_SK
 ```bash
 go mod init {module_path}
 
-# database=bun-* ONLY — skip this line for gorm-* and none.
-# Pins go-lib to the commit this scaffold was generated against, so the project
-# builds the same way today and six months from now. db/bunrepo is on go-lib
-# main, so a plain `go mod tidy` also works — drop this line if you would rather
-# float to @latest.
-go get github.com/labspangaea/go-lib@v0.0.0-20260802024135-5c4f756eb258
-
 go mod tidy       # fetches go-lib (github.com/labspangaea/go-lib) and deps from the public proxy — no replace directive, no token.
 gofmt -w .        # MUST run — templates emit hand-aligned struct fields; without this step every editor save produces noisy diffs.
 
