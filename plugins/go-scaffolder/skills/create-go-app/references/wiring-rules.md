@@ -86,4 +86,6 @@ The wider entry-point skill (`SKILL.md`) keeps only a short "highlights" preview
 | Concern | Severity | Rule | Applies to |
 |---------|----------|------|-----------|
 | Pub/Sub handler ctx | MUST | `context.WithoutCancel(ctx)` inside subscriber handlers | consumer |
+| Redis broker + consumer group | MUST NOT | rely on `ConsumerGroup` to distribute work when `broker=redis`. go-lib's redis adapter takes the group argument and discards it (`Subscribe(ctx, topic, _ string, ...)`), so every replica receives every message. `main.go` still logs the group at startup, which reads as though it were in effect | consumer |
+| Redis broker + durability | MUST NOT | assume a message survives a gap in subscribers. Redis Pub/Sub has no backlog: anything published while no consumer is connected is dropped, and a handler error has nothing to redeliver from. Use kafka or rabbitmq when loss matters | consumer, publisher |
 | Outbound HTTP | SHOULD | `client.NewClient(log)` — auto-propagates OTel trace context | all |

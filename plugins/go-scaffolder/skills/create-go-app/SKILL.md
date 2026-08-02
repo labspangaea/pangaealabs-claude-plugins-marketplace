@@ -82,12 +82,33 @@ AskUserQuestion({
   question: "Which message broker should the service use?",
   header:   "Broker",
   options: [
-    { label: "Kafka (Recommended)", description: "confluent-kafka-go" },
-    { label: "RabbitMQ",            description: "amqp091-go" },
-    { label: "Redis",               description: "Redis Streams" }
+    { label: "Kafka (Recommended)", description: "segmentio/kafka-go — durable, at-least-once, consumer groups share the load" },
+    { label: "RabbitMQ",            description: "amqp091-go — durable, at-least-once, failed messages requeue" },
+    { label: "Redis",               description: "Pub/Sub — fire-and-forget fan-out; no persistence, no consumer groups" }
   ]
 })
 ```
+
+### What the broker choice actually decides
+
+Not the library — the delivery guarantee. Kafka and RabbitMQ are durable work
+queues: a consumer group shares the load across replicas, and a message whose
+handler returns an error is redelivered (kafka leaves the offset uncommitted,
+rabbitmq requeues). Redis is `PUBLISH`/`SUBSCRIBE`, which is neither.
+
+Two consequences of picking Redis that surprise people, both worth saying out
+loud before the choice is made:
+
+- **The consumer group is ignored.** `KAFKA_CONSUMER_GROUP` is read from config
+  and logged at startup, but go-lib's redis adapter discards it — every replica
+  receives every message, so scaling out duplicates work instead of sharing it.
+- **Messages published while nothing is subscribed are gone.** There is no
+  backlog, so a rolling deploy drops whatever arrives during the gap, and a
+  handler error has nothing to redeliver from.
+
+Redis is the right choice for live notifications, cache invalidation, and
+dashboard fan-out. It is the wrong choice if losing a message matters. See
+go-lib `pubsub/README.md` for the full comparison.
 
 **Step 5 — database** (if `type` is `api` or `consumer` and not supplied):
 
