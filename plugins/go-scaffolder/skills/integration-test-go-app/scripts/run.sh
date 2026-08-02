@@ -52,6 +52,8 @@ COMBOS=(
   "api-nethttp-mysql-none|mysql|none"
   "api-gin-bunpg-none|bun-postgres|none"
   "api-chi-bunmysql-none|bun-mysql|none"
+  "consumer-redis-postgres-none|postgres|none"
+  "publisher-redis-nodb-none|none|none"
 )
 
 # DSN templates — service names match docker-compose service names.
@@ -65,6 +67,18 @@ COMBOS=(
 DSN_POSTGRES="host=localhost user=admin password=admin dbname=appdb port=5432 sslmode=disable"
 DSN_BUN_POSTGRES="postgres://admin:admin@localhost:5432/appdb?sslmode=disable"
 DSN_MYSQL="admin:admin@tcp(localhost:3306)/appdb?parseTime=true&loc=Local"
+
+# type_of <combo-id> — api | consumer | publisher, read off the id prefix.
+# Derived rather than added as a fourth COMBOS field: the ids already encode it,
+# and a field that can disagree with the id is a field that eventually will.
+type_of() {
+  case "$1" in
+    api-*) echo api ;;
+    consumer-*) echo consumer ;;
+    publisher-*) echo publisher ;;
+    *) echo unknown ;;
+  esac
+}
 
 # engine_of <driver> — strips the ORM half, leaving the database engine.
 # Used wherever only the server matters (dropping tables, picking a container).
@@ -510,20 +524,188 @@ test_stub_mode() {
   return $rc
 }
 
-test_consumer() {
-  local combo="$1"
-  log ""
-  log "==> $combo (consumer)"
-  log "  [skip] consumer runtime tests not yet implemented (no kafka/rabbitmq in compose)"
+# render_and_build <combo-id> <log-file> <out-dir>
+# Shared prologue for the non-api types: render, tidy, build. 0 on success.
+render_and_build() {
+  local combo="$1" log_file="$2" out_dir="$3"
+
+  rm -rf "$out_dir"
+  mkdir -p "$LOG_BASE"
+  # Truncate the log. Everything below appends with >>, and every log-based
+  # assertion here greps this file — so without this a previous run's output
+  # satisfies the current run's checks. Caught by a canary: publishing to a
+  # topic nobody subscribes to still "passed", because the matching line was
+  # left over from the run before.
+  : > "$log_file"
+
+  if ! (cd "$SMOKE" && go run . -render "$combo" -outdir "$out_dir") >/dev/null 2>&1; then
+    fail_step "render" "$combo"
+    return 1
+  fi
+  if ! (cd "$out_dir" && GOWORK=off go mod tidy) >>"$log_file" 2>&1; then
+    fail_step "go mod tidy" "$combo" "$(tail -10 "$log_file")"
+    return 1
+  fi
+  if ! (cd "$out_dir" && GOWORK=off go build -o "./bin/svc" "./cmd/smoke-$combo") >>"$log_file" 2>&1; then
+    fail_step "go build" "$combo" "$(tail -10 "$log_file")"
+    return 1
+  fi
   return 0
 }
 
+# wait_for_log <log-file> <pattern> [seconds]
+# Consumers and publishers serve no HTTP, so readiness is a log line rather than
+# a healthz probe.
+wait_for_log() {
+  local log_file="$1" pattern="$2" secs="${3:-30}" i
+  for i in $(seq 1 "$secs"); do
+    grep -q "$pattern" "$log_file" 2>/dev/null && return 0
+    sleep 1
+  done
+  return 1
+}
+
+# test_consumer <combo-id> <driver>
+# Boots the consumer against the redis broker, publishes a message, and asserts
+# it was received and decoded.
+#
+# The assertion is on the log, not on database state, because the generated
+# service.HandleEvent is a deliberate no-op that only logs — the scaffold gives
+# you the delivery path and leaves the business logic to you. Asserting a row
+# would be asserting behaviour the scaffolder does not generate.
+test_consumer() {
+  local combo="$1" driver="$2"
+  local out_dir="$OUT_BASE/$combo"
+  local log_file="$LOG_BASE/$combo.log"
+  local rc=0 pid=""
+  local topic="orders-itest-$$"
+
+  log ""
+  hr
+  log "==> $combo (consumer, broker=redis)"
+  hr
+
+  render_and_build "$combo" "$log_file" "$out_dir" || return 1
+
+  local dsn=""
+  case "$(engine_of "$driver")" in
+    postgres)
+      docker exec go-scaffolder-postgres psql -U admin -d appdb \
+        -c 'DROP TABLE IF EXISTS orders CASCADE;' >/dev/null 2>&1 || true
+      dsn="$DSN_POSTGRES"
+      ;;
+    mysql)
+      docker exec go-scaffolder-mysql mysql -uadmin -padmin appdb \
+        -e 'DROP TABLE IF EXISTS orders;' >/dev/null 2>&1 || true
+      dsn="$DSN_MYSQL"
+      ;;
+  esac
+
+  DATABASE_DSN="$dsn" \
+  BROKER_REDIS_ADDR=localhost:6379 BROKER_REDIS_PASSWORD=admin BROKER_REDIS_DB=0 \
+  REDIS_ADDR=localhost:6379 REDIS_PASSWORD=admin REDIS_DB=0 \
+  KAFKA_TOPIC="$topic" KAFKA_CONSUMER_GROUP="itest" \
+  SERVICE_NAME="$combo" SERVICE_BACKEND=real \
+  "$out_dir/bin/svc" >>"$log_file" 2>&1 &
+  pid=$!
+
+  if ! wait_for_log "$log_file" "consumer starting"; then
+    fail_step "consumer-start" "$combo" "$(tail -20 "$log_file")"
+    kill_pid "$pid"
+    return 1
+  fi
+
+  # Redis SUBSCRIBE is not retroactive: a message published before the
+  # subscription is registered is simply dropped. The log line above says the
+  # process reached Subscribe, not that redis has processed it, so give the
+  # server a moment to register before publishing into the void.
+  sleep 2
+
+  # The on-wire envelope is a JSON pubsub.Message whose Payload is []byte, so it
+  # base64-encodes. Inner payload is the {Entity}Event the handler unmarshals.
+  local payload envelope
+  payload=$(printf '{"id":"evt-1","name":"integration"}' | base64)
+  envelope=$(printf '{"id":"itest-msg-1","key":"k1","payload":"%s"}' "$payload")
+  if ! docker exec go-scaffolder-redis redis-cli -a admin --no-auth-warning \
+      PUBLISH "$topic" "$envelope" >/dev/null 2>&1; then
+    fail_step "publish" "$combo" "redis-cli PUBLISH failed"
+    kill_pid "$pid"
+    return 1
+  fi
+
+  if ! wait_for_log "$log_file" "processing message" 15; then
+    fail_step "consume" "$combo" "message never reached the handler: $(tail -20 "$log_file")"
+    rc=1
+  elif ! grep -q "itest-msg-1" "$log_file"; then
+    fail_step "consume-msg-id" "$combo" "handler logged a message but not the id we published"
+    rc=1
+  fi
+
+  # Graceful shutdown: SIGTERM must unwind the subscription, not strand it.
+  kill_pid "$pid"
+  pid=""
+  if [[ $rc -eq 0 ]] && ! wait_for_log "$log_file" "consumer shutdown complete" 10; then
+    fail_step "consumer-shutdown" "$combo" "no clean shutdown after SIGTERM: $(tail -10 "$log_file")"
+    rc=1
+  fi
+
+  if [[ $rc -eq 0 ]]; then
+    log "  [pass] $combo"
+  fi
+  return $rc
+}
+
+# test_publisher <combo-id>
+# Boots the publisher and asserts it connects to the broker and shuts down
+# cleanly.
+#
+# Thin on purpose: the generated publisher is a lifecycle skeleton — logger,
+# telemetry, a constructed publisher, and a signal wait. It exposes no endpoint
+# and publishes nothing by itself, so "starts against a real broker and stops
+# cleanly" is the whole of its observable contract. It still catches a scaffold
+# that will not boot, which is what the compile matrix cannot see.
 test_publisher() {
   local combo="$1"
+  local out_dir="$OUT_BASE/$combo"
+  local log_file="$LOG_BASE/$combo.log"
+  local rc=0 pid=""
+
   log ""
-  log "==> $combo (publisher)"
-  log "  [skip] publisher runtime tests not yet implemented (no kafka/rabbitmq in compose)"
-  return 0
+  hr
+  log "==> $combo (publisher, broker=redis)"
+  hr
+
+  render_and_build "$combo" "$log_file" "$out_dir" || return 1
+
+  BROKER_REDIS_ADDR=localhost:6379 BROKER_REDIS_PASSWORD=admin BROKER_REDIS_DB=0 \
+  KAFKA_TOPIC="orders-itest-$$" \
+  SERVICE_NAME="$combo" SERVICE_BACKEND=real \
+  "$out_dir/bin/svc" >>"$log_file" 2>&1 &
+  pid=$!
+
+  # No startup banner to wait on, so settle briefly then assert it is alive.
+  # A broker misconfiguration exits during this window.
+  sleep 3
+  if ! kill -0 "$pid" 2>/dev/null; then
+    fail_step "publisher-start" "$combo" "process exited during startup: $(tail -20 "$log_file")"
+    return 1
+  fi
+  if grep -q "broker connection failed" "$log_file"; then
+    fail_step "publisher-broker" "$combo" "$(tail -10 "$log_file")"
+    kill_pid "$pid"
+    return 1
+  fi
+
+  kill_pid "$pid"
+  if ! wait_for_log "$log_file" "publisher shutdown complete" 10; then
+    fail_step "publisher-shutdown" "$combo" "no clean shutdown after SIGTERM: $(tail -10 "$log_file")"
+    rc=1
+  fi
+
+  if [[ $rc -eq 0 ]]; then
+    log "  [pass] $combo"
+  fi
+  return $rc
 }
 
 # --- Main ----------------------------------------------------------------------
@@ -577,7 +759,21 @@ main() {
       continue
     fi
 
-    if test_api "$combo" "$driver" "$cache_mode"; then
+    # Dispatch on type. Before this, the loop called test_api unconditionally
+    # while test_consumer/test_publisher sat unreferenced — so adding a consumer
+    # combo would have run it through the api test and failed on a /healthz that
+    # a consumer never serves.
+    local result=0
+    case "$(type_of "$combo")" in
+      api)       test_api "$combo" "$driver" "$cache_mode" || result=1 ;;
+      consumer)  test_consumer "$combo" "$driver" || result=1 ;;
+      publisher) test_publisher "$combo" || result=1 ;;
+      *)
+        log "  [FAIL] unknown combo type for $combo"
+        result=1
+        ;;
+    esac
+    if [[ $result -eq 0 ]]; then
       ((pass++))
     else
       ((fail++))
