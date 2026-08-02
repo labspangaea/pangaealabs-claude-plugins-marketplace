@@ -316,20 +316,9 @@ The user must also ensure `Config` has the relevant fields (`CacheTTL`, `CacheJi
 
 After writing every file:
 
-1. For `database=bun-*` in a project that does not already import `db/bunrepo`,
-   pin go-lib so the project builds identically over time. `db/bunrepo` is on
-   go-lib main, so a plain `go mod tidy` also resolves it — pin only if the
-   project wants a fixed go-lib rather than floating to `@latest`:
-
-   ```bash
-   go get github.com/labspangaea/go-lib@v0.0.0-20260802024135-5c4f756eb258
-   ```
-
-   Drop this step once `db/bunrepo` lands on go-lib main. Keep the pin identical to
-   the one in `/go-scaffolder:create-go-app`'s post-generation step.
-2. Run `mcp__go-lsp__go_diagnose` on each generated `.go` file. Fix all errors.
-3. Run `go build ./...` from the project root. Fix all errors.
-4. Do not report done until both checks pass clean.
+1. Run `mcp__go-lsp__go_diagnose` on each generated `.go` file. Fix all errors.
+2. Run `go build ./...` from the project root. Fix all errors.
+3. Do not report done until both checks pass clean.
 
 ---
 

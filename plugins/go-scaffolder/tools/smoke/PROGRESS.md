@@ -115,16 +115,21 @@ combo here would test a configuration the scaffolder never emits.
 
 ### How bun combos resolve `go-lib`
 
-The bun templates import `github.com/labspangaea/go-lib/db/bunrepo`, which is on
-go-lib main — so `go mod tidy` against `@latest` resolves it fine.
+Like every other combo: `go mod tidy` against the public proxy. `db/bunrepo` is
+on go-lib main, so nothing special is needed.
 
-`writeGoMod` pins `golibBunVersion` (in `combos.go`) anyway, and the same pin
-appears in `create-go-app/SKILL.md`'s post-generation step, so a smoke run and a
-scaffolded project agree on one go-lib. Without it the matrix could turn red
-because an unrelated go-lib commit landed between two runs, which is a slow and
-confusing way to learn nothing about your templates.
+This was pinned to a commit digest while `db/bunrepo` lived on a feature branch
+— a pseudo-version resolves from any pushed commit, so the templates could be
+built and tested before the library merged. The pin is gone now that `@latest`
+reaches it.
 
-### Changing go-lib and a template together
+There is deliberately no local-checkout override in the runner. One would let a
+template be validated against go-lib source nobody else can fetch, and a smoke
+run that passes on unfetchable source is worse than one that fails — it reports
+green for a combination no user can reproduce. To smoke a template against an
+unreleased go-lib change, push the change.
+
+## Changing go-lib and a template together
 
 Commit the go-lib change, push it, then move the pin:
 
