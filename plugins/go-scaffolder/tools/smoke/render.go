@@ -35,6 +35,7 @@ type Fixture struct {
 	Broker        string
 	Database      string
 	Cache         string
+	Messaging     string
 }
 
 func fixtureFor(c Combo) Fixture {
@@ -54,6 +55,7 @@ func fixtureFor(c Combo) Fixture {
 		Broker:        c.Broker,
 		Database:      c.Database,
 		Cache:         c.Cache,
+		Messaging:     c.Messaging,
 	}
 }
 
@@ -193,6 +195,29 @@ func funcMap() template.FuncMap {
 			}
 			return "gorm.io/driver/postgres"
 		},
+
+		// msgPkg maps the messaging model to its go-lib package name, which is
+		// also the local alias and the type qualifier: pubsub.Message vs
+		// queue.Message. Import paths derive from it too, since the engine
+		// sub-packages are named identically under both
+		// (<pkg>/kafka, <pkg>/rabbitmq, <pkg>/redis).
+		"msgPkg": func(messaging string) string {
+			if messaging == "queue" {
+				return "queue"
+			}
+			return "pubsub"
+		},
+
+		// consumeFn is the only method name that differs between the two.
+		// pubsub subscribes to a topic; queue consumes from a queue as one of
+		// several competing members.
+		"consumeFn": func(messaging string) string {
+			if messaging == "queue" {
+				return "Consume"
+			}
+			return "Subscribe"
+		},
+
 		"dbOpen": func(database string) string {
 			if database == "gorm-mysql" {
 				return "mysql.Open(dsn)"

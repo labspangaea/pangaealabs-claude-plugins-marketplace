@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/labspangaea/go-lib/logger"
-	"github.com/labspangaea/go-lib/pubsub"
+	"github.com/labspangaea/go-lib/{{msgPkg .Messaging}}"
 
 	"{{.Module}}/internal/service"
 )
@@ -29,7 +29,7 @@ func NewHandler(svc *service.{{.Entity}}) *Handler {
 // The context passed by the consumer backend (Kafka, Redis) uses
 // context.WithoutCancel — the handler's own DB/HTTP calls will NOT be aborted
 // during graceful shutdown.
-func (h *Handler) Handle(ctx context.Context, msg pubsub.Message) error {
+func (h *Handler) Handle(ctx context.Context, msg {{msgPkg .Messaging}}.Message) error {
 	l := logger.FromContext(ctx)
 	l.Info("processing message", "msg_id", msg.ID, "key", msg.Key)
 

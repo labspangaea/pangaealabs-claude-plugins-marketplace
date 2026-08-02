@@ -14,7 +14,7 @@ import (
 	"github.com/labspangaea/go-lib/db"
 {{- end }}
 	"github.com/labspangaea/go-lib/logger"
-	pubsubredis "github.com/labspangaea/go-lib/pubsub/redis"
+	{{msgPkg .Messaging}}redis "github.com/labspangaea/go-lib/{{msgPkg .Messaging}}/redis"
 	"github.com/labspangaea/go-lib/telemetry"
 {{- if eq .Database "gorm-postgres" }}
 	"gorm.io/driver/postgres"
@@ -105,7 +105,7 @@ func main() {
 		return
 	}
 
-	pub := pubsubredis.NewPublisher(brokerClient)
+	pub := {{msgPkg .Messaging}}redis.NewPublisher(brokerClient)
 	defer pub.Close()
 	_ = pub
 

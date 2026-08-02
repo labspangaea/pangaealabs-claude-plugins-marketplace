@@ -16,6 +16,8 @@ Scaffold production-ready Go services wired to `go-lib` (the team's hexagonal-ar
 - `type`: `api` · `consumer` · `publisher`
 - `http_framework`: `nethttp` · `gin` · `chi` · `mux` · `echo`
 - `broker`: `kafka` · `rabbitmq` · `redis`
+- `messaging`: `pubsub` · `queue` — whether replicas divide the work (`queue`, competing consumers)
+  or each receive every message (`pubsub`, fan-out). Asked for `consumer` / `publisher` only.
 - `database`: `gorm-postgres` · `gorm-mysql` · `bun-postgres` · `bun-mysql` · `none`
   (bun is the SQL-first flavour, backed by `go-lib/db/bunrepo`; it keeps GORM out of
   the binary but has no cache wrapper, so `bun-*` implies `cache=none`)

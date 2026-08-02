@@ -85,6 +85,8 @@ The wider entry-point skill (`SKILL.md`) keeps only a short "highlights" preview
 
 | Concern | Severity | Rule | Applies to |
 |---------|----------|------|-----------|
+| Messaging model | MUST | import `go-lib/queue` + call `Consume` when `messaging=queue`; `go-lib/pubsub` + `Subscribe` when `pubsub`. Never mix: a `queue.Message` handler cannot satisfy a `pubsub.Handler` | consumer, publisher |
+| Queue vs pubsub choice | SHOULD | default to `queue` for background work. On `pubsub`, N replicas each process every message — the duplicate work is silent, since nothing errors | consumer |
 | Pub/Sub handler ctx | MUST | `context.WithoutCancel(ctx)` inside subscriber handlers | consumer |
 | Redis broker + consumer group | MUST NOT | rely on `ConsumerGroup` to distribute work when `broker=redis`. go-lib's redis adapter takes the group argument and discards it (`Subscribe(ctx, topic, _ string, ...)`), so every replica receives every message. `main.go` still logs the group at startup, which reads as though it were in effect | consumer |
 | Redis broker + durability | MUST NOT | assume a message survives a gap in subscribers. Redis Pub/Sub has no backlog: anything published while no consumer is connected is dropped, and a handler error has nothing to redeliver from. Use kafka or rabbitmq when loss matters | consumer, publisher |

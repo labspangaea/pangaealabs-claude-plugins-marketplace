@@ -15,7 +15,7 @@ import (
 	"github.com/labspangaea/go-lib/db"
 {{- end }}
 	"github.com/labspangaea/go-lib/logger"
-	pubsubredis "github.com/labspangaea/go-lib/pubsub/redis"
+	{{msgPkg .Messaging}}redis "github.com/labspangaea/go-lib/{{msgPkg .Messaging}}/redis"
 	"github.com/labspangaea/go-lib/telemetry"
 {{- if eq .Database "gorm-postgres" }}
 	"gorm.io/driver/postgres"
@@ -176,7 +176,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	consumer := pubsubredis.NewConsumer(brokerClient)
+	consumer := {{msgPkg .Messaging}}redis.NewConsumer(brokerClient)
 	defer consumer.Close()
 
 	handler := subscriber.NewHandler(svc)
@@ -189,7 +189,7 @@ func main() {
 		slog.String("group", cfg.ConsumerGroup),
 	)
 
-	if err := consumer.Subscribe(ctx, cfg.Topic, cfg.ConsumerGroup, handler.Handle); err != nil {
+	if err := consumer.{{consumeFn .Messaging}}(ctx, cfg.Topic, cfg.ConsumerGroup, handler.Handle); err != nil {
 		log.Error("consumer subscribe error", slog.Any(logger.KeyError, err))
 		os.Exit(1)
 	}
