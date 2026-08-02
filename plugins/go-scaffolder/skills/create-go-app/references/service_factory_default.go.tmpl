@@ -21,3 +21,18 @@ func New{{.Entity}}Service(cfg config.Config, repo port.{{.Entity}}Repository) p
 	_ = cfg // honored only by the stub-tagged build
 	return New(repo)
 }
+
+// UsesStubBackend reports whether the composition root should skip opening a
+// database, cache and broker. Always false here: the stub package is not linked
+// into a default build, so there is nothing to route to and storage is always
+// required.
+//
+// This is deliberately a build-tagged pair rather than a plain check on
+// cfg.ServiceBackend. SERVICE_BACKEND=stub is the default in a fresh .env, so
+// an env-only test would make a production binary skip its database whenever
+// that value survived into the deployment — turning a stale config line into an
+// outage instead of a loud startup failure.
+func UsesStubBackend(cfg config.Config) bool {
+	_ = cfg // the stub-tagged build consults it
+	return false
+}

@@ -37,3 +37,19 @@ func New{{.Entity}}Service(cfg config.Config, repo port.{{.Entity}}Repository) p
 		panic(fmt.Sprintf("config: SERVICE_BACKEND=%q is invalid (must be %q or %q)", cfg.ServiceBackend, "stub", "real"))
 	}
 }
+
+// UsesStubBackend reports whether the composition root should skip opening a
+// database, cache and broker.
+//
+// True for exactly the values New{{.Entity}}Service routes to the stub, so the
+// two cannot disagree: were this to return false while the factory returned the
+// stub, main.go would demand a database for a service that never queries one —
+// which is the bug this pair exists to prevent.
+func UsesStubBackend(cfg config.Config) bool {
+	switch cfg.ServiceBackend {
+	case "stub", "":
+		return true
+	default:
+		return false
+	}
+}

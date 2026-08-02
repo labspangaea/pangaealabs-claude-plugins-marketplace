@@ -53,6 +53,9 @@ import (
 {{- if ne .Database "none" }}
 	"{{.Module}}/internal/adapter/outbound/repository"
 {{- end }}
+{{- if ne .Database "none" }}
+	"{{.Module}}/internal/port"
+{{- end }}
 	"{{.Module}}/internal/service"
 )
 
@@ -88,101 +91,24 @@ func main() {
 		ctx = logger.WithLogger(ctx, log)
 	}
 
-{{- if isBun .Database }}
-
-	bunDB, err := repo.Open(cfg.DatabaseDSN,
-		repo.WithMaxOpenConns(cfg.DBMaxOpen),
-		repo.WithSlowThreshold(cfg.DBSlowThreshold),
-		repo.WithLogLevel(cfg.DBLogLevel),
-	)
-	if err != nil {
-		log.Error("db open failed", slog.Any(logger.KeyError, err))
-		os.Exit(1)
-	}
-	defer bunDB.Close()
-
-	// Create the table if absent. Idempotent — safe to call on every startup.
-	// For production environments using explicit migration tools (Atlas, Goose,
-	// dbmate), remove this block and run migrations out-of-band before deploy.
-	if err := repository.Migrate(ctx, bunDB); err != nil {
-		log.Error("schema migration failed", slog.Any(logger.KeyError, err))
-		os.Exit(1)
-	}
-{{- else if ne .Database "none" }}
-
-	var dbLogLevel gormlogger.LogLevel
-	switch cfg.DBLogLevel {
-	case "info":   dbLogLevel = gormlogger.Info
-	case "error":  dbLogLevel = gormlogger.Error
-	case "silent": dbLogLevel = gormlogger.Silent
-	default:       dbLogLevel = gormlogger.Warn
-	}
-
-	gormDB, err := db.Open(
-{{- if eq .Database "gorm-postgres" }}postgres.Open(cfg.DatabaseDSN){{else if eq .Database "gorm-mysql" }}mysql.Open(cfg.DatabaseDSN){{end}},
-		db.WithMaxOpenConns(cfg.DBMaxOpen),
-		db.WithSlowThreshold(cfg.DBSlowThreshold),
-		db.WithLogLevel(dbLogLevel),
-	)
-	if err != nil {
-		log.Error("db open failed", slog.Any(logger.KeyError, err))
-		os.Exit(1)
-	}
-	defer db.Close(gormDB)
-
-	// Auto-migrate the schema. Idempotent — safe to call on every startup.
-	// For production environments using explicit migration tools (Atlas, Goose,
-	// dbmate), remove this block and run migrations out-of-band before deploy.
-	if err := gormDB.AutoMigrate(&repository.{{.Entity}}Model{}); err != nil {
-		log.Error("schema migration failed", slog.Any(logger.KeyError, err))
-		os.Exit(1)
-	}
-{{- end }}
-
-{{- if eq .Cache "redis" }}
-
-	redisClient := goredis.NewClient(&goredis.Options{
-		Addr:     cfg.RedisAddr,
-		Password: cfg.RedisPassword,
-		DB:       cfg.RedisDB,
-	})
-	defer redisClient.Close()
-	if err := redisClient.Ping(ctx).Err(); err != nil {
-		log.Error("redis connection failed", slog.Any(logger.KeyError, err))
-		os.Exit(1)
-	}
-	{{.EntityLower}}Cache := cacheredis.New[*repository.{{.Entity}}Model](redisClient)
-{{- else if eq .Cache "memory" }}
-
-	{{.EntityLower}}Cache := cachemem.New[*repository.{{.Entity}}Model](
-		cachemem.WithCapacity[*repository.{{.Entity}}Model](cfg.MemoryCacheCapacity),
-	)
-{{- else if eq .Cache "couchbase" }}
-
-	cluster, err := gocb.Connect(cfg.CouchbaseURL, gocb.ClusterOptions{
-		Username: cfg.CouchbaseUsername,
-		Password: cfg.CouchbasePassword,
-	})
-	if err != nil {
-		log.Error("couchbase connect failed", slog.Any(logger.KeyError, err))
-		os.Exit(1)
-	}
-	defer cluster.Close(nil)
-	col := cluster.Bucket(cfg.CouchbaseBucket).DefaultCollection()
-	{{.EntityLower}}Cache := cachecb.New[*repository.{{.Entity}}Model](col)
-{{- end }}
-
 {{- if ne .Database "none" }}
 
-{{- if ne .Cache "none" }}
-	{{.EntityLower}}Repo := repository.NewCached(gormDB, {{.EntityLower}}Cache,
-		dbrepo.WithTTL(cfg.CacheTTL),
-		dbrepo.WithJitter(cfg.CacheJitterFactor),
-		dbrepo.WithTwoPhaseList(),
-	)
-{{- else }}
-	{{.EntityLower}}Repo := repository.New({{if isBun .Database}}bunDB{{else}}gormDB{{end}})
-{{- end }}
+	// Stub mode answers from canned data and never reaches storage, so it has to
+	// boot with no database, cache or broker running — that is the entire point
+	// of SERVICE_BACKEND=stub for frontend work.
+	//
+	// The guard is service.UsesStubBackend, which is build-tagged and can only
+	// return true in a binary built with -tags=stub. An env-only check would be
+	// actively dangerous: SERVICE_BACKEND=stub is the default in a fresh .env,
+	// so a production binary would silently start with no database whenever that
+	// line survived into the deployment.
+	var {{.EntityLower}}Repo port.{{.Entity}}Repository
+	closeStorage := func() {}
+	if !service.UsesStubBackend(cfg) {
+		{{.EntityLower}}Repo, closeStorage = open{{.Entity}}Storage(ctx, cfg, log)
+	}
+	defer closeStorage()
+
 	svc := service.New{{.Entity}}Service(cfg, {{.EntityLower}}Repo)
 {{- else }}
 
@@ -288,3 +214,119 @@ func main() {
 		log.Warn("graceful shutdown timeout reached")
 	}
 }
+
+{{- if ne .Database "none" }}
+
+// open{{.Entity}}Storage opens the database{{if ne .Cache "none"}}, connects the cache,{{end}} and builds the
+// repository. The returned func closes what it opened and belongs in a defer at
+// the composition root — deferring inside here would close the connection
+// before the server ever served a request.
+//
+// Exits the process on failure. A real backend cannot serve without storage,
+// and continuing would turn one clear startup line into a confusing 500 on
+// every request.
+func open{{.Entity}}Storage(ctx context.Context, cfg config.Config, log *slog.Logger) (port.{{.Entity}}Repository, func()) {
+{{- if isBun .Database }}
+	bunDB, err := repo.Open(cfg.DatabaseDSN,
+		repo.WithMaxOpenConns(cfg.DBMaxOpen),
+		repo.WithSlowThreshold(cfg.DBSlowThreshold),
+		repo.WithLogLevel(cfg.DBLogLevel),
+	)
+	if err != nil {
+		log.Error("db open failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+
+	// Create the table if absent. Idempotent — safe to call on every startup.
+	// For production environments using explicit migration tools (Atlas, Goose,
+	// dbmate), remove this block and run migrations out-of-band before deploy.
+	if err := repository.Migrate(ctx, bunDB); err != nil {
+		log.Error("schema migration failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+{{- else }}
+	var dbLogLevel gormlogger.LogLevel
+	switch cfg.DBLogLevel {
+	case "info":   dbLogLevel = gormlogger.Info
+	case "error":  dbLogLevel = gormlogger.Error
+	case "silent": dbLogLevel = gormlogger.Silent
+	default:       dbLogLevel = gormlogger.Warn
+	}
+
+	gormDB, err := db.Open(
+{{- if eq .Database "gorm-postgres" }}postgres.Open(cfg.DatabaseDSN){{else if eq .Database "gorm-mysql" }}mysql.Open(cfg.DatabaseDSN){{end}},
+		db.WithMaxOpenConns(cfg.DBMaxOpen),
+		db.WithSlowThreshold(cfg.DBSlowThreshold),
+		db.WithLogLevel(dbLogLevel),
+	)
+	if err != nil {
+		log.Error("db open failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+
+	// Auto-migrate the schema. Idempotent — safe to call on every startup.
+	// For production environments using explicit migration tools (Atlas, Goose,
+	// dbmate), remove this block and run migrations out-of-band before deploy.
+	if err := gormDB.AutoMigrate(&repository.{{.Entity}}Model{}); err != nil {
+		log.Error("schema migration failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+{{- end }}
+{{- if eq .Cache "redis" }}
+
+	redisClient := goredis.NewClient(&goredis.Options{
+		Addr:     cfg.RedisAddr,
+		Password: cfg.RedisPassword,
+		DB:       cfg.RedisDB,
+	})
+	if err := redisClient.Ping(ctx).Err(); err != nil {
+		log.Error("redis connection failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+	{{.EntityLower}}Cache := cacheredis.New[*repository.{{.Entity}}Model](redisClient)
+{{- else if eq .Cache "memory" }}
+
+	{{.EntityLower}}Cache := cachemem.New[*repository.{{.Entity}}Model](
+		cachemem.WithCapacity[*repository.{{.Entity}}Model](cfg.MemoryCacheCapacity),
+	)
+{{- else if eq .Cache "couchbase" }}
+
+	cluster, err := gocb.Connect(cfg.CouchbaseURL, gocb.ClusterOptions{
+		Username: cfg.CouchbaseUsername,
+		Password: cfg.CouchbasePassword,
+	})
+	if err != nil {
+		log.Error("couchbase connect failed", slog.Any(logger.KeyError, err))
+		os.Exit(1)
+	}
+	col := cluster.Bucket(cfg.CouchbaseBucket).DefaultCollection()
+	{{.EntityLower}}Cache := cachecb.New[*repository.{{.Entity}}Model](col)
+{{- end }}
+
+{{- if ne .Cache "none" }}
+
+	{{.EntityLower}}Repo := repository.NewCached(gormDB, {{.EntityLower}}Cache,
+		dbrepo.WithTTL(cfg.CacheTTL),
+		dbrepo.WithJitter(cfg.CacheJitterFactor),
+		dbrepo.WithTwoPhaseList(),
+	)
+{{- else }}
+
+	{{.EntityLower}}Repo := repository.New({{if isBun .Database}}bunDB{{else}}gormDB{{end}})
+{{- end }}
+
+	// Closed in reverse order of acquisition.
+	return {{.EntityLower}}Repo, func() {
+{{- if eq .Cache "redis" }}
+		_ = redisClient.Close()
+{{- else if eq .Cache "couchbase" }}
+		_ = cluster.Close(nil)
+{{- end }}
+{{- if isBun .Database }}
+		_ = bunDB.Close()
+{{- else }}
+		db.Close(gormDB)
+{{- end }}
+	}
+}
+{{- end }}
