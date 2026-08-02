@@ -14,6 +14,10 @@ type Combo struct {
 	Broker        string // consumer/publisher: kafka · rabbitmq · redis
 	Database      string // gorm-postgres · gorm-mysql · bun-postgres · bun-mysql · none
 	Cache         string // none · redis · memory · couchbase
+	// Messaging selects the delivery model for consumer/publisher combos:
+	// "pubsub" (fan-out) or "queue" (competing consumers). Blank means pubsub,
+	// so every pre-existing row keeps its meaning without being rewritten.
+	Messaging string
 }
 
 // isBunDB mirrors the isBun template function. Kept in sync by hand — the
@@ -51,6 +55,15 @@ var combos = []Combo{
 	{ID: "api-nethttp-bunpg-none", Type: "api", HTTPFramework: "nethttp", Database: "bun-postgres", Cache: "none"},
 	{ID: "api-chi-bunmysql-none", Type: "api", HTTPFramework: "chi", Database: "bun-mysql", Cache: "none"},
 	{ID: "consumer-kafka-bunpg-none", Type: "consumer", Broker: "kafka", Database: "bun-postgres", Cache: "none"},
+
+	// queue combos — competing consumers rather than fan-out. Redis is the one
+	// whose implementation genuinely differs (Streams, not Pub/Sub), so it is
+	// covered on both a consumer and a publisher; kafka and rabbitmq change
+	// only which package the same mechanics come from.
+	{ID: "consumer-redis-postgres-none-queue", Type: "consumer", Broker: "redis", Database: "gorm-postgres", Cache: "none", Messaging: "queue"},
+	{ID: "consumer-kafka-postgres-none-queue", Type: "consumer", Broker: "kafka", Database: "gorm-postgres", Cache: "none", Messaging: "queue"},
+	{ID: "consumer-rabbitmq-nodb-none-queue", Type: "consumer", Broker: "rabbitmq", Database: "none", Cache: "none", Messaging: "queue"},
+	{ID: "publisher-redis-nodb-none-queue", Type: "publisher", Broker: "redis", Database: "none", Cache: "none", Messaging: "queue"},
 }
 
 // b1Ready is the explicit allowlist of templates safe for the smoke runner.

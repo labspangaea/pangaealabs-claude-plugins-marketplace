@@ -68,6 +68,7 @@ type Params struct {
 	Broker        string
 	Database      string
 	Cache         string
+	Messaging     string
 }
 
 func main() {
@@ -229,6 +230,28 @@ func funcMap() template.FuncMap {
 			default:
 				return "none"
 			}
+		},
+
+		// msgPkg maps the messaging model to its go-lib package name, which is
+		// also the local alias and the type qualifier: pubsub.Message vs
+		// queue.Message. Import paths derive from it too, since the engine
+		// sub-packages are named identically under both
+		// (<pkg>/kafka, <pkg>/rabbitmq, <pkg>/redis).
+		"msgPkg": func(messaging string) string {
+			if messaging == "queue" {
+				return "queue"
+			}
+			return "pubsub"
+		},
+
+		// consumeFn is the only method name that differs between the two.
+		// pubsub subscribes to a topic; queue consumes from a queue as one of
+		// several competing members.
+		"consumeFn": func(messaging string) string {
+			if messaging == "queue" {
+				return "Consume"
+			}
+			return "Subscribe"
 		},
 
 		// dbDriver returns the gorm driver import path for the given database param.

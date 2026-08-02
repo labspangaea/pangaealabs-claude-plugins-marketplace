@@ -14,7 +14,7 @@ import (
 	"github.com/labspangaea/go-lib/db"
 {{- end }}
 	"github.com/labspangaea/go-lib/logger"
-	"github.com/labspangaea/go-lib/pubsub/rabbitmq"
+	"github.com/labspangaea/go-lib/{{msgPkg .Messaging}}/rabbitmq"
 	"github.com/labspangaea/go-lib/telemetry"
 {{- if eq .Database "gorm-postgres" }}
 	"gorm.io/driver/postgres"

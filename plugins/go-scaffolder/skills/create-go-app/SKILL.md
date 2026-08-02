@@ -19,6 +19,7 @@ Scaffold a production-ready Go application that wires `go-lib`.
 | `name` | **yes** | — | kebab-case string |
 | `http_framework` | no | `gin` | `nethttp` · `gin` · `chi` · `mux` · `echo` |
 | `broker` | no | `kafka` | `kafka` · `rabbitmq` · `redis` |
+| `messaging` | no | `pubsub` | `pubsub` · `queue` (asked only for `consumer` / `publisher`) |
 | `database` | no | `gorm-postgres` | `gorm-postgres` · `gorm-mysql` · `bun-postgres` · `bun-mysql` · `none` |
 | `cache` | no | `none` | `none` · `redis` · `memory` · `couchbase` (forced to `none` when `database` is `bun-*`) |
 
@@ -88,6 +89,47 @@ AskUserQuestion({
   ]
 })
 ```
+
+**Step 4b — messaging** (if `type` is `consumer` or `publisher` and not supplied):
+
+```
+AskUserQuestion({
+  question: "Should this service compete for messages or receive every one?",
+  header:   "Messaging",
+  options: [
+    { label: "Queue (Recommended)", description: "queue — each message handled by exactly one replica; failures are redelivered" },
+    { label: "Pub/Sub",             description: "pubsub — every replica receives every message; use for broadcasts, not work" }
+  ]
+})
+```
+
+Map to the `messaging` parameter (`queue` / `pubsub`).
+
+### Which one, and why it is not cosmetic
+
+The question is whether adding a replica **divides** the work or **duplicates**
+it.
+
+- **`queue`** — competing consumers. Each message goes to exactly one member of
+  the group, and a handler that returns an error gets the message again. This is
+  what almost all background work wants: orders to fulfil, emails to send,
+  invoices to generate.
+- **`pubsub`** — fan-out. Every subscriber sees every message. Right for facts
+  many listeners care about: cache invalidations, dashboard updates.
+
+Getting it wrong is quiet rather than loud. A queue workload on `pubsub` with
+two replicas processes everything twice — double charges, double emails — and
+nothing errors. A pubsub workload on `queue` means only one replica ever hears
+about it, so the others hold stale caches.
+
+Default to `queue` unless the service genuinely broadcasts. `pubsub` remains
+the default parameter value only for backwards compatibility with existing
+scaffolds.
+
+Note the pairing with `broker`: on `pubsub` the redis backend is
+`PUBLISH`/`SUBSCRIBE` and drops the consumer group entirely, whereas on `queue`
+it is Redis Streams, which has real groups, a durable backlog and redelivery.
+`broker=redis` therefore means something quite different under each.
 
 ### What the broker choice actually decides
 
@@ -182,6 +224,7 @@ When the user picks an option above, the user-friendly label is the surface and 
 | 1 | API / Consumer / Publisher | `api` / `consumer` / `publisher` |
 | 3 | gin / nethttp / chi / echo / Other(`mux`) | `gin` / `nethttp` / `chi` / `echo` / `mux` |
 | 4 | Kafka / RabbitMQ / Redis | `kafka` / `rabbitmq` / `redis` |
+| 4b | Queue / Pub/Sub | `queue` / `pubsub` |
 | 5 | PostgreSQL via GORM / MySQL via GORM / PostgreSQL via bun / MySQL via bun / Other(`none`) | `gorm-postgres` / `gorm-mysql` / `bun-postgres` / `bun-mysql` / `none` |
 | 6 | None / Redis / In-memory / Couchbase | `none` / `redis` / `memory` / `couchbase` |
 
@@ -277,6 +320,7 @@ PARAMS=$(cat <<'EOF'
   "Type":          "api",
   "HTTPFramework": "gin",
   "Broker":        "kafka",
+  "Messaging":     "queue",
   "Database":      "gorm-postgres",
   "Cache":         "redis",
   "Fields": [
@@ -327,6 +371,8 @@ The render-file tool registers extra functions used by the dev-env templates:
 | `hasFieldType` | `hasFieldType(goType string, fields []FieldDef) bool` | `seed.go.tmpl` — conditional `time` import |
 | `hasNullableField` | `hasNullableField(fields []FieldDef) bool` | `seed.go.tmpl` — conditional `ptr` import (only emitted when ≥1 nullable/`*T` field, since `seedValue` only references `ptr.Of(...)` for those) |
 | `dbOpen` | `dbOpen(database string) string` | `config.go.tmpl` — `postgres.Open` vs `mysql.Open` |
+| `msgPkg` | `msgPkg(messaging string) string` → `pubsub` · `queue` | the seven broker templates — package name, type qualifier and import path all derive from it |
+| `consumeFn` | `consumeFn(messaging string) string` → `Subscribe` · `Consume` | `main_consumer_*` — the one method name that differs between the two models |
 | `isBun` | `isBun(database string) bool` | every template that imports `db/repo` — swaps in `db/bunrepo`; `main_*` — swaps the DB-open block |
 | `dbEngine` | `dbEngine(database string) string` → `postgres` · `mysql` · `none` | `docker-compose.yml.tmpl`, `.env.tmpl` — the server, with the ORM half dropped, so those blocks did not double when bun arrived |
 | `isRequired` | `isRequired(validate string) bool` | `httphandler_dto.go.tmpl` — `,omitempty` on optional fields |

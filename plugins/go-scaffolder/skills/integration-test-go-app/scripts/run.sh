@@ -59,6 +59,9 @@ COMBOS=(
   "publisher-redis-nodb-none|none|none"
   "publisher-kafka-nodb-none|none|none"
   "publisher-rabbitmq-nodb-none|none|none"
+  "consumer-redis-postgres-none-queue|postgres|none"
+  "consumer-kafka-postgres-none-queue|postgres|none"
+  "publisher-redis-nodb-none-queue|none|none"
 )
 
 # DSN templates — service names match docker-compose service names.
@@ -85,6 +88,14 @@ type_of() {
   esac
 }
 
+# messaging_of <combo-id> — queue | pubsub, read off the id suffix.
+messaging_of() {
+  case "$1" in
+    *-queue) echo queue ;;
+    *) echo pubsub ;;
+  esac
+}
+
 # broker_of <combo-id> — redis | kafka | rabbitmq, read off the id.
 # Combo ids are <type>-<broker>-... for consumers and publishers.
 broker_of() {
@@ -108,16 +119,25 @@ broker_env() {
   esac
 }
 
-# publish_test_message <broker> <topic> <payload-json>
+# publish_test_message <broker> <topic> <payload-json> <messaging>
 # Injects one message using whatever tooling that broker ships, matching the
 # wire format go-lib's consumer expects. Returns non-zero if the message could
 # not be handed to the broker at all.
 publish_test_message() {
-  local broker="$1" topic="$2" payload="$3"
+  local broker="$1" topic="$2" payload="$3" messaging="${4:-pubsub}"
+
+  # Redis is the one broker whose wire format depends on the messaging model:
+  # pubsub is PUBLISH with a JSON envelope, queue is a Streams entry written
+  # with XADD. Kafka and rabbitmq carry the same bytes either way.
+  if [[ "$broker" == "redis" && "$messaging" == "queue" ]]; then
+    docker exec go-scaffolder-redis redis-cli -a admin --no-auth-warning \
+      XADD "$topic" '*' key k1 payload "$payload" >/dev/null 2>&1
+    return $?
+  fi
 
   case "$broker" in
     redis)
-      # go-lib's redis adapter wraps the message in a JSON envelope whose
+      # go-lib's redis pubsub adapter wraps the message in a JSON envelope whose
       # Payload is []byte, so it base64-encodes on the wire.
       local envelope
       envelope=$(printf '{"id":"itest-msg-1","key":"k1","payload":"%s"}' "$(printf '%s' "$payload" | base64)")
@@ -649,8 +669,9 @@ test_consumer() {
   local out_dir="$OUT_BASE/$combo"
   local log_file="$LOG_BASE/$combo.log"
   local rc=0 pid=""
-  local broker
+  local broker messaging
   broker=$(broker_of "$combo")
+  messaging=$(messaging_of "$combo")
   # Unique per run so a leftover binding or an uncommitted offset from an
   # earlier run cannot make this one look green.
   local topic="orders-itest-$$"
@@ -658,7 +679,7 @@ test_consumer() {
 
   log ""
   hr
-  log "==> $combo (consumer, broker=$broker)"
+  log "==> $combo (consumer, broker=$broker, messaging=$messaging)"
   hr
 
   render_and_build "$combo" "$log_file" "$out_dir" || return 1
@@ -718,12 +739,19 @@ test_consumer() {
   # a fresh subscription, so a message published too early is simply discarded.
   # Kafka additionally has to complete a group join before it is assigned the
   # partition, which is the slowest of the three.
-  case "$broker" in
-    kafka) sleep 8 ;;
-    *)     sleep 3 ;;
-  esac
+  # queue backends keep a backlog, so publishing early is harmless — that is
+  # the whole point of the model. pubsub/redis is not retroactive and kafka has
+  # to finish a group join before it is assigned the partition.
+  if [[ "$messaging" == "queue" && "$broker" != "kafka" ]]; then
+    sleep 1
+  else
+    case "$broker" in
+      kafka) sleep 8 ;;
+      *)     sleep 3 ;;
+    esac
+  fi
 
-  if ! publish_test_message "$broker" "$topic" '{"id":"evt-1","name":"integration"}'; then
+  if ! publish_test_message "$broker" "$topic" '{"id":"evt-1","name":"integration"}' "$messaging"; then
     fail_step "publish" "$combo" "could not deliver a message via $broker (topic=$topic)"
     kill_pid "$pid"
     return 1
@@ -734,10 +762,14 @@ test_consumer() {
   if ! wait_for_log "$log_file" "processing message" "$consume_wait"; then
     fail_step "consume" "$combo" "message never reached the handler: $(tail -20 "$log_file")"
     rc=1
-  elif [[ "$broker" == "redis" ]] && ! grep -q "itest-msg-1" "$log_file"; then
-    # Only redis carries a caller-supplied id on the wire. Kafka derives it from
-    # partition/offset and rabbitmq leaves it empty unless a publisher sets one,
-    # so there is no id to match there.
+  elif [[ "$broker" == "redis" && "$messaging" == "pubsub" ]] && ! grep -q "itest-msg-1" "$log_file"; then
+    # Only redis pubsub carries a caller-supplied id on the wire.
+    #
+    # Not redis queue: a Streams id must be <millis>-<seq>, so redis assigns it
+    # and that assigned value is what the consumer sees and what XACK needs —
+    # echoing a caller string there would break acknowledgement. Kafka derives
+    # its id from partition/offset, and rabbitmq leaves it empty unless the
+    # publisher sets one, so neither has an id to match either.
     fail_step "consume-msg-id" "$combo" "handler logged a message but not the id we published"
     rc=1
   fi
@@ -776,12 +808,13 @@ test_publisher() {
   local out_dir="$OUT_BASE/$combo"
   local log_file="$LOG_BASE/$combo.log"
   local rc=0 pid=""
-  local broker
+  local broker messaging
   broker=$(broker_of "$combo")
+  messaging=$(messaging_of "$combo")
 
   log ""
   hr
-  log "==> $combo (publisher, broker=$broker)"
+  log "==> $combo (publisher, broker=$broker, messaging=$messaging)"
   hr
 
   render_and_build "$combo" "$log_file" "$out_dir" || return 1
