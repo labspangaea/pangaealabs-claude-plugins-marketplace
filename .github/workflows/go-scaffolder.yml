@@ -149,3 +149,33 @@ jobs:
         if: always()
         working-directory: plugins/go-scaffolder
         run: docker compose down -v
+
+  # Renders a scaffold and brings up ITS OWN docker-compose.yml — the file the
+  # templates emit, which neither job above ever touches. compile-matrix only
+  # runs `go build`, and runtime-suite starts binaries directly against the
+  # maintainer compose stack. That gap is how a couchbase service that could
+  # never work sat in the templates unnoticed until #57.
+  #
+  # Independent of runtime-suite on purpose: different failure mode, and there
+  # is no reason to make one wait on the other.
+  generated-stack:
+    name: generated stack boots
+    runs-on: ubuntu-latest
+    needs: compile-matrix
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: plugins/go-scaffolder/tools/smoke/go.mod
+          cache-dependency-path: plugins/go-scaffolder/tools/smoke/go.sum
+
+      - name: Install jq
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq jq
+
+      # The script renders, tidies, brings the stack up with --wait, runs CRUD
+      # and asserts the cache document. It tears its own stack down on exit and
+      # dumps container logs only on failure.
+      - name: Generated stack boots and serves
+        run: plugins/go-scaffolder/tools/check-generated-stack.sh
