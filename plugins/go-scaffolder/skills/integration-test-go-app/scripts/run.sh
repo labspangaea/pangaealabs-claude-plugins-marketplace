@@ -133,6 +133,12 @@ test_api() {
   rm -rf "$out_dir"
   mkdir -p "$LOG_BASE"
 
+  # Truncate the log. The service below appends to it with >>, and the
+  # request_id assertion greps this same file — so without this, a previous
+  # run's output satisfies the current run's check and the assertion passes
+  # whether or not this run logged anything at all.
+  : > "$log_file"
+
   log ""
   hr
   log "==> $combo ($driver, cache=$cache_mode)"
