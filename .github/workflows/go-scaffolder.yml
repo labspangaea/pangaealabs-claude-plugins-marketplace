@@ -107,7 +107,7 @@ jobs:
           path: plugins/go-scaffolder/tools/smoke/scratch/
           retention-days: 7
 
-  # Boots each generated api service against real postgres/mysql/redis and
+  # Boots each generated api service against real postgres/mysql/redis/couchbase and
   # asserts CRUD, both pagination modes, cache keys, request_id logging and the
   # OpenAPI surface. Slower, and the only job that can catch a scaffold that
   # compiles but does not work.
@@ -129,9 +129,9 @@ jobs:
 
       # run.sh brings the stack up itself with `--wait`, but doing it here keeps
       # a slow mysql first-boot out of the per-combo healthz timeout.
-      - name: Start postgres + mysql + redis + kafka + rabbitmq
+      - name: Start postgres + mysql + redis + kafka + rabbitmq + couchbase
         working-directory: plugins/go-scaffolder
-        run: docker compose up -d --wait postgres mysql redis kafka rabbitmq
+        run: docker compose up -d --wait postgres mysql redis kafka rabbitmq couchbase
 
       - name: Runtime suite
         working-directory: plugins/go-scaffolder/skills/integration-test-go-app/scripts

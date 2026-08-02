@@ -35,14 +35,18 @@ PORT=18080
 # --- Combo selection -----------------------------------------------------------
 # Each entry: combo-id|driver|cache-mode
 #   driver: postgres | mysql | bun-postgres | bun-mysql
-#   cache-mode: redis | memory | none   (which cache features the runtime tests should expect)
+#   cache-mode: redis | memory | none | couchbase   (which cache features the runtime tests should expect)
 #
 # The driver names the ORM as well as the engine because the two differ in DSN
 # format — see DSN templates below. bun combos are always cache=none; the cache
 # decorator is GORM-typed, so the scaffolder refuses that pairing.
 #
-# Combos that need services not in docker-compose (couchbase, kafka, rabbitmq) are
-# intentionally absent. Add new combos to combos.go + here when those services land.
+# Unlike the other services couchbase does not come up ready to use — the
+# compose file initialises the cluster and creates the appdb bucket behind the
+# server process, and its healthcheck polls the bucket rather than the process.
+#
+# Add new combos to combos.go and here together; a combo listed in only one of
+# them is either uncompiled or unrun.
 
 COMBOS=(
   "api-nethttp-postgres-redis|postgres|redis"
@@ -52,6 +56,7 @@ COMBOS=(
   "api-nethttp-mysql-none|mysql|none"
   "api-gin-bunpg-none|bun-postgres|none"
   "api-chi-bunmysql-none|bun-mysql|none"
+  "api-chi-mysql-couchbase|mysql|couchbase"
   "consumer-redis-postgres-none|postgres|none"
   "consumer-kafka-postgres-none|postgres|none"
   "consumer-kafka-bunpg-none|bun-postgres|none"
@@ -306,6 +311,8 @@ test_api() {
   # survives that future flip.
   DATABASE_DSN="$dsn" \
   REDIS_ADDR=localhost:6379 REDIS_PASSWORD=admin REDIS_DB=0 \
+  COUCHBASE_URL=couchbase://localhost COUCHBASE_USERNAME=admin \
+  COUCHBASE_PASSWORD=administrator COUCHBASE_BUCKET=appdb \
   HTTP_ADDR=":$PORT" \
   SERVICE_NAME="$combo" \
   SERVICE_BACKEND=real \
@@ -407,14 +414,43 @@ test_api() {
     fi
   fi
 
-  # 9. Cache verification — only meaningful for redis-backed combos. Memory cache
-  #    keeps state in-process and isn't observable from outside; "none" has no cache.
+  # 9. Cache verification — only meaningful for out-of-process caches. Memory
+  #    cache keeps state in-process and isn't observable from outside; "none"
+  #    has no cache. repo.NewCached keys entries "<prefix>:<id>" and the
+  #    scaffold passes the entity name as the prefix, so both backends below
+  #    are looking for "order:<uuid>".
   if [[ $rc -eq 0 && "$cache_mode" == "redis" ]]; then
     local keys
     keys=$(docker exec go-scaffolder-redis redis-cli -a admin --no-auth-warning KEYS '*order*' 2>/dev/null)
     if [[ -z "$keys" ]]; then
       fail_step "cache-keys" "$combo" "no redis keys matching *order* — cache layer not exercised?"
       rc=1
+    fi
+  elif [[ $rc -eq 0 && "$cache_mode" == "couchbase" ]]; then
+    # No KEYS equivalent: listing couchbase document ids needs a N1QL primary
+    # index, and go-lib's couchbase cache writes with a raw-binary transcoder,
+    # which N1QL does not index anyway. So probe one specific document instead
+    # — read an order back through the API, which is what populates the cache,
+    # then look that exact key up over the bucket's docs endpoint.
+    #
+    # Scoping the probe to an id minted by THIS run is also what keeps the
+    # assertion honest: unlike the SQL table in step 3 the bucket is never
+    # emptied between runs, so a pattern match would happily pass on a
+    # document left behind by the previous one.
+    local cb_id cb_status
+    cb_id=$(curl -sfS "http://localhost:$PORT/api/v1/orders?limit=1" 2>>"$log_file" | jq -r '.data[0].id // empty')
+    if [[ -z "$cb_id" ]]; then
+      fail_step "cache-doc" "$combo" "could not read back an order id to probe the cache with"
+      rc=1
+    else
+      curl -sfS "http://localhost:$PORT/api/v1/orders/$cb_id" >/dev/null 2>>"$log_file" || true
+      cb_status=$(docker exec go-scaffolder-couchbase curl -s -o /dev/null -w '%{http_code}' \
+        -u admin:administrator \
+        "http://localhost:8091/pools/default/buckets/appdb/docs/order%3A$cb_id" 2>/dev/null)
+      if [[ "$cb_status" != "200" ]]; then
+        fail_step "cache-doc" "$combo" "no couchbase document order:$cb_id (HTTP ${cb_status:-none}) — cache layer not exercised?"
+        rc=1
+      fi
     fi
   fi
 
@@ -884,8 +920,8 @@ main() {
     exit 2
   fi
 
-  log "Bringing up postgres + mysql + redis + kafka + rabbitmq (if not already up)..."
-  if ! docker compose -f "$COMPOSE_FILE" up -d --wait postgres mysql redis kafka rabbitmq 2>&1 | tail -5; then
+  log "Bringing up postgres + mysql + redis + kafka + rabbitmq + couchbase (if not already up)..."
+  if ! docker compose -f "$COMPOSE_FILE" up -d --wait postgres mysql redis kafka rabbitmq couchbase 2>&1 | tail -5; then
     log "ERROR: docker compose up failed"
     exit 2
   fi
