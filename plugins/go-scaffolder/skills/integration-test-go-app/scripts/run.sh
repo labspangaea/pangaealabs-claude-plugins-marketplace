@@ -376,12 +376,131 @@ test_api() {
     fi
   fi
 
-  # Tear down
+  # Tear down the production binary before the stub phase reuses the port.
   kill_pid "$pid"
+  pid=""
+
+  # 12. Stub mode. Everything above ran the production build, where the stub
+  #     package is not even linked in. The compile matrix builds -tags=stub but
+  #     never runs it, so until here nothing has executed a line of the stub —
+  #     and the factory switch it hangs off has three branches, all unverified.
+  #
+  #     Worth testing because the failure is silent in the worst direction: a
+  #     stub that quietly persists, or a SERVICE_BACKEND=real that quietly
+  #     serves canned data, looks exactly like a working service to whoever is
+  #     developing a frontend against it.
+  if [[ $rc -eq 0 ]]; then
+    test_stub_mode "$combo" "$driver" || rc=1
+  fi
 
   if [[ $rc -eq 0 ]]; then
     log "  [pass] $combo"
   fi
+  return $rc
+}
+
+# test_stub_mode <combo-id> <driver>
+# Builds with -tags=stub and exercises both branches of the service factory.
+# Returns 0 on pass, 1 on any failure.
+test_stub_mode() {
+  local combo="$1" driver="$2"
+  local out_dir="$OUT_BASE/$combo"
+  local log_file="$LOG_BASE/$combo.log"
+  local rc=0 pid=""
+
+  if ! (cd "$out_dir" && GOWORK=off go build -tags=stub -o "./bin/svc-stub" "./cmd/smoke-$combo") >>"$log_file" 2>&1; then
+    fail_step "stub-build" "$combo" "$(tail -10 "$log_file")"
+    return 1
+  fi
+
+  local dsn
+  case "$driver" in
+    postgres)     dsn="$DSN_POSTGRES" ;;
+    bun-postgres) dsn="$DSN_BUN_POSTGRES" ;;
+    mysql | bun-mysql) dsn="$DSN_MYSQL" ;;
+  esac
+
+  # --- SERVICE_BACKEND=stub: canned, stateless, no database required ---------
+  #
+  # DATABASE_DSN is deliberately unset. The stub's whole purpose is booting a
+  # frontend-facing API with no infrastructure, so if it can only start when a
+  # database happens to be reachable, that promise is broken and every local
+  # `go run -tags=stub` on a laptop without docker fails.
+  HTTP_ADDR=":$PORT" SERVICE_NAME="$combo-stub" SERVICE_BACKEND=stub \
+  DOCS_ENABLED=true LOG_BODY=true \
+  "$out_dir/bin/svc-stub" >>"$log_file" 2>&1 &
+  pid=$!
+
+  if ! wait_healthz; then
+    fail_step "stub-healthz" "$combo" "stub build did not come up without a database: $(tail -20 "$log_file")"
+    kill_pid "$pid"
+    return 1
+  fi
+
+  local stub_list stub_count first_id
+  stub_list=$(curl -sfS "http://localhost:$PORT/api/v1/orders?limit=50" 2>>"$log_file") || rc=1
+  if [[ $rc -eq 0 ]]; then
+    stub_count=$(echo "$stub_list" | jq -r '.data | length')
+    first_id=$(echo "$stub_list" | jq -r '.data[0].id // empty')
+    # Deterministic ids are a documented contract: a frontend hardcodes them as
+    # fixtures, so they must survive a restart rather than being regenerated.
+    if [[ "$stub_count" -lt 1 ]]; then
+      fail_step "stub-list" "$combo" "stub returned $stub_count records, expected the canned set"
+      rc=1
+    elif [[ "$first_id" != order-stub-* ]]; then
+      fail_step "stub-canned-ids" "$combo" "first id was '$first_id', expected the deterministic order-stub-N form"
+      rc=1
+    fi
+  fi
+
+  # Writes must not persist. A stub that accumulates state drifts away from the
+  # canned fixtures the frontend is coded against, one POST at a time.
+  if [[ $rc -eq 0 ]]; then
+    curl -sfS -X POST "http://localhost:$PORT/api/v1/orders" \
+      -H 'Content-Type: application/json' \
+      -d '{"product_code":"STUB-WRITE","quantity":1,"in_stock":true}' >/dev/null 2>>"$log_file" || rc=1
+    local after_count
+    after_count=$(curl -sfS "http://localhost:$PORT/api/v1/orders?limit=50" 2>>"$log_file" | jq -r '.data | length')
+    if [[ "$after_count" != "$stub_count" ]]; then
+      fail_step "stub-stateless" "$combo" "record count moved $stub_count -> $after_count; the stub is persisting writes"
+      rc=1
+    fi
+  fi
+
+  kill_pid "$pid"
+  pid=""
+
+  # --- SERVICE_BACKEND=real under -tags=stub: the switch must still flip -----
+  #
+  # This is the branch that matters in production: the binary is built with the
+  # tag but must serve real data. If the factory were stuck on the stub, every
+  # CRUD assertion above would still pass while the service quietly returned
+  # fixtures.
+  if [[ $rc -eq 0 ]]; then
+    DATABASE_DSN="$dsn" \
+    REDIS_ADDR=localhost:6379 REDIS_PASSWORD=admin REDIS_DB=0 \
+    HTTP_ADDR=":$PORT" SERVICE_NAME="$combo-stubreal" SERVICE_BACKEND=real \
+    DOCS_ENABLED=true LOG_BODY=true \
+    "$out_dir/bin/svc-stub" >>"$log_file" 2>&1 &
+    pid=$!
+
+    if ! wait_healthz; then
+      fail_step "stub-real-healthz" "$combo" "$(tail -20 "$log_file")"
+      rc=1
+    else
+      local real_first
+      real_first=$(curl -sfS "http://localhost:$PORT/api/v1/orders?limit=1" 2>>"$log_file" | jq -r '.data[0].id // empty')
+      if [[ -z "$real_first" ]]; then
+        fail_step "stub-real-list" "$combo" "no rows returned from the real backend"
+        rc=1
+      elif [[ "$real_first" == order-stub-* ]]; then
+        fail_step "stub-real-switch" "$combo" "SERVICE_BACKEND=real still served canned data (id=$real_first) — factory is stuck on the stub"
+        rc=1
+      fi
+    fi
+    kill_pid "$pid"
+  fi
+
   return $rc
 }
 
