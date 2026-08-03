@@ -43,7 +43,12 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-uadmin", "-padmin"]
+      # -h 127.0.0.1 forces TCP. Without it the client uses the unix socket,
+      # which answers OK against the temporary socket-only server the entrypoint
+      # runs during first-boot initialisation — green ~5s before the real server
+      # listens on 3306. Latent here (run.sh starts binaries long afterwards),
+      # real in the generated compose file, so both are fixed the same way.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uadmin", "-padmin"]
       interval: 5s
       timeout: 3s
       retries: 10

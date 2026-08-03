@@ -29,7 +29,13 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # 127.0.0.1, not localhost: the mysql client treats "localhost" as the
+      # unix socket, and the entrypoint runs a temporary socket-only server
+      # while it initialises the database. A socket ping answers OK against
+      # THAT server ~5s before the real one listens on 3306, so the app starts
+      # against a mysql it cannot dial. Forcing TCP makes the check wait for
+      # the thing the app actually connects to.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
       interval: 5s
       timeout: 5s
       retries: 10
