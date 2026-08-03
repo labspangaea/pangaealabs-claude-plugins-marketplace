@@ -174,13 +174,14 @@ jobs:
 
       - id: list
         run: |
-          # api-* only — see the header of check-generated-stack.sh for why
-          # consumer/publisher scaffolds cannot boot their own compose file yet.
+          # Every combo, no filter. api scaffolds are proved by CRUD through
+          # their own HTTP surface; consumer/publisher scaffolds by asking the
+          # broker who attached.
           combos=$(grep -oP '\{ID: "\K[^"]+' plugins/go-scaffolder/tools/smoke/combos.go \
-            | grep '^api-' | jq -R . | jq -sc .)
+            | jq -R . | jq -sc .)
           n=$(echo "$combos" | jq length)
           if [[ "$n" -eq 0 ]]; then
-            echo "::error::no api-* combos found in combos.go — has the literal changed shape?"
+            echo "::error::no combos found in combos.go — has the literal changed shape?"
             exit 1
           fi
           echo "found $n api combos: $combos"

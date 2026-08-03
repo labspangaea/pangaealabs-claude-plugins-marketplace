@@ -9,29 +9,15 @@
 # ever rendered docker-compose.yml.tmpl and brought it up, so a compose file
 # that could not work rendered green forever.
 #
-# api-* combos only. A generated consumer/publisher compose file cannot come up
-# at all today: the template emits no broker service, leaves the broker env at
-# its localhost default, and healthchecks /healthz against a process that
-# serves no HTTP. Verified — publisher-redis-nodb-none dials 127.0.0.1:6379 and
-# the container exits. Fixing that is a template change, not something this
-# check can absorb, so non-api combos are refused with a pointer rather than
-# left to fail confusingly.
+# Covers every combo type. api scaffolds are proved by CRUD through their own
+# HTTP surface; consumer and publisher scaffolds serve no HTTP at all, so they
+# are proved by staying up and by asking the BROKER who attached.
 #
 #   ./check-generated-stack.sh [combo-id]
 #
 set -euo pipefail
 
 COMBO="${1:-api-chi-mysql-couchbase}"
-
-case "$COMBO" in
-  api-*) ;;
-  *)
-    echo "  [skip] $COMBO — generated consumer/publisher compose files emit no" >&2
-    echo "         broker service and healthcheck an HTTP endpoint that does not" >&2
-    echo "         exist. api-* combos only until the template is fixed." >&2
-    exit 0
-    ;;
-esac
 SMOKE="$(cd "$(dirname "${BASH_SOURCE[0]}")/smoke" && pwd)"
 WORK="$(mktemp -d)"
 PORT=8080
@@ -66,10 +52,80 @@ echo "==> docker compose config"
 (cd "$WORK" && docker compose config) >/dev/null || fail "generated compose file is not valid"
 
 # --wait is the assertion: it returns non-zero unless every service reaches
-# healthy, which includes the app's own /healthz and therefore proves it
-# connected to its database and cache.
+# healthy, which for an api scaffold includes its own /healthz and therefore
+# proves it connected to its database and cache.
+#
+# Bounded, because `--wait` does not terminate on its own when the app crash
+# loops under `restart: on-failure` — it keeps seeing a container that is
+# briefly running and never concludes. Unbounded, a broken scaffold burns the
+# whole CI job timeout and reports nothing useful. 7 minutes is well clear of
+# the slowest real case (couchbase cold-pulls and initialises in ~2).
 echo "==> docker compose up -d --wait"
-(cd "$WORK" && docker compose up -d --wait --quiet-pull) || fail "stack did not come up healthy"
+if ! (cd "$WORK" && timeout 420 docker compose up -d --wait --quiet-pull); then
+  rc=$?
+  [[ $rc -eq 124 ]] && fail "stack did not converge within 7m — app is probably crash looping"
+  fail "stack did not come up healthy"
+fi
+
+# --- consumer / publisher --------------------------------------------------
+# These serve no HTTP, so there is no endpoint to poll and (by design) no
+# healthcheck on the app service. Two assertions instead.
+if [[ "$COMBO" != api-* ]]; then
+  app=$(cd "$WORK" && docker compose ps -q "smoke-$COMBO")
+  [[ -n "$app" ]] || fail "no app container for $COMBO"
+
+  # 1. It is still alive after a settle window. A scaffold that cannot reach
+  #    its broker exits — that is exactly how the missing-broker-service bug
+  #    presented — and `restart: on-failure` would otherwise hide it behind a
+  #    crash loop that looks momentarily running.
+  echo "==> app stays up"
+  sleep 10
+  running=$(docker inspect -f '{{.State.Running}}' "$app")
+  restarts=$(docker inspect -f '{{.RestartCount}}' "$app")
+  [[ "$running" == "true" ]] || fail "app container is not running (exited $(docker inspect -f '{{.State.ExitCode}}' "$app"))"
+  [[ "$restarts" == "0" ]] || fail "app container restarted $restarts times — crash loop"
+
+  # 2. The broker agrees something attached. "No error in the log" is not
+  #    evidence: publishers log nothing at all on success, so silence is
+  #    indistinguishable between working and never-started.
+  broker_svc() { (cd "$WORK" && docker compose ps -q "$1"); }
+  proof="attaches to its broker"
+
+  if [[ "$COMBO" == *-kafka-* ]]; then
+    k=$(broker_svc kafka); [[ -n "$k" ]] || fail "no kafka container"
+    if [[ "$COMBO" == consumer-* ]]; then
+      echo "==> kafka consumer group registered"
+      groups=$(docker exec "$k" /opt/kafka/bin/kafka-consumer-groups.sh \
+        --bootstrap-server localhost:9092 --list 2>/dev/null || true)
+      grep -q "smoke-$COMBO" <<<"$groups" \
+        || fail "consumer group smoke-$COMBO not registered with kafka (got: ${groups:-none})"
+    else
+      # kafka-go's Writer connects lazily, on first produce. A publisher that
+      # has not published yet holds no connection, so there is genuinely
+      # nothing broker-side to observe — the liveness check above is the
+      # assertion. Stated rather than silently skipped.
+      echo "==> kafka publisher: no broker-side check (writer connects lazily)"
+      proof="stays up (kafka writer connects lazily — nothing to observe yet)"
+    fi
+
+  elif [[ "$COMBO" == *-rabbitmq-* ]]; then
+    r=$(broker_svc rabbitmq); [[ -n "$r" ]] || fail "no rabbitmq container"
+    echo "==> rabbitmq connection from the app"
+    conns=$(docker exec "$r" rabbitmqctl -q list_connections name 2>/dev/null | grep -c . || true)
+    [[ "${conns:-0}" -ge 1 ]] || fail "rabbitmq reports no client connections — app never attached"
+
+  elif [[ "$COMBO" == *-redis-* ]]; then
+    rd=$(broker_svc redis); [[ -n "$rd" ]] || fail "no redis container"
+    echo "==> redis connection from the app"
+    # >=2 because redis-cli itself is one of the connected clients.
+    clients=$(docker exec "$rd" redis-cli INFO clients 2>/dev/null \
+      | grep -oP 'connected_clients:\K[0-9]+' || echo 0)
+    [[ "${clients:-0}" -ge 2 ]] || fail "redis reports $clients client(s) — app never attached"
+  fi
+
+  echo "  [pass] $COMBO — generated stack boots and $proof"
+  exit 0
+fi
 
 # A database=none scaffold has no repository wired, so there is nothing to
 # CRUD. Reaching healthy is the whole assertion for it — the compose file
