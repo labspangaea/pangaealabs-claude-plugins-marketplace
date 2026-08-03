@@ -116,11 +116,42 @@ if [[ "$COMBO" != api-* ]]; then
 
   elif [[ "$COMBO" == *-redis-* ]]; then
     rd=$(broker_svc redis); [[ -n "$rd" ]] || fail "no redis container"
-    echo "==> redis connection from the app"
-    # >=2 because redis-cli itself is one of the connected clients.
-    clients=$(docker exec "$rd" redis-cli INFO clients 2>/dev/null \
-      | grep -oP 'connected_clients:\K[0-9]+' || echo 0)
-    [[ "${clients:-0}" -ge 2 ]] || fail "redis reports $clients client(s) — app never attached"
+    topic=$(grep '^KAFKA_TOPIC=' "$WORK/.env" | cut -d= -f2-)
+    [[ -n "$topic" ]] || fail "no KAFKA_TOPIC in .env — consumer would subscribe to nothing"
+
+    # redis is the one broker where queue and pubsub are genuinely different
+    # mechanisms, so assert the one this combo asked for. kafka and rabbitmq
+    # are competing-consumer either way, which is why only redis splits here.
+    #
+    # This is worth asserting rather than settling for "a client connected":
+    # a scaffold quietly using Pub/Sub in queue mode would look identical by
+    # connection count while losing the delivery guarantee it promised. The
+    # docs made exactly that mistake before — redis was described as Streams
+    # when it was Pub/Sub.
+    if [[ "$COMBO" == consumer-* ]]; then
+      if [[ "$COMBO" == *-queue ]]; then
+        echo "==> redis Streams consumer group on $topic"
+        groups=$(docker exec "$rd" redis-cli XINFO GROUPS "$topic" 2>/dev/null || true)
+        grep -q "smoke-$COMBO" <<<"$groups" \
+          || fail "no Streams consumer group smoke-$COMBO on '$topic' — queue mode is not using Streams"
+        proof="registers a Streams consumer group on $topic"
+      else
+        echo "==> redis Pub/Sub subscription to $topic"
+        chans=$(docker exec "$rd" redis-cli PUBSUB CHANNELS 2>/dev/null || true)
+        grep -qx "$topic" <<<"$chans" \
+          || fail "not subscribed to Pub/Sub channel '$topic' (got: ${chans:-none})"
+        proof="subscribes to Pub/Sub channel $topic"
+      fi
+    else
+      # A publisher neither subscribes nor creates a group, so connection
+      # count is all there is — and it is still falsifiable: without the app
+      # only redis-cli is connected.
+      echo "==> redis connection from the app"
+      clients=$(docker exec "$rd" redis-cli INFO clients 2>/dev/null \
+        | grep -oP 'connected_clients:\K[0-9]+' || echo 0)
+      [[ "${clients:-0}" -ge 2 ]] || fail "redis reports $clients client(s) — app never attached"
+      proof="attaches to redis (a publisher subscribes to nothing)"
+    fi
   fi
 
   echo "  [pass] $COMBO — generated stack boots and $proof"
