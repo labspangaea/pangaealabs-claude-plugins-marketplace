@@ -1,8 +1,9 @@
 # Pangaea Labs — Claude Code Plugins Marketplace
 
 A [Claude Code](https://claude.com/claude-code) plugin marketplace by
-**[Pangaea Digital Labs](https://www.pangaea.id/)** — **5 plugins, 14 skills, 3 subagents** across
-document production, QA test design, graphic-design review, and backend service scaffolding.
+**[Pangaea Digital Labs](https://www.pangaea.id/)** — **6 plugins, 15 skills, 3 subagents** across
+document production, QA test design, graphic-design review, backend service scaffolding, and
+Claude Code multi-account setup.
 Add the marketplace once, then install whichever you need.
 
 ## Add the marketplace
@@ -30,8 +31,9 @@ See **[docs/install.md](docs/install.md)** for the cross-agent flow, flags, and 
 | **[`dkv`](#dkv--graphic-design-fundamentals-as-a-review-method)** | design critique & direction for print and static graphics | 1 | python3 *(optional)* |
 | **[`go-scaffolder`](#go-scaffolder--scaffold-production-ready-go-services)** | production-ready Go services, hexagonal, 5 HTTP frameworks | 5 | Go 1.26+ · `go-lsp` MCP |
 | **[`elysia-scaffolder`](#elysia-scaffolder--scaffold-production-ready-elysiajsbun-services)** | the ElysiaJS/Bun counterpart, wired to `@labspangaea/ts-lib` | 5 | Bun 1.1+ · `ts-lsp` MCP |
+| **[`claude-profiles`](#claude-profiles--two-claude-subscriptions-one-machine-one-config)** | two Claude subscriptions on one machine, sharing one config | 1 | python3 |
 
-Each is independent — install one or all five. The `npx` installer warns about a missing toolchain
+Each is independent — install one or all six. The `npx` installer warns about a missing toolchain
 but never blocks; only the scaffolders hard-require theirs.
 
 ### `docsmith` — markdown → professional, on-brand PDFs
@@ -111,6 +113,22 @@ mode so frontends can integrate against the contract before backend logic is fin
 ```
 
 ▸ **Parameters, stub mode, hexagonal architecture & the config store → [elysia-scaffolder README](plugins/elysia-scaffolder/README.md)**
+
+### `claude-profiles` — two Claude subscriptions, one machine, one config
+
+Run a work account and a personal one side by side on the same laptop — separate logins, rate limits
+and session history, but **one** set of settings, plugins, skills, agents, commands, hooks and MCP
+servers. `/setup-claude-profiles` explains the `CLAUDE_CONFIG_DIR` model, then does the work: a
+read-only doctor that reports every profile and its hazards, a dry-run-first linker that shares
+config by symlink and can undo itself, and an MCP mirror (MCP servers live in the one file that also
+holds your account, so they must be copied, not linked). Covers macOS, Linux and **WSL + Ubuntu**,
+where a config directory on the Windows drive silently breaks symlinks and file permissions.
+
+```bash
+/plugin install claude-profiles@pangaealabs-claude-plugins-marketplace
+```
+
+▸ **The sharing matrix, the WSL notes & the traps that look like success → [claude-profiles README](plugins/claude-profiles/README.md)**
 
 ---
 

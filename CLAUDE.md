@@ -1,10 +1,11 @@
 # CLAUDE.md — pangaealabs-claude-plugins-marketplace
 
 Maintainer/agent guidance for this repo. This is a **Claude Code plugin marketplace**
-by Pangaea Labs. Today it ships five plugins: **`docsmith`** (markdown → on-brand PDFs),
+by Pangaea Labs. Today it ships six plugins: **`docsmith`** (markdown → on-brand PDFs),
 **`testcraft`** (user flows → test-case suite + offline HTML console), **`dkv`**
-(graphic-design fundamentals → design critique + direction), and the two scaffolders
-**`go-scaffolder`** / **`elysia-scaffolder`**.
+(graphic-design fundamentals → design critique + direction), the two scaffolders
+**`go-scaffolder`** / **`elysia-scaffolder`**, and **`claude-profiles`** (two Claude
+subscriptions on one machine, sharing one config).
 
 ## Layout
 
@@ -28,6 +29,8 @@ by Pangaea Labs. Today it ships five plugins: **`docsmith`** (markdown → on-br
 | `plugins/dkv/skills/design-fundamentals/` | the only user-facing skill (`SKILL.md` router + rubric) |
 | `plugins/dkv/skills/design-fundamentals/references/` | `color.md`, `typography.md`, `layout.md`, `gestalt.md`, `principles.md` — section-numbered so `SKILL.md` cites `§N`. **`principles.md` is an index, not a peer doc** — contrast/hierarchy/repetition live where they're operationalised; don't restate them there. |
 | `plugins/{go-scaffolder,elysia-scaffolder}/` | the two service scaffolders (5 skills each) |
+| `plugins/claude-profiles/` | sixth plugin — **multi-subscription setup**; one skill, three python3 scripts, no assets/agents |
+| `plugins/claude-profiles/skills/setup-claude-profiles/scripts/` | `profiles_doctor.py` (read-only report + `--selfcheck`), `link_shared_config.py` (dry-run-first symlink sharing, reversible), `sync_mcp.py` (mirrors `mcpServers`). Shared helpers in `_profiles.py`. |
 | `dev/` | **dev/eval workspaces — NOT shipped** (moved out of `plugins/` on purpose) |
 | `dev/docsmith-workspace/trigger-evals.json` | the skill-triggering eval set (20 queries) |
 
@@ -53,6 +56,29 @@ Severity_Reasoning, Transition, Title, Steps / Test Data, Expected Result + Down
 Fix` — is the interchange format between both skills and the console; the bundled
 `validate_cases.py` is the importer-ready gate. No monitors/evals ship here — testcraft's eval
 workspaces live in its originating project, not this repo.
+
+## `claude-profiles` (sixth plugin — two subscriptions, one machine)
+
+`plugins/claude-profiles/` ships one skill, `setup-claude-profiles`, and three stdlib-only Python
+scripts. The domain facts it encodes were verified against a real two-subscription macOS setup; the
+WSL paths are covered by `profiles_doctor.py --selfcheck`, which drives the filesystem detection
+from a captured `/proc/mounts` table so the WSL logic is exercised on a non-WSL box.
+
+**Four facts the plugin exists to get right — don't "simplify" any of them away:**
+
+1. The default profile's live config is **`~/.claude.json`**, NOT `~/.claude/.claude.json` (which
+   commonly exists as a stale leftover and reports the wrong account). Only
+   `_profiles.config_json_for()` may resolve this.
+2. `mcpServers` is a key of `.claude.json` and is **not** valid in `settings.json` — putting it
+   there is silently ignored. That is why `sync_mcp.py` copies rather than linking.
+3. Claude Code writes **through** a symlinked `settings.json` instead of replacing it, which is what
+   makes the whole sharing scheme work. Verified, not assumed.
+4. The marketplace registry is split between `settings.json` (`extraKnownMarketplaces`) and the
+   per-profile `plugins/known_marketplaces.json` — so `plugins/` must be shared as a whole
+   directory, or plugins from a marketplace known only to the first profile vanish with no error.
+
+`link_shared_config.py` is dry-run by default and backs up anything it displaces into
+`<target>/backups/profile-link-<ts>/`; `--unlink --apply` restores from there. Keep both properties.
 
 ## `dkv` (third plugin — design theory → critique + direction)
 

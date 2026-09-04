@@ -6,6 +6,26 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## claude-profiles 0.1.0 — 2026-09-04
+two Claude subscriptions on one machine, sharing one config
+- Added to this marketplace at version 0.1.0.
+- One skill, `setup-claude-profiles`: run a work account and a personal one side by side under
+  `CLAUDE_CONFIG_DIR` — separate logins, rate limits and session history — while sharing one set of
+  settings, plugins, skills, agents, commands, hooks and MCP servers.
+- Three stdlib-only Python scripts. `profiles_doctor.py` reports every profile with its account,
+  plan, credential store and hazards (read-only; `--json`, and `--selfcheck` drives the WSL
+  filesystem rules from a captured `/proc/mounts` so they are exercised off-WSL).
+  `link_shared_config.py` shares config by symlink — dry-run by default and genuinely inert, and
+  `--unlink` copies out of its backup rather than emptying it, so the undo is repeatable and leaves
+  a manifest. `sync_mcp.py` mirrors `mcpServers`, which cannot be symlinked because it lives in the
+  same file as the account.
+- Covers macOS, Linux and WSL + Ubuntu, where the config directory must stay off the Windows drive
+  or symlinks and the `600` mode on the plaintext credentials file silently fail.
+- Encodes the traps that look like success: the stale `~/.claude/.claude.json` that reports the
+  wrong account, the marketplace registry split between `settings.json` and
+  `plugins/known_marketplaces.json`, a shared status line with an email hardcoded in it, and
+  project-level config not being isolated by `CLAUDE_CONFIG_DIR`.
+
 ## dkv 0.1.0 — 2026-07-28
 Add dkv: graphic-design fundamentals as a working review method.
 - Added to this marketplace at version 0.1.0.
