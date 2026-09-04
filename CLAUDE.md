@@ -126,6 +126,15 @@ npx github:labspangaea/pangaealabs-claude-plugins-marketplace
   location. Plugin-only bits (`monitors/`, `agents/`) are deliberately **not** bundled —
   they're Claude-Code machinery, inert in a bare skill. (Hence `SKILL.md`'s `PLUGIN_DIR`
   note now resolves both the plugin layout and the standalone `~/.agents/skills` layout.)
+- **Two post-install wizards, same division of labour.** `installer/profile.mjs` (docsmith)
+  and `installer/profiles.mjs` (claude-profiles) hold only the clack UI; every filesystem
+  decision is delegated to the plugin's own scripts, so install-time and in-agent setup
+  cannot drift. `profiles.mjs` never invents a plan — it runs `link_shared_config.py`'s real
+  dry run, shows that output, asks once, then re-runs the same command with `--apply`. It
+  supports **more than two** profiles (loop until "add another?" is declined), leaves the
+  default `~/.claude` in place, and refuses to run without a TTY. `--no-profile` skips both.
+  Verify: `node installer/index.mjs add claude-profiles -g --symlink -a claude-code --dry-run`
+  (the no-TTY guard fires) and the harness pattern in `dev/claude-profiles-workspace/`.
 - **One canonical profile writer:** `scripts/setup_profile.py` (pure-stdlib to write; PyYAML
   only for append). The installer's clack wizard (`installer/profile.mjs`) collects fields then
   pipes JSON to `setup_profile.py --json`; the **same** script is `make-pdf` **Step 0**. So

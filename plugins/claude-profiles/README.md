@@ -8,6 +8,14 @@ plugins, skills, agents, commands, hooks and MCP servers, so you configure thing
 /plugin install claude-profiles@pangaealabs-claude-plugins-marketplace
 ```
 
+Or through the marketplace's cross-agent installer, which adds a setup wizard — it reads which
+profiles already exist, asks whether you run more than one subscription, collects the additional
+profile names, shows the linker's dry run and asks once before sharing anything:
+
+```bash
+npx github:labspangaea/pangaealabs-claude-plugins-marketplace add claude-profiles
+```
+
 One skill, three scripts, no dependencies beyond Python 3.
 
 ## The idea
