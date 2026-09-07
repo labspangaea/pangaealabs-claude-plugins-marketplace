@@ -141,6 +141,32 @@ def hazards(host, profiles):
                     "those @-imports will not resolve." % (cfg, ", ".join(missing))
                 )
 
+    # Partial sharing. A profile that shares SOME entries but is missing one the
+    # default profile has is the quiet failure of this whole scheme: the report
+    # lists the entry under "absent", which reads as tidy rather than broken, and
+    # nothing tells you a whole category is gone. Losing `skills/` this way costs
+    # every user-scoped skill in the second profile, with no error anywhere.
+    default = next((p for p in profiles if p["is_default"]), None)
+    if default:
+        present_in_default = {n for n, v in default["links"].items() if v["kind"] != "missing"}
+        for p in profiles:
+            if p["is_default"]:
+                continue
+            shared = [n for n, v in p["links"].items() if v["kind"] == "link"]
+            # No shared entries at all means a deliberately independent profile,
+            # not a half-finished one. Only a partial share is worth a warning.
+            if not shared:
+                continue
+            present_here = {n for n, v in p["links"].items() if v["kind"] != "missing"}
+            gap = sorted(present_in_default - present_here)
+            if gap:
+                out.append(
+                    "%s shares %d of %d entries — %s exist(s) in %s but not here, so that "
+                    "profile has none of them. Close the gap with: link_shared_config.py --to %s"
+                    % (p["config_dir"], len(shared), len(present_in_default),
+                       ", ".join(gap), default["config_dir"], p["config_dir"])
+                )
+
     emails = [p["account"]["email"] for p in profiles if p["account"]["email"]]
     dupes = {e for e in emails if emails.count(e) > 1}
     for email in sorted(dupes):
@@ -254,6 +280,44 @@ def selfcheck():
         check("memory imports", imported_memory_files(d / "CLAUDE.md"), ["RTK.md"])
         ok, _ = symlinks_work_in(d)
         check("symlink probe on a normal dir", ok, True)
+
+    # Partial sharing. Built from synthetic profile dicts rather than real
+    # directories so the rule is exercised anywhere, like the WSL rules above.
+    def prof(cfg, is_default, links, email="a@example.com"):
+        return {
+            "config_dir": cfg, "is_default": is_default,
+            "config_json": cfg + "/.claude.json", "config_json_exists": True,
+            "account": {"email": email, "logged_in": True, "plan": "Max", "mcp_servers": []},
+            "credentials": {"warning": None}, "links": links, "memory_imports": [],
+            "filesystem": None, "on_windows_filesystem": False,
+            "symlinks_supported": True, "symlinks_detail": "ok",
+        }
+    own = {"kind": "own", "target": None, "resolves": True}
+    link = {"kind": "link", "target": "/d", "resolves": True}
+    gone = {"kind": "missing", "target": None, "resolves": False}
+    d_links = {"settings.json": own, "skills": own}
+
+    partial = hazards("macos", [
+        prof("/d", True, d_links),
+        prof("/w", False, {"settings.json": link, "skills": gone}, "b@example.com"),
+    ])
+    check("partial share is reported",
+          any("shares 1 of 2 entries" in x and "skills" in x for x in partial), True)
+
+    full = hazards("macos", [
+        prof("/d", True, d_links),
+        prof("/w", False, {"settings.json": link, "skills": link}, "b@example.com"),
+    ])
+    check("fully shared profile is not reported",
+          any("shares" in x for x in full), False)
+
+    # A profile that shares nothing is deliberately independent, not broken.
+    independent = hazards("macos", [
+        prof("/d", True, d_links),
+        prof("/w", False, {"settings.json": own, "skills": gone}, "b@example.com"),
+    ])
+    check("independent profile is not nagged",
+          any("shares" in x for x in independent), False)
 
     for line in failures:
         print("FAIL " + line)

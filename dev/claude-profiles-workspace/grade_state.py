@@ -150,6 +150,13 @@ def checks_for(eval_id, home):
 
 def main():
     root = Path(sys.argv[1] if len(sys.argv) > 1 else "iteration-1").resolve()
+    # A grader that checks nothing must not read as a pass. The path is relative
+    # to the cwd, so running this from the repo root instead of the workspace
+    # silently globbed zero run directories and printed "0/0 passed" — exactly
+    # the looks-like-success failure this plugin exists to catch.
+    if not root.is_dir():
+        print("no such iteration directory: %s" % root, file=sys.stderr)
+        return 2
     total = passed = 0
     for run in sorted(root.glob("eval-*/*/")):
         meta = load(run / "eval_metadata.json")
@@ -169,8 +176,11 @@ def main():
             print("%-4s %-28s %s" % (flag, run.parent.name + "/" + run.name, t[:70]))
             if not p:
                 print("       evidence: %s" % e)
+    if total == 0:
+        print("no run directories under %s — nothing was checked." % root, file=sys.stderr)
+        return 2
     print("\nstate checks: %d/%d passed" % (passed, total))
-    return 0
+    return 0 if passed == total else 1
 
 
 if __name__ == "__main__":

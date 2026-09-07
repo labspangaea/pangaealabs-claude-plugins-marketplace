@@ -83,6 +83,10 @@ needs Developer Mode or an elevated shell. Run both profiles inside WSL instead.
   targets that profile. Use `env -u CLAUDE_CONFIG_DIR claude …` for the default one.
 - Two profiles signed in to the *same* account look completely healthy and share one subscription's
   rate limits. The doctor flags it; comparing `accountUuid` is the only real proof.
+- **A half-shared profile looks tidy, not broken.** Share five entries and forget `skills/` and the
+  second profile has *no* user-scoped skills at all — no error, nothing missing-looking, the skills
+  just are not offered. The doctor now reports any entry the default profile has and a sharing
+  profile lacks, because listing it as "absent" was not enough to make anyone notice.
 
 ---
 

@@ -11,7 +11,7 @@ Claude Code behaves* (shareable) or *who you are and what you did* (never sharea
 | `CLAUDE.md` | user-level memory | Link its `@file.md` imports too — they resolve next to the file. |
 | `agents/` | custom subagent definitions | |
 | `commands/` | custom slash commands | |
-| `skills/` | personal skills (`claude plugin init` scaffolds here) | |
+| `skills/` | personal skills (`claude plugin init` scaffolds here), including symlinks out to a universal store such as `~/.agents/skills/` | **The one most often forgotten.** A profile with no `skills/` directory looks clean rather than broken, and the cost is every user-scoped skill in that profile — they are simply never offered, with no error. Sharing the directory carries the outbound symlinks with it, since they are absolute. |
 | `plugins/` | installed plugins, marketplace clones, catalog cache | Must be shared **as a whole directory** — see §3. |
 
 `link_shared_config.py` covers exactly this list.
