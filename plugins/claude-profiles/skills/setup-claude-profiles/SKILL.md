@@ -87,32 +87,28 @@ nervous about pointing it at the wrong directory.
 python3 .../scripts/sync_mcp.py --to ~/.claude-work --apply
 ```
 
-**4 — Wrap it in a shell function**, so the mirror runs on every launch and the server list can
-never drift. Put this in `~/.zshrc` (macOS default) or `~/.bashrc` (Ubuntu/WSL default):
+**4 — Register a launcher**, so the mirror runs on every launch and the server list can never
+drift. `shell_wrapper.py` writes it, and is dry-run by default like the linker:
 
 ```bash
-claude-work() {
-  local sync
-  sync=$(ls -d "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1)
-  [ -n "$sync" ] && python3 "$sync" --to "$HOME/.claude-work" --apply --quiet
-  CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"
-}
+python3 .../scripts/shell_wrapper.py --to ~/.claude-work            # show the plan
+python3 .../scripts/shell_wrapper.py --to ~/.claude-work --apply
 ```
 
-A **function, not an alias** — an alias cannot run the sync first. `--quiet` prints only when
-something actually changed, and `command claude` avoids recursing if a `claude` alias exists.
+It picks `~/.zshrc` or `~/.bashrc` from `$SHELL`, backs the file up first, and writes between
+`# >>> claude-profiles >>>` markers so re-running replaces its own block rather than stacking
+duplicates. Pass `--to` more than once to register several profiles in one block.
 
-The glob matters: `${CLAUDE_PLUGIN_ROOT}` is set while the skill runs but means nothing inside a
-shell rc, and the plugin cache path contains a version directory that changes on update. Resolving
-it at launch survives upgrades, and the `[ -n "$sync" ]` guard means a miss costs you the MCP sync,
-never the ability to start Claude. Check it resolves before you walk away:
+Read what it prints before applying, because two things it reports are easy to wave past. An
+**alias** of the same name already existing means the function will never run — in zsh an alias is
+expanded before a same-named function is considered, so appending underneath one looks like it
+worked and changes nothing. An existing **function** of the same name means two definitions, and
+the later one wins; that is ours, but it is confusing to read six months later.
 
-```bash
-ls -d "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py
-```
-
-If that prints nothing the plugin has not been fetched yet — start the default profile once, then
-re-check. Do not paste a hardcoded version path in its place; it will break on the next update.
+The launcher is a function rather than an alias because an alias cannot run the sync first. It
+resolves the sync script by glob, since the plugin cache carries a version directory that changes
+on update and `${CLAUDE_PLUGIN_ROOT}` means nothing inside a shell rc; the guard makes a miss cost
+the MCP sync, never the launch.
 
 Do not reach for `--mcp-config` here instead: the flag works and merges with the profile's own
 servers, but it is variadic, so `claude --mcp-config f "prompt"` swallows the prompt as a second

@@ -39,10 +39,40 @@ WINDOWS_FS_TYPES = {"drvfs", "9p", "v9fs", "cifs", "smbfs"}
 
 
 def config_dir(value=None):
-    """Resolve a profile's config directory. None/'' means the default profile."""
-    if not value:
+    """Resolve a profile's config directory. None/'' means the default profile.
+
+    Whitespace is stripped before anything else, and that is load-bearing rather
+    than tidiness. A TRAILING space produced a real directory named
+    ``.claude-work  `` that nobody could type again; a LEADING space is worse,
+    because ``expanduser`` leaves " ~/..." alone, so the path stops being
+    absolute and resolves against the current working directory — creating a
+    folder literally named ``~`` wherever the command happened to run.
+    """
+    if value is None or not str(value).strip():
         return DEFAULT_CONFIG_DIR
-    return Path(os.path.expanduser(str(value))).resolve(strict=False)
+    path = Path(os.path.expanduser(str(value).strip()))
+    if path.name != path.name.strip():
+        path = path.parent / path.name.strip()
+    return path.resolve(strict=False)
+
+
+def unusable_profile_dir(path):
+    """Why `path` is a bad config directory, or None if it is fine.
+
+    Callers that CREATE the directory check this first: a name that cannot be
+    typed back is worse to create than to refuse.
+    """
+    name = Path(path).name
+    if not name:
+        return "resolves to a filesystem root"
+    if name != name.strip():
+        return "name has leading or trailing whitespace (%r) — almost always a typo" % name
+    if name == "~":
+        return ("name is literally '~' — the tilde was not expanded, usually a quoted or "
+                "space-prefixed argument, and this would be created in the current directory")
+    if any(ord(c) < 32 for c in name):
+        return "name contains a control character (%r)" % name
+    return None
 
 
 def config_json_for(cfg_dir):

@@ -37,6 +37,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _profiles import (  # noqa: E402
     DEFAULT_CONFIG_DIR,
+    unusable_profile_dir,
     SHAREABLE,
     config_dir,
     host_platform,
@@ -137,6 +138,11 @@ def main(argv=None):
         return 2
     if not src.is_dir():
         print("Source profile %s does not exist." % src, file=sys.stderr)
+        return 2
+    # Refuse a target we would have to CREATE under a name nobody can type back.
+    bad = unusable_profile_dir(dst)
+    if bad and not dst.is_dir():
+        print("Refusing target %r: %s" % (str(dst), bad), file=sys.stderr)
         return 2
 
     if not dst.is_dir():
