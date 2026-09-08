@@ -72,14 +72,31 @@ def function_text(profile_dir, home=None):
     A plain lexical sort picks the OLDEST (this shipped in 0.2.0 resolving to the
     0.1.0 copy), and reversing it is no better, because lexically "0.10.0" sorts
     below "0.9.0".
+
+    Two layouts are searched, because the plugin arrives by two routes:
+    `/plugin install` puts it under ~/.claude/plugins/cache/<marketplace>/..., and
+    the npx installer writes into the universal store at ~/.agents/skills/. An
+    npx-only machine has no plugin cache at all.
+
+    The globbing runs inside `sh -c`, and that is not stylistic. zsh sets
+    `nomatch` by default, so an unmatched glob is an ERROR raised while expanding
+    the line — before `ls` runs, which is why redirecting the command's stderr
+    does not silence it. A user on a fresh npx install got
+    "claude-work:2: no matches found: ..." and the function aborted. POSIX sh
+    leaves an unmatched pattern literal instead, so `ls` simply fails and its
+    stderr is discarded.
     """
     home = Path.home() if home is None else Path(home)
     d = str(profile_dir).replace(str(home), "$HOME")
+    find = (
+        'ls -dt "$1"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py '
+        '"$1"/.agents/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1'
+    )
     return "\n".join([
         "%s() {" % function_name(profile_dir),
         "  local sync",
-        '  sync=$(ls -dt "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1)',
-        '  [ -n "$sync" ] && python3 "$sync" --to "%s" --apply --quiet' % d,
+        "  sync=$(sh -c '%s' _ \"$HOME\")" % find,
+        '  [ -n "$sync" ] && [ -f "$sync" ] && python3 "$sync" --to "%s" --apply --quiet' % d,
         '  CLAUDE_CONFIG_DIR="%s" command claude "$@"' % d,
         "}",
     ])

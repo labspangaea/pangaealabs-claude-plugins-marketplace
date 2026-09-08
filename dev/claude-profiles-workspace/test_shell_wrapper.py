@@ -19,6 +19,7 @@ Everything runs against a temporary HOME. No test touches the real profiles.
 """
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -129,6 +130,73 @@ class LauncherResolvesNewestVersion(unittest.TestCase):
 
     def test_does_not_pick_the_oldest(self):
         self.assertNotEqual(Path(self.resolved()), self.paths[0])
+
+
+ZSH = shutil.which("zsh")
+
+
+@unittest.skipUnless(ZSH, "zsh not installed")
+class LauncherIsShellSafe(unittest.TestCase):
+    """The launcher has to survive the shell it is actually pasted into.
+
+    zsh sets `nomatch` by default, so an unmatched glob is a hard ERROR raised by
+    the shell during expansion — before `ls` ever runs, which is why a `2>/dev/null`
+    on the command does not suppress it. A user on a fresh npx install saw:
+
+        claude-work:2: no matches found: .../plugins/cache/*/claude-profiles/*/...
+
+    and the function aborted. POSIX sh leaves an unmatched pattern literal instead,
+    which is why this went unnoticed in earlier tests that used sh.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def sync_line(self):
+        return [ln for ln in sw.function_text("/h/.claude-work", "/h").splitlines()
+                if "sync=" in ln][0].strip()
+
+    def run_in(self, shell):
+        res = subprocess.run(
+            [shell, "-c", '%s; printf "%%s" "$sync"' % self.sync_line()],
+            capture_output=True, text=True, env=dict(os.environ, HOME=str(self.home)),
+        )
+        return res
+
+    def make(self, rel):
+        d = self.home / rel
+        d.mkdir(parents=True, exist_ok=True)
+        f = d / "sync_mcp.py"
+        f.write_text("#\n", encoding="utf-8")
+        return f
+
+    def test_zsh_reports_no_error_when_nothing_is_installed(self):
+        res = self.run_in(ZSH)
+        self.assertNotIn("no matches found", res.stderr)
+        self.assertEqual(res.stderr.strip(), "", "the launcher must stay silent, got: %s" % res.stderr)
+
+    def test_zsh_resolves_nothing_gracefully(self):
+        self.assertEqual(self.run_in(ZSH).stdout.strip(), "")
+
+    def test_finds_an_npx_install(self):
+        # `npx …` installs into the universal store, not the plugin cache.
+        want = self.make(".agents/skills/setup-claude-profiles/scripts")
+        for shell in filter(None, [ZSH, "/bin/sh"]):
+            with self.subTest(shell=shell):
+                self.assertEqual(Path(self.run_in(shell).stdout.strip()), want)
+
+    def test_finds_a_plugin_install(self):
+        want = self.make(".claude/plugins/cache/mkt/claude-profiles/0.2.2/skills/setup-claude-profiles/scripts")
+        self.assertEqual(Path(self.run_in(ZSH).stdout.strip()), want)
+
+    def test_prefers_the_newest_when_both_layouts_exist(self):
+        self.make(".claude/plugins/cache/mkt/claude-profiles/0.1.0/skills/setup-claude-profiles/scripts")
+        newest = self.make(".agents/skills/setup-claude-profiles/scripts")
+        self.assertEqual(Path(self.run_in(ZSH).stdout.strip()), newest)
 
 
 class ExistingDefinitions(unittest.TestCase):

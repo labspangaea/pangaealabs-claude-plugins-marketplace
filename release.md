@@ -18,10 +18,20 @@ Stop the installer's own hint text becoming a profile directory name.
   only appear when hint text has been captured as a value.
 - Note this was *not* a whitespace-trimming problem: the name was not padded, it was an entire
   sentence, so 0.2.0's stripping could never have caught it.
+- **Fixed:** the launcher aborted under zsh. `claude-work` failed with
+  `no matches found: …/plugins/cache/*/claude-profiles/*/…` on a fresh install, because zsh sets
+  `nomatch`, making an unmatched glob an error raised while *expanding* the line — before `ls` runs,
+  so the command's `2>/dev/null` could not silence it. The globbing now runs inside `sh -c`, where
+  an unmatched pattern is left literal.
+- **Fixed:** the launcher only ever looked in `~/.claude/plugins/cache/`, so on a machine installed
+  with `npx` — which writes to the universal store at `~/.agents/skills/` — it could never find
+  `sync_mcp.py` at all. Both layouts are searched now, newest first.
 - **Coverage:** `dev/claude-profiles-workspace/test_profile_input.mjs` asserts every placeholder the
   wizard offers resolves exactly as typing that name would — the Tab path — and that the precise
-  string which reached a user is rejected. Plus `test_link_shared_config.py` (10 tests) now covers
-  the directory-creation path itself, which had only ever been checked by hand.
+  string which reached a user is rejected. `test_link_shared_config.py` (10 tests) covers the
+  directory-creation path itself, which had only ever been checked by hand. The launcher is now
+  exercised **under zsh**, not just `sh`: earlier tests used `sh`, which silently tolerates the
+  unmatched glob, which is exactly why the abort was not caught before shipping.
 
 ## claude-profiles 0.2.1 — 2026-09-08
 Make the launcher find the version of the plugin you actually have installed.
