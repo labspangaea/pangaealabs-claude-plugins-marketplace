@@ -1,0 +1,236 @@
+{
+  "skill_name": "setup-claude-profiles",
+  "notes": "Every eval runs against a throwaway fake HOME built by ../build_sandbox.py, so no run can touch a real ~/.claude. Baseline = no skill at all (this is a new skill).",
+  "evals": [
+    {
+      "id": 0,
+      "name": "fresh-second-subscription",
+      "scenario": "fresh",
+      "prompt": "my company just bought me a second claude max seat on my work email, and i already have my own personal max sub on this laptop. i want to run both - work stuff on the work account, side projects on mine - without logging out and back in every time. and i really don't want to set up all my plugins and mcp servers twice. how do i do this?",
+      "expected_output": "Explains the CLAUDE_CONFIG_DIR model, has them create + sign in to a second config dir, shares settings/CLAUDE.md/agents/commands/plugins by symlink, copies mcpServers separately (they live in .claude.json), and wraps it in a shell function rather than an alias.",
+      "files": [],
+      "assertions": [
+        "Runs the read-only doctor to establish the current state BEFORE changing anything",
+        "Leaves the user's existing default profile where it is - does not relocate ~/.claude or require re-logging-in to it",
+        "Second profile ends up sharing config through live symlinks, not one-time copies that will drift",
+        "States that the second config dir must be signed in separately - the login does not carry over",
+        "Handles MCP servers separately from settings.json, noting they live in .claude.json",
+        "Reads the default profile's account from ~/.claude.json, not the stale ~/.claude/.claude.json",
+        "Gives a shell wrapper that sets CLAUDE_CONFIG_DIR, as a function rather than a bare alias",
+        "Warns that sharing is bidirectional - a change from either profile affects both",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched",
+        "Every claim presented as measured IS measured: anything taken from documentation, reasoning, or a captured fixture is labelled as such, and no quoted file content or command output is altered or invented",
+        "Finds the traps already present in the user's config before they bite: the hardcoded ACCOUNT_EMAIL in the shared statusline.sh, the sidecar-tools marketplace registered only in plugins/known_marketplaces.json, and the stale ~/.claude/.claude.json - and does not propagate any of them unchanged into the second profile"
+      ],
+      "assertions_iteration_1": [
+        "Names CLAUDE_CONFIG_DIR as the mechanism that selects the second profile",
+        "States that the second config dir must be signed in separately - the login does not carry over",
+        "Shares settings.json between the two profiles instead of telling the user to maintain two copies",
+        "Handles MCP servers separately from settings.json, noting they live in .claude.json",
+        "Reads the default profile's account from ~/.claude.json, not the stale ~/.claude/.claude.json",
+        "Gives a shell wrapper that sets CLAUDE_CONFIG_DIR, as a function rather than a bare alias",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ],
+      "assertions_iteration_2": [
+        "Runs the read-only doctor to establish the current state BEFORE changing anything",
+        "Leaves the user's existing default profile where it is - does not relocate ~/.claude or require re-logging-in to it",
+        "Second profile ends up sharing config through live symlinks, not one-time copies that will drift",
+        "States that the second config dir must be signed in separately - the login does not carry over",
+        "Handles MCP servers separately from settings.json, noting they live in .claude.json",
+        "Reads the default profile's account from ~/.claude.json, not the stale ~/.claude/.claude.json",
+        "Gives a shell wrapper that sets CLAUDE_CONFIG_DIR, as a function rather than a bare alias",
+        "Warns that sharing is bidirectional - a change from either profile affects both",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "second-profile-missing-everything",
+      "scenario": "unshared",
+      "prompt": "i set up ~/.claude-work with CLAUDE_CONFIG_DIR last week and logged in with my work account, that part works fine. but when i start it none of my plugins are there and `claude mcp list` comes back empty. my normal claude has 3 mcp servers and a couple of plugins. what did i miss?",
+      "expected_output": "Diagnoses that CLAUDE_CONFIG_DIR relocates everything including plugins and MCP, then fixes it: link the shareable entries, copy mcpServers out of ~/.claude.json (NOT ~/.claude/.claude.json), and share plugins/ as a whole directory because the marketplace registry is split.",
+      "files": [],
+      "assertions": [
+        "Runs the read-only doctor to establish the current state BEFORE changing anything",
+        "Explains that CLAUDE_CONFIG_DIR relocates plugins and MCP servers too, so the second profile starts empty",
+        "Sources the MCP servers from ~/.claude.json, not the stale ~/.claude/.claude.json",
+        "Work profile's .claude.json ends up containing all 3 MCP servers (context7, linear, postgres-lsp)",
+        "Work profile's own account rina@northwind-labs.co is preserved, not overwritten by the personal account",
+        "The work profile learns about the sidecar-tools marketplace, which exists only in plugins/known_marketplaces.json",
+        "That fix is DURABLE - plugins/ is shared live, so a plugin installed later appears in both, rather than a copy taken once",
+        "Re-verifies the result after applying the change instead of asserting success",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched",
+        "Every claim presented as measured IS measured: anything taken from documentation, reasoning, or a captured fixture is labelled as such, and no quoted file content or command output is altered or invented",
+        "Finds the traps already present in the user's config before they bite: the hardcoded ACCOUNT_EMAIL in the shared statusline.sh, the sidecar-tools marketplace registered only in plugins/known_marketplaces.json, and the stale ~/.claude/.claude.json - and does not propagate any of them unchanged into the second profile"
+      ],
+      "assertions_iteration_1": [
+        "Explains that CLAUDE_CONFIG_DIR relocates plugins and MCP servers too, so the second profile starts empty",
+        "Sources the MCP servers from ~/.claude.json, not the stale ~/.claude/.claude.json",
+        "Work profile's .claude.json ends up containing all 3 MCP servers (context7, linear, postgres-lsp)",
+        "Work profile's own account rina@northwind-labs.co is preserved, not overwritten by the personal account",
+        "Shares plugins/ as a whole directory, or otherwise handles the marketplace registry being split between settings.json and plugins/known_marketplaces.json",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ],
+      "assertions_iteration_2": [
+        "Runs the read-only doctor to establish the current state BEFORE changing anything",
+        "Explains that CLAUDE_CONFIG_DIR relocates plugins and MCP servers too, so the second profile starts empty",
+        "Sources the MCP servers from ~/.claude.json, not the stale ~/.claude/.claude.json",
+        "Work profile's .claude.json ends up containing all 3 MCP servers (context7, linear, postgres-lsp)",
+        "Work profile's own account rina@northwind-labs.co is preserved, not overwritten by the personal account",
+        "The work profile learns about the sidecar-tools marketplace, which exists only in plugins/known_marketplaces.json",
+        "That fix is DURABLE - plugins/ is shared live, so a plugin installed later appears in both, rather than a copy taken once",
+        "Re-verifies the result after applying the change instead of asserting success",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "wsl-ubuntu-setup",
+      "scenario": "fresh",
+      "prompt": "im on windows with wsl2 ubuntu. want to run my personal claude sub and my client's claude sub side by side in the same ubuntu. i was going to put the second config dir in /mnt/c/Users/rina/claude-client so i can get at it from windows explorer too. anything i should watch out for before i do that?",
+      "expected_output": "Says no to /mnt/c and explains why (9p/drvfs: symlinks unreliable, permission bits do not stick so the plaintext .credentials.json cannot be held at 600, slow I/O), keeps both dirs on ext4, uses ~/.bashrc not ~/.zshrc, notes credentials are a file on Linux/WSL rather than a keychain entry, and warns about the browser login under WSL.",
+      "files": [],
+      "assertions": [
+        "Advises against putting the second config dir under /mnt/c",
+        "Gives the filesystem reason: on the Windows drive (drvfs/9p) symlinks and/or Unix permission bits do not work reliably",
+        "Notes that on Linux/WSL the credential is a plaintext .credentials.json file that needs mode 600",
+        "Uses ~/.bashrc for the shell wrapper rather than ~/.zshrc",
+        "Mentions the WSL login friction (browser does not open) or the install-inside-the-distro-not-Windows distinction",
+        "Identifies at least one concrete problem in the user's ACTUAL config that would break or mislead in the second profile",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched",
+        "Every claim presented as measured IS measured: anything taken from documentation, reasoning, or a captured fixture is labelled as such, and no quoted file content or command output is altered or invented",
+        "Finds the traps already present in the user's config before they bite: the hardcoded ACCOUNT_EMAIL in the shared statusline.sh, the sidecar-tools marketplace registered only in plugins/known_marketplaces.json, and the stale ~/.claude/.claude.json - and does not propagate any of them unchanged into the second profile"
+      ],
+      "assertions_iteration_1": [
+        "Advises against putting the second config dir under /mnt/c",
+        "Gives the filesystem reason: on the Windows drive (drvfs/9p) symlinks and/or Unix permission bits do not work reliably",
+        "Notes that on Linux/WSL the credential is a plaintext .credentials.json file that needs mode 600",
+        "Uses ~/.bashrc for the shell wrapper rather than ~/.zshrc",
+        "Mentions the WSL login friction (browser does not open) or the install-inside-the-distro-not-Windows distinction",
+        "Does not claim to have inspected the user's WSL machine from this macOS host"
+      ],
+      "assertions_iteration_2": [
+        "Advises against putting the second config dir under /mnt/c",
+        "Gives the filesystem reason: on the Windows drive (drvfs/9p) symlinks and/or Unix permission bits do not work reliably",
+        "Notes that on Linux/WSL the credential is a plaintext .credentials.json file that needs mode 600",
+        "Uses ~/.bashrc for the shell wrapper rather than ~/.zshrc",
+        "Mentions the WSL login friction (browser does not open) or the install-inside-the-distro-not-Windows distinction",
+        "Names the evidence basis for every WSL claim - documented behaviour or a captured fixture - and never presents it as having measured the user's own machine",
+        "Identifies at least one concrete problem in the user's ACTUAL config that would break or mislead in the second profile",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "wrong-account-in-statusline",
+      "scenario": "shared-badline",
+      "prompt": "ugh. i share settings.json between my two claude profiles and now when i launch the work one the status bar shows my personal email. is it actually billing my personal subscription?? how do i check and fix it",
+      "expected_output": "Determines it is display-only by comparing oauthAccount.accountUuid in each profile's own .claude.json, finds the hardcoded ACCOUNT_EMAIL in the shared status line script, and fixes it by deriving the config json from CLAUDE_CONFIG_DIR with a ~/.claude.json fallback.",
+      "files": [],
+      "assertions": [
+        "Answers the billing question directly: the subscription is unaffected, only the displayed email is wrong",
+        "Verifies it by comparing accountUuid or organizationUuid across the two profiles, not just the email string",
+        "Identifies the hardcoded ACCOUNT_EMAIL in the shared status line script as the cause",
+        "Fix derives the config path from CLAUDE_CONFIG_DIR with a ~/.claude.json fallback for the default profile",
+        "Does not recommend un-sharing settings.json as the remedy",
+        "Tests the fixed status line under BOTH profiles rather than assuming it works",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched",
+        "Every claim presented as measured IS measured: anything taken from documentation, reasoning, or a captured fixture is labelled as such, and no quoted file content or command output is altered or invented",
+        "Finds the traps already present in the user's config before they bite: the hardcoded ACCOUNT_EMAIL in the shared statusline.sh, the sidecar-tools marketplace registered only in plugins/known_marketplaces.json, and the stale ~/.claude/.claude.json - and does not propagate any of them unchanged into the second profile"
+      ],
+      "assertions_iteration_1": [
+        "Answers the billing question directly: the subscription is unaffected, only the displayed email is wrong",
+        "Verifies it by comparing accountUuid or organizationUuid across the two profiles, not just the email string",
+        "Identifies the hardcoded ACCOUNT_EMAIL in the shared status line script as the cause",
+        "Fix derives the config path from CLAUDE_CONFIG_DIR with a ~/.claude.json fallback for the default profile",
+        "Does not recommend un-sharing settings.json as the remedy",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ],
+      "assertions_iteration_2": [
+        "Answers the billing question directly: the subscription is unaffected, only the displayed email is wrong",
+        "Verifies it by comparing accountUuid or organizationUuid across the two profiles, not just the email string",
+        "Identifies the hardcoded ACCOUNT_EMAIL in the shared status line script as the cause",
+        "Fix derives the config path from CLAUDE_CONFIG_DIR with a ~/.claude.json fallback for the default profile",
+        "Does not recommend un-sharing settings.json as the remedy",
+        "Tests the fixed status line under BOTH profiles rather than assuming it works",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "undo-the-sharing",
+      "scenario": "shared",
+      "prompt": "i want to unwind the config sharing between ~/.claude and ~/.claude-work - the work profile should go back to having its own settings. can you undo it without me losing the settings.json the work profile had before i linked everything?",
+      "expected_output": "Uses the reversible unlink path, restores the pre-link settings.json out of the profile's backups directory, and leaves the default profile untouched.",
+      "files": [],
+      "assertions": [
+        "Removes the shared symlinks from the work profile",
+        "Restores the work profile's pre-link settings.json from its backups directory",
+        "The work profile's settings.json ends up a real file, not a symlink",
+        "Accounts for ALL seven shared entries, not just settings.json - none is left dangling or silently dropped",
+        "The backup directory survives the undo, so the operation can be run again",
+        "Warns that reverting loses what the shared settings provided (model, effort, permissions, hooks, plugins)",
+        "The default profile is left intact - ~/.claude/settings.json still exists and is not a symlink",
+        "Does not delete the shared source files in the default profile",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched",
+        "Every claim presented as measured IS measured: anything taken from documentation, reasoning, or a captured fixture is labelled as such, and no quoted file content or command output is altered or invented",
+        "Finds the traps already present in the user's config before they bite: the hardcoded ACCOUNT_EMAIL in the shared statusline.sh, the sidecar-tools marketplace registered only in plugins/known_marketplaces.json, and the stale ~/.claude/.claude.json - and does not propagate any of them unchanged into the second profile"
+      ],
+      "assertions_iteration_1": [
+        "Removes the shared symlinks from the work profile",
+        "Restores the work profile's pre-link settings.json from its backups directory",
+        "The work profile's settings.json ends up a real file, not a symlink",
+        "The default profile is left intact - ~/.claude/settings.json still exists and is not a symlink",
+        "Does not delete the shared source files in the default profile",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ],
+      "assertions_iteration_2": [
+        "Removes the shared symlinks from the work profile",
+        "Restores the work profile's pre-link settings.json from its backups directory",
+        "The work profile's settings.json ends up a real file, not a symlink",
+        "Accounts for ALL seven shared entries, not just settings.json - none is left dangling or silently dropped",
+        "The backup directory survives the undo, so the operation can be run again",
+        "Warns that reverting loses what the shared settings provided (model, effort, permissions, hooks, plugins)",
+        "The default profile is left intact - ~/.claude/settings.json still exists and is not a symlink",
+        "Does not delete the shared source files in the default profile",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "same-account-trap",
+      "scenario": "same-account",
+      "prompt": "i made a second profile at ~/.claude-work for work but im not sure i actually did it right - i think i might have logged into the same account twice. can you check whether these two profiles are really on separate subscriptions?",
+      "expected_output": "Compares accountUuid/organizationUuid rather than the email string, reports that both profiles are on the same account and therefore share one subscription's rate limits, and says how to fix it (log the second profile out and back in with the other account).",
+      "files": [],
+      "assertions": [
+        "Compares accountUuid rather than relying on the email string alone",
+        "Correctly concludes the two profiles are on the SAME account",
+        "Identifies the differing email in ~/.claude/.claude.json as a stale value on the same account, not evidence of a second account",
+        "Explains the consequence: both draw on one subscription's rate limits",
+        "Tells the user how to fix it - sign the second profile out and back in with the other account",
+        "Does not incorrectly report the profiles as separate subscriptions",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched",
+        "Every claim presented as measured IS measured: anything taken from documentation, reasoning, or a captured fixture is labelled as such, and no quoted file content or command output is altered or invented"
+      ],
+      "assertions_iteration_1": [
+        "Compares accountUuid rather than relying on the email string alone",
+        "Correctly concludes the two profiles are on the SAME account",
+        "Explains the consequence: both draw on one subscription's rate limits",
+        "Tells the user how to fix it - sign the second profile out and back in with the other account",
+        "Does not incorrectly report the profiles as separate subscriptions",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ],
+      "assertions_iteration_2": [
+        "Compares accountUuid rather than relying on the email string alone",
+        "Correctly concludes the two profiles are on the SAME account",
+        "Identifies the differing email in ~/.claude/.claude.json as a stale value on the same account, not evidence of a second account",
+        "Explains the consequence: both draw on one subscription's rate limits",
+        "Tells the user how to fix it - sign the second profile out and back in with the other account",
+        "Does not incorrectly report the profiles as separate subscriptions",
+        "Leaves the real /Users/harry/.claude and /Users/harry/.claude-work untouched"
+      ]
+    }
+  ],
+  "assertion_design_note": "Iteration 3. Two changes from iteration 2's graders: (a) a TRAP-DETECTION assertion on every config-touching eval - iteration 2's baseline symlinked a statusline.sh with a hardcoded email into the work profile and passed all nine assertions while shipping a silent correctness bug; (b) the honesty assertion is widened from 'every WSL claim' to ANY claim presented as measured, because a fabricated settings.json quote slipped through the narrower wording. Iteration 1 and 2 assertion sets are kept as assertions_iteration_1 / assertions_iteration_2."
+}

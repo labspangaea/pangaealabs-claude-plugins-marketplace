@@ -5,7 +5,8 @@
 //   npx github:labspangaea/pangaealabs-claude-plugins-marketplace add docsmith -g
 //
 // Flow (mirrors the skills.sh TUI, plus a per-plugin post-install step):
-//   plugins → skills → agents → scope → method → summary/confirm → install → [docsmith profile].
+//   plugins → skills → agents → scope → method → summary/confirm → install →
+//   [docsmith profile] [claude-profiles setup].
 // Multi-skill plugins (e.g. testcraft) prompt a skill multiselect; pre-select with -s/--skill
 // to run non-interactively.
 
@@ -19,6 +20,7 @@ import { AGENTS } from "./agents.mjs";
 import { REPO_ROOT, readMarketplace, discoverSkills, pluginDir, shortHint } from "./marketplace.mjs";
 import { buildPlan, execute, summaryLines, displayPath } from "./install.mjs";
 import { runProfileWizard } from "./profile.mjs";
+import { runProfilesWizard } from "./profiles.mjs";
 
 function parseArgs(argv) {
   const args = { plugins: [], skills: [], agents: [], scope: null, method: null, dryRun: false, yes: false, noProfile: false, help: false };
@@ -68,7 +70,8 @@ Options:
       --project    Install into the current project
       --copy       Copy skill files instead of symlinking
       --symlink    Symlink skill files (recommended)
-      --no-profile Skip the docsmith profile.yaml wizard
+      --no-profile Skip the post-install wizards (docsmith profile.yaml,
+                   claude-profiles multi-subscription setup)
       --dry-run    Show what would happen; write nothing
   -y, --yes        Skip the final confirmation
   -h, --help       Show this help
@@ -257,6 +260,58 @@ async function main() {
     else if (res.status === "dry-run") p.log.info(`dry-run: would write ${res.orgs.length} org(s) → ${displayPath(res.path, ctx.home)}`);
     else if (res.status === "skipped") p.log.info("profile setup skipped — make-pdf will offer it again on first use.");
     else if (res.status === "error") p.log.error(`profile setup failed: ${res.message}`);
+  }
+
+  // 9) claude-profiles setup wizard -------------------------------------------
+  // Offered only when the skill was actually installed. It rewires config
+  // directories, so it asks before touching anything and skips itself without a
+  // TTY; --no-profile opts out entirely.
+  const profilesSkill = skills.find((s) => s.name === "setup-claude-profiles");
+  if (profilesSkill && args.noProfile) {
+    p.log.info("claude-profiles setup skipped (--no-profile) — run /setup-claude-profiles later.");
+  } else if (profilesSkill) {
+    const res = await runProfilesWizard(p, {
+      pluginDir: profilesSkill.pluginDir,
+      env: ctx.env,
+      home: ctx.home,
+      dryRun: args.dryRun,
+    });
+    if (res.status === "written") {
+      for (const r of res.results) {
+        if (!r.linked) {
+          p.log.error(`${displayPath(r.dir, ctx.home)} — linking failed:\n${r.linkOut}`);
+          continue;
+        }
+        p.log.success(
+          `${displayPath(r.dir, ctx.home)} — config shared` +
+            (r.mcp === "synced" ? ", MCP servers mirrored" : ", MCP pending first sign-in")
+        );
+      }
+      const pending = res.results.filter((r) => r.linked && r.mcp !== "synced");
+      p.note(
+        [
+          ...(pending.length
+            ? [
+                `Sign in to each new profile once — the login does not carry over:`,
+                ...pending.map((r) => `  CLAUDE_CONFIG_DIR=${displayPath(r.dir, ctx.home)} claude    # then /login`),
+                ``,
+              ]
+            : []),
+          `Add to ${res.rc} so each profile is one command away:`,
+          ``,
+          ...res.functions,
+        ].join("\n"),
+        "Next steps"
+      );
+    } else if (res.status === "planned") {
+      p.log.info(`dry-run: would share config into ${res.targets.length} profile(s).`);
+    } else if (res.status === "skipped") {
+      p.log.info("claude-profiles setup skipped — the skill can do it whenever you need it.");
+    } else if (res.status === "unavailable") {
+      p.log.info(`claude-profiles setup skipped: ${res.message}`);
+    } else if (res.status === "error") {
+      p.log.error(`claude-profiles setup failed: ${res.message}`);
+    }
   }
 
   p.outro(

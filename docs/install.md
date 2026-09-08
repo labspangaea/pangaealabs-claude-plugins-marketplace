@@ -30,6 +30,18 @@ It walks you through the same flow as the screenshots you've seen from `skills.s
 6. **Summary + confirm.**
 7. **docsmith profile wizard** — set up `~/.docsmith/profile.yaml` (company, author,
    email, logo, wordmark, website, confidentiality, copyright) for one or more orgs.
+8. **claude-profiles setup** — offered only when `setup-claude-profiles` was installed.
+   It reads the machine first (which profiles exist, which account each is on, whether
+   `CLAUDE_CONFIG_DIR` is already set in this shell), asks whether you actually run more
+   than one Claude subscription, and if so collects one or more **additional** profile
+   names — `work` becomes `~/.claude-work`, or give a path. Your existing `~/.claude`
+   stays exactly where it is; relocating it would cost a re-login. It then shows the
+   linker's own dry run for each target and asks once before sharing anything. Ends by
+   printing a shell function per profile to paste into your rc file.
+
+   Both wizards are skipped by `--no-profile`. The profiles wizard also skips itself
+   when there is no TTY, since rewiring config directories is not something to do to
+   someone who cannot see the prompts.
 
 Useful flags:
 

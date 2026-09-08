@@ -6,6 +6,38 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## claude-profiles 0.1.0 — 2026-09-08
+two Claude subscriptions on one machine, sharing one config
+- Added to this marketplace at version 0.1.0.
+- One skill, `setup-claude-profiles`: run a work account and a personal one side by side under
+  `CLAUDE_CONFIG_DIR` — separate logins, rate limits and session history — while sharing one set of
+  settings, plugins, skills, agents, commands, hooks and MCP servers.
+- Three stdlib-only Python scripts. `profiles_doctor.py` reports every profile with its account,
+  plan, credential store and hazards (read-only; `--json`, and `--selfcheck` drives the WSL
+  filesystem rules from a captured `/proc/mounts` so they are exercised off-WSL).
+  `link_shared_config.py` shares config by symlink — dry-run by default and genuinely inert, and
+  `--unlink` copies out of its backup rather than emptying it, so the undo is repeatable and leaves
+  a manifest. `sync_mcp.py` mirrors `mcpServers`, which cannot be symlinked because it lives in the
+  same file as the account.
+- Covers macOS, Linux and WSL + Ubuntu, where the config directory must stay off the Windows drive
+  or symlinks and the `600` mode on the plaintext credentials file silently fail.
+- Encodes the traps that look like success: the stale `~/.claude/.claude.json` that reports the
+  wrong account, the marketplace registry split between `settings.json` and
+  `plugins/known_marketplaces.json`, a shared status line with an email hardcoded in it, and
+  project-level config not being isolated by `CLAUDE_CONFIG_DIR`.
+- The `npx` installer offers a setup wizard when this plugin is picked. It reads the machine first
+  — which profiles exist, which account each is on, whether `CLAUDE_CONFIG_DIR` is already set in
+  the shell — asks whether you actually run more than one subscription, then collects additional
+  profile names in a loop, so three or more profiles work like two. Your existing `~/.claude` is
+  never relocated. Sharing is gated on the linker's own dry run: the wizard shows that real output,
+  asks once, then re-runs the identical command with `--apply`. It skips itself without a TTY, and
+  `--no-profile` opts out of both post-install wizards.
+- The doctor reports **partially shared** profiles. A profile that shares some entries but lacks
+  one the default profile has is the quiet failure of this scheme — miss `skills/` and the second
+  profile has no user-scoped skills at all, with no error and nothing missing-looking. Listing it
+  as "absent" was not enough to make anyone notice, so it is now a named problem with the command
+  that closes the gap.
+
 ## go-scaffolder 0.14.0 — 2026-08-03
 Make generated stacks actually run, and prove it in CI.
 - **New:** `bun` as a second repository flavour (`bun-postgres`, `bun-mysql`), and a `messaging`
