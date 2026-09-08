@@ -81,6 +81,13 @@ from a captured `/proc/mounts` table so the WSL logic is exercised on a non-WSL 
 `link_shared_config.py` is dry-run by default and backs up anything it displaces into
 `<target>/backups/profile-link-<ts>/`; `--unlink --apply` restores from there. Keep both properties.
 
+**A clack `placeholder` is a VALUE, not a hint.** `@clack/core` writes the placeholder verbatim
+into the field when Tab is pressed on an empty input, so any descriptive text in one becomes a real
+value. A placeholder reading `work   →  ~/.claude-work` created a directory of that exact name on a
+user's machine. Put the explanation in `message:`; keep `placeholder:` to something the user could
+legitimately have typed. `installer/profiles.mjs` exports `profilePlaceholder()` and
+`invalidProfileInput()` for this, covered by `dev/claude-profiles-workspace/test_profile_input.mjs`.
+
 **`shell_wrapper.py` is the canonical rc writer, and it must stay in the PLUGIN.** The `npx`
 installer's wizard calls it and so does step 4 of the skill — someone who installs with
 `/plugin install` never runs the installer, so logic that lived only there would mean the launcher

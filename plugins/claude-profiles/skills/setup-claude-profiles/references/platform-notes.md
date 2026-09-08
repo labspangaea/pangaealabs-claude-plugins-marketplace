@@ -28,8 +28,8 @@ The wrapper is a **function, not an alias**, because it has to run the MCP sync 
 ```bash
 claude-work() {
   local sync
-  sync=$(ls -dt "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1)
-  [ -n "$sync" ] && python3 "$sync" --to "$HOME/.claude-work" --apply --quiet
+  sync=$(sh -c 'ls -dt "$1"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py "$1"/.agents/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1' _ "$HOME")
+  [ -n "$sync" ] && [ -f "$sync" ] && python3 "$sync" --to "$HOME/.claude-work" --apply --quiet
   CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"
 }
 ```
@@ -38,11 +38,19 @@ Resolve the script with a glob rather than a fixed path: the plugin cache carrie
 directory that changes on update, and `${CLAUDE_PLUGIN_ROOT}` means nothing inside a shell rc. The
 guard makes a miss cost the MCP sync, never the launch.
 
-`-t` is not decoration. The cache keeps every installed version side by side, so the glob matches
-more than one and the picker has to choose; `-t` sorts by modification time, newest first — the
-version installed most recently, which is the one in use. A plain lexical sort picks the *oldest*,
-and reversing it is no better, because lexically `0.10.0` sorts below `0.9.0`. In practice you
-should not hand-edit this line: `shell_wrapper.py` writes it.
+Do not hand-edit that line — `shell_wrapper.py` writes it, and three details in it are load-bearing:
+
+- **`sh -c`** wraps the globbing because **zsh sets `nomatch`**, so an unmatched glob is an *error
+  raised while expanding the line*, before `ls` runs — which is why redirecting the command's
+  stderr does not silence it. A fresh npx install with no plugin cache produced
+  `claude-work:2: no matches found: …` and the function aborted. POSIX `sh` leaves an unmatched
+  pattern literal, so `ls` merely fails and its stderr is discarded.
+- **Two paths are searched.** `/plugin install` puts the scripts under
+  `~/.claude/plugins/cache/<marketplace>/…`; the `npx` installer writes to the universal store at
+  `~/.agents/skills/`. A machine that only ever ran `npx` has no plugin cache at all.
+- **`-t`** sorts by modification time, newest first — the version installed most recently. A plain
+  lexical sort picks the *oldest*, and reversing it is no better, since lexically `0.10.0` sorts
+  below `0.9.0`.
 
 Define the function *or* an alias of the same name, never both — in zsh an alias is expanded first
 and shadows the function. Reload with `source ~/.bashrc` (or `~/.zshrc`), or open a new terminal.
