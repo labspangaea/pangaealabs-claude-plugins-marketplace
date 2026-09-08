@@ -53,6 +53,35 @@ export function resolveProfileDir(input, home) {
 const short = (p_, home) => (p_.startsWith(home) ? p_.replace(home, "~") : p_);
 
 /**
+ * The placeholder for the profile-name prompt.
+ *
+ * It must be a VALID VALUE, never a description. @clack/core inserts the
+ * placeholder verbatim when Tab is pressed on an empty field:
+ *
+ *   u === "\t" && this.opts.placeholder && (this.value || this.rl.write(this.opts.placeholder))
+ *
+ * A previous version read `work   →  ~/.claude-work`, so one Tab created a
+ * directory literally named `.claude-work   →  ~/.claude-work` on a user's
+ * machine. Explain the result in the prompt's message instead.
+ */
+export function profilePlaceholder(name) {
+  return name;
+}
+
+/** Why this input cannot be a profile name, or undefined if it is fine. */
+export function invalidProfileInput(value) {
+  const s = String(value ?? "").trim();
+  if (!s) return "Give a name (e.g. work) or a path.";
+  // A path is allowed to contain slashes; a name is a single bare token. Neither
+  // may contain whitespace or arrows — those only appear when descriptive text
+  // has been captured as the value.
+  if (/\s/.test(s)) return "No spaces or tabs — use a single name like `work`, or a path.";
+  if (/[→←]|->|<-/.test(s)) return "That looks like hint text rather than a name. Type just the name, e.g. `work`.";
+  if (/[\u0000-\u001f]/.test(s)) return "Contains a control character.";
+  return undefined;
+}
+
+/**
  * Run the interactive wizard.
  *
  * Returns { status, ... } where status is one of:
@@ -143,10 +172,15 @@ export async function runProfilesWizard(p, { pluginDir, env = process.env, home 
   for (;;) {
     const suggested = suggestions[targets.length] || `profile${targets.length + 2}`;
     const raw = await p.text({
-      message: `Profile #${targets.length + 2} — name or directory`,
-      placeholder: `${suggested}   →  ~/.claude-${suggested}`,
+      message:
+        `Profile #${targets.length + 2} — name or directory ` +
+        `(a name like "${suggested}" becomes ~/.claude-${suggested})`,
+      // Value only: Tab inserts this verbatim.
+      placeholder: profilePlaceholder(suggested),
       defaultValue: suggested,
       validate: (v) => {
+        const bad = invalidProfileInput(v || suggested);
+        if (bad) return bad;
         const dir = resolveProfileDir(v || suggested, home);
         if (!dir) return "Give a name (e.g. work) or a path.";
         if (dir === def.config_dir) return "That is the default profile — pick a different name.";

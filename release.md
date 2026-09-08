@@ -6,6 +6,23 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## claude-profiles 0.2.2 — 2026-09-08
+Stop the installer's own hint text becoming a profile directory name.
+- **Fixed:** the profile-name prompt used a *descriptive* placeholder,
+  `work   →  ~/.claude-work`. `@clack/core` inserts the placeholder **verbatim** as the value when
+  Tab is pressed on an empty field, so a single Tab created a directory literally named
+  `.claude-work   →  ~/.claude-work` on a fresh install. The placeholder is now the value alone
+  (`work`) and the explanation moved into the prompt's message, where it cannot be typed.
+- **Fixed:** the prompt accepted it in the first place. Input containing whitespace, an arrow or a
+  control character is now rejected with a message naming what to type instead — those characters
+  only appear when hint text has been captured as a value.
+- Note this was *not* a whitespace-trimming problem: the name was not padded, it was an entire
+  sentence, so 0.2.0's stripping could never have caught it.
+- **Coverage:** `dev/claude-profiles-workspace/test_profile_input.mjs` asserts every placeholder the
+  wizard offers resolves exactly as typing that name would — the Tab path — and that the precise
+  string which reached a user is rejected. Plus `test_link_shared_config.py` (10 tests) now covers
+  the directory-creation path itself, which had only ever been checked by hand.
+
 ## claude-profiles 0.2.1 — 2026-09-08
 Make the launcher find the version of the plugin you actually have installed.
 - **Fixed:** the launcher function resolved `sync_mcp.py` with `ls -d … | head -1`, which sorts
