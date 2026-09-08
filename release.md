@@ -6,6 +6,20 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## claude-profiles 0.2.1 — 2026-09-08
+Make the launcher find the version of the plugin you actually have installed.
+- **Fixed:** the launcher function resolved `sync_mcp.py` with `ls -d … | head -1`, which sorts
+  lexically and therefore picked the **oldest** cached version. Installing 0.2.0 alongside an
+  existing 0.1.0 made the launcher run 0.1.0's copy, and the gap would widen with every release.
+  Reversing the sort would not fix it either, because lexically `0.10.0` sorts below `0.9.0`. Now
+  `ls -dt`, newest by modification time — the version installed most recently, which is the one in
+  use.
+- The rc block is written by `shell_wrapper.py`, so anyone on 0.2.0 gets the corrected line by
+  re-running it; the marker block is replaced in place rather than duplicated.
+- **Coverage:** a regression test builds a cache holding 0.1.0, 0.2.0 and 0.10.0 side by side and
+  runs the launcher's own resolution line under `sh`, asserting it picks the newest. It reproduced
+  the bug before the fix.
+
 ## claude-profiles 0.2.0 — 2026-09-08
 Register the launcher from the plugin, and stop bad profile names.
 - **New:** `shell_wrapper.py` writes the per-profile launcher function into `~/.zshrc` or

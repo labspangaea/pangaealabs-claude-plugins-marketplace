@@ -65,13 +65,20 @@ def function_text(profile_dir, home=None):
     plugin cache carries a version directory that changes on update, and
     ${CLAUDE_PLUGIN_ROOT} means nothing inside a shell rc. The guard makes a miss
     cost the MCP sync, never the ability to launch.
+
+    The cache keeps every installed version side by side, so the glob matches
+    several and the picker has to choose. `-t` sorts by modification time,
+    newest first — the version installed most recently, which is the one in use.
+    A plain lexical sort picks the OLDEST (this shipped in 0.2.0 resolving to the
+    0.1.0 copy), and reversing it is no better, because lexically "0.10.0" sorts
+    below "0.9.0".
     """
     home = Path.home() if home is None else Path(home)
     d = str(profile_dir).replace(str(home), "$HOME")
     return "\n".join([
         "%s() {" % function_name(profile_dir),
         "  local sync",
-        '  sync=$(ls -d "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1)',
+        '  sync=$(ls -dt "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1)',
         '  [ -n "$sync" ] && python3 "$sync" --to "%s" --apply --quiet' % d,
         '  CLAUDE_CONFIG_DIR="%s" command claude "$@"' % d,
         "}",

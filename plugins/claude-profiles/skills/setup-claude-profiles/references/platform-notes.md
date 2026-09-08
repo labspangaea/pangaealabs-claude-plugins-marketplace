@@ -28,7 +28,7 @@ The wrapper is a **function, not an alias**, because it has to run the MCP sync 
 ```bash
 claude-work() {
   local sync
-  sync=$(ls -d "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1)
+  sync=$(ls -dt "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1)
   [ -n "$sync" ] && python3 "$sync" --to "$HOME/.claude-work" --apply --quiet
   CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"
 }
@@ -37,6 +37,12 @@ claude-work() {
 Resolve the script with a glob rather than a fixed path: the plugin cache carries a version
 directory that changes on update, and `${CLAUDE_PLUGIN_ROOT}` means nothing inside a shell rc. The
 guard makes a miss cost the MCP sync, never the launch.
+
+`-t` is not decoration. The cache keeps every installed version side by side, so the glob matches
+more than one and the picker has to choose; `-t` sorts by modification time, newest first — the
+version installed most recently, which is the one in use. A plain lexical sort picks the *oldest*,
+and reversing it is no better, because lexically `0.10.0` sorts below `0.9.0`. In practice you
+should not hand-edit this line: `shell_wrapper.py` writes it.
 
 Define the function *or* an alias of the same name, never both — in zsh an alias is expanded first
 and shadows the function. Reload with `source ~/.bashrc` (or `~/.zshrc`), or open a new terminal.
