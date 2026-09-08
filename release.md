@@ -6,7 +6,7 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
-## claude-profiles 0.1.0 — 2026-09-04
+## claude-profiles 0.1.0 — 2026-09-08
 two Claude subscriptions on one machine, sharing one config
 - Added to this marketplace at version 0.1.0.
 - One skill, `setup-claude-profiles`: run a work account and a personal one side by side under
@@ -25,6 +25,18 @@ two Claude subscriptions on one machine, sharing one config
   wrong account, the marketplace registry split between `settings.json` and
   `plugins/known_marketplaces.json`, a shared status line with an email hardcoded in it, and
   project-level config not being isolated by `CLAUDE_CONFIG_DIR`.
+- The `npx` installer offers a setup wizard when this plugin is picked. It reads the machine first
+  — which profiles exist, which account each is on, whether `CLAUDE_CONFIG_DIR` is already set in
+  the shell — asks whether you actually run more than one subscription, then collects additional
+  profile names in a loop, so three or more profiles work like two. Your existing `~/.claude` is
+  never relocated. Sharing is gated on the linker's own dry run: the wizard shows that real output,
+  asks once, then re-runs the identical command with `--apply`. It skips itself without a TTY, and
+  `--no-profile` opts out of both post-install wizards.
+- The doctor reports **partially shared** profiles. A profile that shares some entries but lacks
+  one the default profile has is the quiet failure of this scheme — miss `skills/` and the second
+  profile has no user-scoped skills at all, with no error and nothing missing-looking. Listing it
+  as "absent" was not enough to make anyone notice, so it is now a named problem with the command
+  that closes the gap.
 
 ## dkv 0.1.0 — 2026-07-28
 Add dkv: graphic-design fundamentals as a working review method.
