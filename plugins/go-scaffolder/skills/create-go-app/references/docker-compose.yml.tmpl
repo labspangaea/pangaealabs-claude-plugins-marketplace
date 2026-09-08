@@ -29,14 +29,22 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # 127.0.0.1, not localhost: the mysql client treats "localhost" as the
+      # unix socket, and the entrypoint runs a temporary socket-only server
+      # while it initialises the database. A socket ping answers OK against
+      # THAT server ~5s before the real one listens on 3306, so the app starts
+      # against a mysql it cannot dial. Forcing TCP makes the check wait for
+      # the thing the app actually connects to.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
       interval: 5s
       timeout: 5s
       retries: 10
 {{- end }}
 {{- end }}
-{{- if eq .Cache "redis" }}
+{{- if or (eq .Cache "redis") (eq .Broker "redis") }}
 
+  # Serves double duty when this scaffold uses redis for both cache and broker
+  # — they are separated by DB index (BROKER_REDIS_DB), not by server.
   redis:
     image: redis:7-alpine
     ports:
@@ -47,6 +55,57 @@ services:
       timeout: 5s
       retries: 10
 {{- end }}
+{{- if eq .Broker "kafka" }}
+
+  kafka:
+    image: apache/kafka:3.9.0
+    # KRaft mode — no zookeeper. Single node acting as both broker and
+    # controller, which is all a local stack needs.
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      # Advertised as the compose service name, not localhost: clients dial
+      # kafka:9092 from inside the network, and a broker advertising localhost
+      # sends them back to their own container.
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # Single node, so every replication factor has to be 1 — the defaults are
+      # 3 and the broker refuses to create its internal topics otherwise.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # The scaffold subscribes to a topic it never creates.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+{{- end }}
+{{- if eq .Broker "rabbitmq" }}
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      # Management UI — handy for watching queues while developing.
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+{{- end }}
 {{- if eq .Cache "couchbase" }}
 
   couchbase:
@@ -54,18 +113,58 @@ services:
     ports:
       - "8091-8096:8091-8096"
       - "11210:11210"
+    # Unlike postgres/mysql/redis, the image starts an UNINITIALISED cluster:
+    # no cluster, no bucket, nothing gocb can connect to. Run the real
+    # entrypoint in the background and do the one-time init behind it. The
+    # credentials and bucket name must match .env — that is what the service
+    # reads. On a restart with a warm volume both calls fail with "already
+    # initialized" / "already exists", which `|| true` swallows.
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /entrypoint.sh couchbase-server &
+        # No -f: once the cluster IS initialised /pools answers 401, so a
+        # failure-on-HTTP-error gate never opens on a warm volume and this
+        # loop spins forever. Any response at all means the server is up.
+        until curl -s -o /dev/null http://localhost:8091/pools; do sleep 2; done
+        couchbase-cli cluster-init -c localhost \
+          --cluster-username Administrator --cluster-password password \
+          --services data,index,query \
+          --cluster-ramsize 512 --cluster-index-ramsize 256 || true
+        couchbase-cli bucket-create -c localhost -u Administrator -p password \
+          --bucket {{.EntityLower}}_db --bucket-type couchbase \
+          --bucket-ramsize 256 --wait || true
+        wait
+    # No volume on purpose: this is a cache, so losing it on `down` costs
+    # nothing and re-init is ~12s. It also keeps the volumes block below from
+    # having to render for a cache=couchbase, database=none scaffold.
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8091/pools"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
+      # Polls the BUCKET, not the process. An uninitialised node answers
+      # /pools with 200 while the bucket 404s, so a /pools check goes green
+      # with nothing to connect to — and then goes permanently red once the
+      # cluster IS initialised, because /pools starts requiring auth.
+      test: ["CMD-SHELL", "curl -sf -u Administrator:password http://localhost:8091/pools/default/buckets/{{.EntityLower}}_db >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      # Boot slack belongs in start_period, not retries — retries also sets how
+      # long a live bucket can be gone before the container is called unhealthy.
+      start_period: 90s
+      retries: 6
 {{- end }}
 
   {{.Name}}:
     build:
       context: .
     env_file: .env
-{{- if ne .Database "none" }}
+{{- /*
+  One environment/depends_on block covering database, cache AND broker. This
+  used to be an if/else-if chain keyed on .Database, which meant a scaffold
+  with a broker got neither its broker env nor a depends_on for it — a
+  consumer rendered a compose file with no kafka in it and dialled the
+  localhost default until it gave up.
+*/}}
+{{- $wantsService := or (ne .Database "none") (ne .Cache "none") (ne .Broker "") }}
+{{- if $wantsService }}
     environment:
 {{- if eq .Database "bun-postgres" }}
       DATABASE_DSN: postgres://postgres:postgres@postgres:5432/{{.EntityLower}}_db?sslmode=disable
@@ -79,6 +178,13 @@ services:
 {{- else if eq .Cache "couchbase" }}
       COUCHBASE_URL: couchbase://couchbase
 {{- end }}
+{{- if eq .Broker "kafka" }}
+      KAFKA_BROKERS: kafka:9092
+{{- else if eq .Broker "rabbitmq" }}
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+{{- else if eq .Broker "redis" }}
+      BROKER_REDIS_ADDR: redis:6379
+{{- end }}
     depends_on:
 {{- if eq (dbEngine .Database) "postgres" }}
       postgres:
@@ -87,26 +193,22 @@ services:
       mysql:
         condition: service_healthy
 {{- end }}
-{{- if eq .Cache "redis" }}
+{{- if or (eq .Cache "redis") (eq .Broker "redis") }}
       redis:
         condition: service_healthy
 {{- else if eq .Cache "couchbase" }}
       couchbase:
         condition: service_healthy
 {{- end }}
-{{- else if eq .Cache "redis" }}
-    environment:
-      REDIS_ADDR: redis:6379
-    depends_on:
-      redis:
+{{- if eq .Broker "kafka" }}
+      kafka:
         condition: service_healthy
-{{- else if eq .Cache "couchbase" }}
-    environment:
-      COUCHBASE_URL: couchbase://couchbase
-    depends_on:
-      couchbase:
+{{- else if eq .Broker "rabbitmq" }}
+      rabbitmq:
         condition: service_healthy
 {{- end }}
+{{- end }}
+{{- if eq .Type "api" }}
     ports:
       - "8080:8080"
     healthcheck:
@@ -114,6 +216,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+{{- end }}
+{{- /*
+  Consumers and publishers get neither: they serve no HTTP at all, so both the
+  published port and a /healthz check were fiction. The old healthcheck could
+  never pass, which made `docker compose up --wait` fail on a scaffold that was
+  working fine.
+*/}}
     restart: on-failure
 {{- if ne .Database "none" }}
 

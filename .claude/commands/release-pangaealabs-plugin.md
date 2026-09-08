@@ -19,7 +19,11 @@ Expected format: `<plugin-name> <patch|minor|major> "<commit subject>"`
 ### 1. Resolve repo and plugin paths
 
 ```bash
-REPO=~/projects/pangaealabs-claude-plugins-marketplace
+# Resolved from the checkout the command was invoked in, not hardcoded — the
+# repo has lived at more than one path (it is under ~/projects/labspangaea/
+# today) and a wrong absolute path fails the manifest check before anything
+# useful happens.
+REPO=$(git rev-parse --show-toplevel)
 PLUGIN_NAME="<plugin-name from args>"
 PLUGIN_DIR="$REPO/plugins/$PLUGIN_NAME"
 PLUGIN_JSON="$PLUGIN_DIR/.claude-plugin/plugin.json"
@@ -154,6 +158,8 @@ claude plugin marketplace update "$MARKETPLACE_NAME"
 ```
 
 This marketplace is registered as a **directory source** pointing at this repo, so the update reads the local working tree — make sure it is on `main` with the merged release before refreshing.
+
+**If it reports `Marketplace '<name>' not found`, the release is still complete.** Steps 12–13 only refresh the *maintainer's own machine*, and the marketplace is not registered on every machine this repo is edited from — `claude plugin marketplace list` will show which are. That is a local-install gap, not a release failure: say so plainly and stop, rather than registering the marketplace or installing plugins as a side effect of a release. Registering it (`claude plugin marketplace add "$REPO"`) then installing is a deliberate, separate action for the maintainer to take.
 
 ### 13. Update the installed plugin to the new version
 

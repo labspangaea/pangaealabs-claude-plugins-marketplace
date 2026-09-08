@@ -38,6 +38,26 @@ two Claude subscriptions on one machine, sharing one config
   as "absent" was not enough to make anyone notice, so it is now a named problem with the command
   that closes the gap.
 
+## go-scaffolder 0.14.0 — 2026-08-03
+Make generated stacks actually run, and prove it in CI.
+- **New:** `bun` as a second repository flavour (`bun-postgres`, `bun-mysql`), and a `messaging`
+  parameter choosing `queue` (competing consumers) or `pubsub` (fan-out) for consumers and
+  publishers. `pubsub` stays the default, so existing scaffolds are unaffected.
+- **Fixed:** a generated `cache=couchbase` scaffold could never reach its own cache — nothing
+  initialised the cluster, and the healthcheck went green on an uninitialised node then
+  permanently red once it was initialised.
+- **Fixed:** a generated consumer or publisher could not start at all. No broker service was
+  emitted, the broker env kept its localhost default, and every scaffold got a `/healthz`
+  healthcheck regardless of whether it served HTTP.
+- **Fixed:** the mysql healthcheck pinged over the unix socket, so it passed against the
+  temporary server the entrypoint runs during first-boot init — roughly five seconds before the
+  real server accepts TCP.
+- **Fixed:** `KAFKA_TOPIC` had no default, leaving a generated consumer subscribed to `""`.
+- **Coverage:** CI now renders every one of the 24 combos and boots its generated
+  `docker-compose.yml` — api scaffolds proved by CRUD through their own API, consumers and
+  publishers by asking the broker who attached. Nothing had ever run these files before, which
+  is how the four defects above survived.
+
 ## dkv 0.1.0 — 2026-07-28
 Add dkv: graphic-design fundamentals as a working review method.
 - Added to this marketplace at version 0.1.0.

@@ -41,9 +41,9 @@ If the user passed a framework name as an argument (e.g., `nethttp`, `echo`), pa
 | `api-echo-postgres-redis` | echo | postgres | redis |
 | `api-nethttp-mysql-none` | nethttp | mysql | none |
 
-**Chi is currently uncovered** at runtime — the only existing chi combo is `api-chi-mysql-couchbase`, and couchbase isn't in the docker-compose stack. To add chi coverage, append `api-chi-postgres-redis` to `tools/smoke/combos.go` and add the same line to `${CLAUDE_SKILL_DIR}/scripts/run.sh`'s `COMBOS` array. That's a separate task; flag the gap to the user only if they ask why chi is missing.
+| `api-chi-mysql-couchbase` | chi | mysql | couchbase |
 
-Consumer and publisher combos (kafka/rabbitmq/redis-broker types) need broker services not in the compose file. The script returns `[skip]` for them with the reason printed. This is intentional — adding kafka + rabbitmq is its own follow-on piece of work.
+Consumer and publisher combos run too — the compose file carries redis, kafka and rabbitmq. 18 combos total.
 
 ## Step 3: Invoke the bundled driver
 
@@ -93,8 +93,6 @@ Stub-mode runtime verification (boot without docker, assert canned responses on 
 
 ## What this skill does NOT do
 
-- **Test consumer/publisher runtime behavior** — needs kafka/rabbitmq, deferred until those services land in docker-compose.
-- **Test couchbase cache combos** — same reason (no couchbase service).
 - **Test stub-mode behavior** — see "Stub mode is out of scope" above; this skill is real-service only.
 - **Verify OTel trace export** — would need a trace collector; the test does verify `request_id` appears in logs, which is sufficient evidence that the request-context propagation works end-to-end.
 - **Authentication / RBAC tests** — generated services don't ship with auth.

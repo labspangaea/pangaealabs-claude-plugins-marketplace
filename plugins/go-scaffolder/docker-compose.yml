@@ -8,11 +8,9 @@
 #   docker compose up -d mysql                 # for a mysql combo
 #   docker compose down -v                     # teardown + delete volumes
 #
-# All credentials use admin/admin per request. NEVER use these in any
-# environment that isn't your laptop.
-#
-# Combos NOT covered by this file: couchbase. Add an equivalent service here
-# when you need it.
+# All credentials use admin/admin per request — except couchbase, which rejects
+# any password shorter than 6 characters. NEVER use these in any environment
+# that isn't your laptop.
 
 services:
   postgres:
@@ -45,7 +43,12 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-uadmin", "-padmin"]
+      # -h 127.0.0.1 forces TCP. Without it the client uses the unix socket,
+      # which answers OK against the temporary socket-only server the entrypoint
+      # runs during first-boot initialisation — green ~5s before the real server
+      # listens on 3306. Latent here (run.sh starts binaries long afterwards),
+      # real in the generated compose file, so both are fixed the same way.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uadmin", "-padmin"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -113,10 +116,56 @@ services:
       timeout: 10s
       retries: 15
 
+  couchbase:
+    # Community, not the enterprise tag the generated compose file uses — this
+    # one runs in CI and community carries no licence question.
+    image: couchbase:community-7.6.2
+    container_name: go-scaffolder-couchbase
+    ports:
+      # 8091 REST/admin, 8093 query, 11210 data (the port gocb actually uses).
+      - "8091-8096:8091-8096"
+      - "11210:11210"
+    volumes:
+      - couchbase_data:/opt/couchbase/var
+    # Unlike every other service here, the image comes up UNINITIALISED: no
+    # cluster, no bucket, nothing gocb can connect to. So run the real
+    # entrypoint in the background and do the one-time init behind it. Both
+    # calls are idempotent enough — on a restart with a warm volume they fail
+    # with "already initialized" / "already exists", which `|| true` swallows.
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /entrypoint.sh couchbase-server &
+        # No -f: once the cluster IS initialised /pools answers 401, so a
+        # failure-on-HTTP-error gate never opens on a warm volume and this
+        # loop spins forever. Any response at all means the server is up.
+        until curl -s -o /dev/null http://localhost:8091/pools; do sleep 2; done
+        couchbase-cli cluster-init -c localhost \
+          --cluster-username admin --cluster-password administrator \
+          --services data,index,query \
+          --cluster-ramsize 512 --cluster-index-ramsize 256 || true
+        couchbase-cli bucket-create -c localhost -u admin -p administrator \
+          --bucket appdb --bucket-type couchbase --bucket-ramsize 256 --wait || true
+        wait
+    healthcheck:
+      # Polls the BUCKET, not the process. `/pools` answers 200 while the
+      # cluster is still uninitialised and appdb does not exist, so anything
+      # gated on that starts against a couchbase it cannot connect to.
+      test: ["CMD-SHELL", "curl -sf -u admin:administrator http://localhost:8091/pools/default/buckets/appdb >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      # Boot slack belongs in start_period, not retries — retries also sets how
+      # long a live bucket can be gone before the container is called unhealthy,
+      # and a big number there makes the check look like it can never fail.
+      # ~12s cold start locally; 90s leaves room for a slower CI runner.
+      start_period: 90s
+      retries: 6
+
 volumes:
   postgres_data:
   mysql_data:
   redis_data:
+  couchbase_data:
 
 # DSN / addr cheatsheet for generated services (see config.go.tmpl):
 #
@@ -130,6 +179,12 @@ volumes:
 #     REDIS_ADDR=localhost:6379
 #     REDIS_PASSWORD=admin
 #     REDIS_DB=0
+#
+#   couchbase cache (Cache=couchbase):
+#     COUCHBASE_URL=couchbase://localhost
+#     COUCHBASE_USERNAME=admin
+#     COUCHBASE_PASSWORD=administrator
+#     COUCHBASE_BUCKET=appdb
 #
 #   redis broker (Broker=redis):
 #     BROKER_REDIS_ADDR=localhost:6379
