@@ -30,7 +30,8 @@ subscriptions on one machine, sharing one config).
 | `plugins/dkv/skills/design-fundamentals/references/` | `color.md`, `typography.md`, `layout.md`, `gestalt.md`, `principles.md` — section-numbered so `SKILL.md` cites `§N`. **`principles.md` is an index, not a peer doc** — contrast/hierarchy/repetition live where they're operationalised; don't restate them there. |
 | `plugins/{go-scaffolder,elysia-scaffolder}/` | the two service scaffolders (5 skills each) |
 | `plugins/claude-profiles/` | sixth plugin — **multi-subscription setup**; one skill, three python3 scripts, no assets/agents |
-| `plugins/claude-profiles/skills/setup-claude-profiles/scripts/` | `profiles_doctor.py` (read-only report + `--selfcheck`), `link_shared_config.py` (dry-run-first symlink sharing, reversible), `sync_mcp.py` (mirrors `mcpServers`). Shared helpers in `_profiles.py`. |
+| `plugins/claude-profiles/skills/setup-claude-profiles/scripts/` | `profiles_doctor.py` (read-only report + `--selfcheck`), `link_shared_config.py` (dry-run-first symlink sharing, reversible), `sync_mcp.py` (mirrors `mcpServers`), `shell_wrapper.py` (registers the per-profile launcher in `~/.zshrc`/`~/.bashrc`). Shared helpers in `_profiles.py`. |
+| `dev/claude-profiles-workspace/test_*.py` / `test_*.mjs` | the test suite — `python3 -m unittest discover -s dev/claude-profiles-workspace -p 'test_*.py'` (35 unit tests) and `node dev/claude-profiles-workspace/test_wizard.mjs /tmp/wiz` (installer wizard, end to end). Both run against a temporary HOME and assert the real profiles are untouched. |
 | `dev/` | **dev/eval workspaces — NOT shipped** (moved out of `plugins/` on purpose) |
 | `dev/docsmith-workspace/trigger-evals.json` | the skill-triggering eval set (20 queries) |
 
@@ -79,6 +80,18 @@ from a captured `/proc/mounts` table so the WSL logic is exercised on a non-WSL 
 
 `link_shared_config.py` is dry-run by default and backs up anything it displaces into
 `<target>/backups/profile-link-<ts>/`; `--unlink --apply` restores from there. Keep both properties.
+
+**`shell_wrapper.py` is the canonical rc writer, and it must stay in the PLUGIN.** The `npx`
+installer's wizard calls it and so does step 4 of the skill — someone who installs with
+`/plugin install` never runs the installer, so logic that lived only there would mean the launcher
+silently never gets registered on their machine. Same reason docsmith has one `setup_profile.py`.
+
+**`_profiles.config_dir()` strips whitespace, and that is load-bearing.** A trailing space created
+a real `.claude-work  ` directory on a fresh install; a leading space is worse, because
+`expanduser` leaves `" ~/..."` alone so the path stops being absolute and resolves against the
+cwd — creating a folder literally named `~`. `unusable_profile_dir()` is the backstop for names
+that survive stripping and still cannot be typed back. Both are covered in
+`dev/claude-profiles-workspace/test_shell_wrapper.py`; write the failing test before the fix.
 
 ## `dkv` (third plugin — design theory → critique + direction)
 

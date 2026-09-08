@@ -311,6 +311,19 @@ def selfcheck():
     check("fully shared profile is not reported",
           any("shares" in x for x in full), False)
 
+    # Whitespace in a profile name. A trailing space created a real directory
+    # named '.claude-work  ' on a fresh install; a leading one is worse, since
+    # expanduser leaves " ~/..." alone and the path resolves against the cwd.
+    from _profiles import unusable_profile_dir
+    check("trailing space is stripped", str(config_dir("~/.claude-work  ")),
+          str(Path.home() / ".claude-work"))
+    check("leading space still expands ~", str(config_dir(" ~/.claude-work")),
+          str(Path.home() / ".claude-work"))
+    check("tab is stripped", str(config_dir("~/.claude-work\t")),
+          str(Path.home() / ".claude-work"))
+    check("an unexpanded ~ is rejected", bool(unusable_profile_dir("/tmp/~")), True)
+    check("a normal name is accepted", unusable_profile_dir("/tmp/.claude-work"), None)
+
     # A profile that shares nothing is deliberately independent, not broken.
     independent = hazards("macos", [
         prof("/d", True, d_links),

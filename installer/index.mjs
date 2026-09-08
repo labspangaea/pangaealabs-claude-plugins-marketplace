@@ -287,6 +287,19 @@ async function main() {
             (r.mcp === "synced" ? ", MCP servers mirrored" : ", MCP pending first sign-in")
         );
       }
+      const rcRes = res.rcResult || {};
+      if (rcRes.status === "appended" || rcRes.status === "updated") {
+        p.log.success(
+          `${rcRes.status === "updated" ? "Updated" : "Added"} ${(rcRes.names || []).join(", ")} in ` +
+            `${displayPath(rcRes.rc_file, ctx.home)}` +
+            (rcRes.backup ? ` (backup: ${displayPath(rcRes.backup, ctx.home)})` : "")
+        );
+      } else if (rcRes.status === "declined" || rcRes.status === "cancelled") {
+        p.log.info("Shell startup file left alone — paste the block above into it yourself when ready.");
+      } else if (rcRes.status === "error") {
+        p.log.error(`shell wrapper not registered: ${rcRes.message}`);
+      }
+
       const pending = res.results.filter((r) => r.linked && r.mcp !== "synced");
       p.note(
         [
@@ -297,9 +310,9 @@ async function main() {
                 ``,
               ]
             : []),
-          `Add to ${res.rc} so each profile is one command away:`,
-          ``,
-          ...res.functions,
+          rcRes.rc_file
+            ? `Reload your shell:  source ${displayPath(rcRes.rc_file, ctx.home)}   (or open a new terminal)`
+            : `Add a launcher function with: shell_wrapper.py --to <profile dir> --apply`,
         ].join("\n"),
         "Next steps"
       );

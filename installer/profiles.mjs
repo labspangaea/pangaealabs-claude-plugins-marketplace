@@ -24,6 +24,7 @@ export function scriptPaths(pluginDirPath) {
     doctor: path.join(base, "profiles_doctor.py"),
     linker: path.join(base, "link_shared_config.py"),
     mcp: path.join(base, "sync_mcp.py"),
+    wrapper: path.join(base, "shell_wrapper.py"),
     base,
   };
 }
@@ -205,20 +206,60 @@ export async function runProfilesWizard(p, { pluginDir, env = process.env, home 
     });
   }
 
-  const rc = /zsh/.test(env.SHELL || process.env.SHELL || "") ? "~/.zshrc" : "~/.bashrc";
-  const fns = results
-    .filter((r) => r.linked)
-    .map((r) => {
-      const name = `claude-${path.basename(r.dir).replace(/^\.claude-?/, "") || "alt"}`;
-      return [
-        `${name}() {`,
-        `  local sync`,
-        `  sync=$(ls -d "$HOME"/.claude/plugins/cache/*/claude-profiles/*/skills/setup-claude-profiles/scripts/sync_mcp.py 2>/dev/null | head -1)`,
-        `  [ -n "$sync" ] && python3 "$sync" --to "${r.dir.replace(home, "$HOME")}" --apply --quiet`,
-        `  CLAUDE_CONFIG_DIR="${r.dir.replace(home, "$HOME")}" command claude "$@"`,
-        `}`,
-      ].join("\n");
-    });
+  const rcResult = await offerRcAppend(p, {
+    script: S.wrapper,
+    dirs: results.filter((r) => r.linked).map((r) => r.dir),
+    env, home, dryRun,
+  });
 
-  return { status: "written", results, rc, functions: fns, defaultDir: def.config_dir };
+  return { status: "written", results, rcResult, defaultDir: def.config_dir };
+}
+
+// --- shell rc handling ------------------------------------------------------
+// Delegated to the plugin's shell_wrapper.py, exactly as the docsmith wizard
+// delegates to setup_profile.py. It has to live in the PLUGIN, not here: someone
+// who installs with `/plugin install` never runs this installer, and if the rc
+// logic lived only in the installer their launcher would silently never be
+// registered. Same script, same behaviour, whichever way the plugin arrived.
+
+async function offerRcAppend(p, { script, dirs, env, home, dryRun }) {
+  if (!dirs.length) return { status: "skipped", reason: "no-profiles" };
+
+  const argv = dirs.flatMap((d) => ["--to", d]);
+  const probe = py(script, [...argv, "--json"], env);
+  if (probe.status !== 0) {
+    return { status: "error", message: (probe.stderr || "shell_wrapper.py failed").trim() };
+  }
+  let plan;
+  try {
+    plan = JSON.parse(probe.stdout);
+  } catch (e) {
+    return { status: "error", message: `could not parse shell_wrapper.py --json: ${e.message}` };
+  }
+
+  for (const c of plan.clashes) p.log.warn(c);
+  p.note(
+    `${short(plan.rc_file, home)}${plan.rc_exists ? "" : "   (will be created)"}\n\n${plan.block}`,
+    plan.action === "update" ? "Update the existing claude-profiles block?" : "Add to your shell startup file?"
+  );
+  if (dryRun) return { status: "dry-run", ...plan };
+
+  const go = await p.confirm({
+    message: plan.action === "update"
+      ? `Replace the existing claude-profiles block in ${short(plan.rc_file, home)}?`
+      : `Append this to ${short(plan.rc_file, home)}? (a timestamped backup is written first)`,
+    initialValue: true,
+  });
+  if (p.isCancel(go)) return { status: "cancelled", ...plan };
+  if (!go) return { status: "declined", ...plan };
+
+  const res = py(script, [...argv, "--apply", "--json"], env);
+  if (res.status !== 0) {
+    return { status: "error", message: (res.stderr || "shell_wrapper.py --apply failed").trim() };
+  }
+  try {
+    return JSON.parse(res.stdout);
+  } catch (e) {
+    return { status: "error", message: `could not parse shell_wrapper.py --apply: ${e.message}` };
+  }
 }
