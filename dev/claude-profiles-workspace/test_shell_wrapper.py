@@ -87,6 +87,50 @@ class FunctionRendering(unittest.TestCase):
         self.assertTrue(sw.function_text("/h/.claude-work", "/h").startswith("claude-work() {"))
 
 
+class LauncherResolvesNewestVersion(unittest.TestCase):
+    """The plugin cache keeps every installed version side by side.
+
+    The launcher globs for sync_mcp.py across those version directories, so the
+    picker has to choose the CURRENT one. A lexical `ls | head -1` picks the
+    oldest — it shipped in 0.2.0 resolving to the 0.1.0 copy — and `tail -1`
+    is no better, since lexically "0.10.0" sorts below "0.9.0".
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self.tmp.name)
+        base = self.home / ".claude/plugins/cache/mkt/claude-profiles"
+        # Created oldest-first, as a real install sequence would.
+        self.paths = []
+        for v in ("0.1.0", "0.2.0", "0.10.0"):
+            d = base / v / "skills/setup-claude-profiles/scripts"
+            d.mkdir(parents=True)
+            (d / "sync_mcp.py").write_text("#\n", encoding="utf-8")
+            self.paths.append(d / "sync_mcp.py")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def resolved(self):
+        """Run the launcher's own resolution line and return what it picks."""
+        line = [ln for ln in sw.function_text("/h/.claude-work", "/h").splitlines()
+                if "sync=" in ln][0].strip()
+        res = subprocess.run(
+            ["sh", "-c", '%s; printf "%%s" "$sync"' % line],
+            capture_output=True, text=True, env=dict(os.environ, HOME=str(self.home)),
+        )
+        return res.stdout.strip()
+
+    def test_picks_the_most_recently_installed_version(self):
+        picked = self.resolved()
+        self.assertTrue(picked, "resolved to nothing")
+        self.assertEqual(Path(picked), self.paths[-1],
+                         "picked %s, want the newest install %s" % (picked, self.paths[-1]))
+
+    def test_does_not_pick_the_oldest(self):
+        self.assertNotEqual(Path(self.resolved()), self.paths[0])
+
+
 class ExistingDefinitions(unittest.TestCase):
     def test_alias_is_detected(self):
         self.assertTrue(sw.existing_definitions("alias claude-work='claude'\n", "claude-work")["alias"])
