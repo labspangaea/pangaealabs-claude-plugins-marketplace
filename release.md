@@ -6,6 +6,29 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## claude-profiles 0.2.0 — 2026-09-08
+Register the launcher from the plugin, and stop bad profile names.
+- **New:** `shell_wrapper.py` writes the per-profile launcher function into `~/.zshrc` or
+  `~/.bashrc` instead of printing it for you to paste. It is dry-run by default, backs the file up
+  to `<rc>.bak-claude-profiles-<timestamp>`, writes between `# >>> claude-profiles >>>` markers so a
+  re-run replaces its own block rather than stacking duplicates, and reports an existing alias or
+  function of the same name instead of quietly fighting it — in zsh an alias is expanded before a
+  same-named function, so appending underneath one looks like it worked and changes nothing.
+- **Fixed:** a profile name with whitespace created a directory nobody could type again. A trailing
+  space produced `.claude-work  `; a leading space was worse and unreported, because `expanduser`
+  leaves `" ~/..."` alone, so the path stopped being absolute and resolved against the current
+  working directory — creating a folder literally named `~`. `config_dir()` now strips first, and
+  the two scripts that create directories refuse a name that survives stripping and still cannot be
+  typed back.
+- **Fixed:** the launcher could never have been registered by a `/plugin install`. The code that
+  produced it lived in `installer/`, which is not part of the plugin payload, so only the `npx`
+  path ever ran it — and even there it only printed. The writer now lives in the plugin and both
+  paths call it, the same arrangement docsmith uses for `setup_profile.py`.
+- **Coverage:** 35 unit tests in `dev/claude-profiles-workspace/test_shell_wrapper.py` plus an
+  end-to-end wizard test, both against a temporary `HOME` and both asserting the real profiles and
+  the real `~/.zshrc` are untouched. Written before the fixes; the suite caught a status string
+  reading `appendd` before it shipped.
+
 ## claude-profiles 0.1.0 — 2026-09-08
 two Claude subscriptions on one machine, sharing one config
 - Added to this marketplace at version 0.1.0.
