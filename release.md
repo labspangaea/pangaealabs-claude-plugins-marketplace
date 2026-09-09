@@ -6,6 +6,19 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## elysia-scaffolder 0.2.0 — 2026-09-09
+Three fixes to the generated project, each one silent until it costs you something.
+- **Added `.dockerignore` to the scaffold.** The `Dockerfile` copies the build context wholesale
+  and the scaffold also generates a `.env` carrying `DATABASE_DSN` and `REDIS_PASSWORD` — so
+  without this file those credentials were baked into an image layer, readable by anyone who can
+  pull the image. The template existed but nothing rendered it; `create-elysia-app` now does.
+- **`drizzle.config.ts` now globs `./src/db/schema/*.ts`** instead of naming one entity file.
+  With one entity per file, a hardcoded path silently omits every entity after the first from
+  generated migrations — invisible until data goes missing.
+- **`drizzle/` is no longer gitignored, and `.env.example` is no longer ignored.**
+  `drizzle-kit generate` writes the migration SQL there and it is a committed artefact, the
+  single source of DDL truth; ignoring it meant a fresh clone could not reproduce the schema.
+
 ## claude-profiles 0.3.0 — 2026-09-09
 Hand a conversation from one subscription to another. Separate profiles mean separate session
 lists, so `claude --resume` cannot see across them — these two skills are the bridge.

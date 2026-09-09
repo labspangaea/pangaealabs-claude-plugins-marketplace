@@ -1,7 +1,12 @@
 import { defineConfig } from 'drizzle-kit';
 
+/**
+ * `schema` is a GLOB, not a single file. With one entity per file under
+ * src/db/schema/, a hardcoded path silently omits every entity after the first
+ * from generated migrations — the failure is invisible until data goes missing.
+ */
 export default defineConfig({
-  schema: './src/db/schema/<%= EntityLower %>.ts',
+  schema: './src/db/schema/*.ts',
   out: './drizzle',
   dialect: '<%= Database === "drizzle-mysql" ? "mysql" : "postgresql" %>',
   dbCredentials: {

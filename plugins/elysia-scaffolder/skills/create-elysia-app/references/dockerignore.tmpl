@@ -1,0 +1,18 @@
+# The Dockerfile copies the build context wholesale. Without this file the
+# generated .env — carrying DATABASE_DSN and REDIS_PASSWORD — is baked into an
+# image layer and readable by anyone who can pull the image.
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+dist-stub/
+drizzle/
+.git/
+.gitignore
+docker-compose.yml
+tests/
+scripts/
+*.log
+README.md
+CLAUDE.md
