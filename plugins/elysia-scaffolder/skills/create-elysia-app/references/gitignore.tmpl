@@ -2,6 +2,10 @@ node_modules/
 dist/
 dist-stub/
 .env
+!.env.example
 *.log
-drizzle/
 bun.lockb
+
+# NOTE: drizzle/ is deliberately NOT ignored. `drizzle-kit generate` writes the
+# migration SQL there and it is a committed artefact — the single source of DDL
+# truth. Ignoring it means a fresh clone cannot reproduce the schema.

@@ -259,6 +259,7 @@ $RENDER -template "$SKILL_REFS/drizzle.config.ts.tmpl"   -params "$PARAMS" -outp
 $RENDER -template "$SKILL_REFS/package.json.tmpl"        -params "$PARAMS" -output package.json
 $RENDER -template "$SKILL_REFS/tsconfig.json.tmpl"       -params "$PARAMS" -output tsconfig.json
 $RENDER -template "$SKILL_REFS/Dockerfile.tmpl"          -params "$PARAMS" -output Dockerfile
+$RENDER -template "$SKILL_REFS/dockerignore.tmpl"        -params "$PARAMS" -output .dockerignore
 $RENDER -template "$SKILL_REFS/docker-compose.yml.tmpl"  -params "$PARAMS" -output docker-compose.yml
 $RENDER -template "$SKILL_REFS/env.tmpl"                 -params "$PARAMS" -output .env
 $RENDER -template "$SKILL_REFS/gitignore.tmpl"           -params "$PARAMS" -output .gitignore
@@ -478,6 +479,7 @@ order-service/
 ├── package.json
 ├── tsconfig.json
 ├── Dockerfile
+├── .dockerignore
 ├── docker-compose.yml
 └── .env
 ```
