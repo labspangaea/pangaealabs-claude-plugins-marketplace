@@ -6,6 +6,29 @@ maintainer command at release time — see `.claude/commands/release-pangaealabs
 
 <!-- RELEASES:TOP — the release command inserts each new entry directly below this line, newest first -->
 
+## claude-profiles 0.3.0 — 2026-09-09
+Hand a conversation from one subscription to another. Separate profiles mean separate session
+lists, so `claude --resume` cannot see across them — these two skills are the bridge.
+- **Added `publish-session`:** copies the current session's transcript into a shared staging
+  directory (`~/claude-profiles/shared-conversation/`, overridable via
+  `CLAUDE_SHARED_SESSIONS_DIR`). It finds *this* session by grepping every profile's transcripts
+  for a nonce the caller echoed one Bash call earlier, because "newest `.jsonl` in this project
+  dir" picks the wrong file exactly when it matters — someone juggling two subscriptions usually
+  has two sessions open in the same project.
+- **Added `consume-session`:** `list` / `digest` / `resume` / `delete`. `digest` is the cheap
+  path — it keeps the conversation and drops thinking blocks, tool results and subagent
+  chatter, taking a real 0.5 MB transcript to 3 KB — and `resume` is the full-fidelity path that
+  installs into the consuming profile for `claude --resume`. It ends by asking whether to keep or
+  delete the staged copy, unless the user already said which.
+- **A session is the `.jsonl` plus a same-named sidecar directory.** `<session-id>/subagents/`
+  and `<session-id>/tool-results/` hold subagent transcripts and outputs too large to inline —
+  4.0 MB against 1.4 MB of transcript on a real session here. Publish, resume and delete all
+  carry it; copying only the file would have made `resume` silently replay a session with its
+  subagent runs and big outputs missing.
+- `delete` refuses anything outside the shared directory, so a staged copy can never take the
+  publishing profile's original with it.
+- 15 new unit tests (67 total for this plugin), all against a temporary HOME.
+
 ## claude-profiles 0.2.2 — 2026-09-08
 Stop the installer's own hint text becoming a profile directory name.
 - **Fixed:** the profile-name prompt used a *descriptive* placeholder,

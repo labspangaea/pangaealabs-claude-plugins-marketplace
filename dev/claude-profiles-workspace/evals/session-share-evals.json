@@ -1,0 +1,74 @@
+{
+  "skill_name": "publish-session + consume-session",
+  "evals": [
+    {
+      "id": 0,
+      "name": "publish-handoff-under-limit",
+      "skill": "publish-session",
+      "prompt": "I'm about to hit my usage cap on this account and I don't want to lose everything we've worked out here. I run a separate claude-work profile on this machine \u2014 get this conversation over to it so I can keep going there.",
+      "expected_output": "Nonce echoed in its own Bash call, publish_session.py run in a later call, transcript copied into the shared dir, session id + the consume command reported back.",
+      "files": [],
+      "assertions": [
+        "Echoed a nonce in an earlier, separate Bash call and reused it verbatim",
+        "Used publish_session.py instead of hand-copying a transcript",
+        "Exactly one transcript landed in the shared dir, parses, and is the id reported to the user",
+        "Reply gives the session id AND the consume-session command to run",
+        "Reply flags the snapshot boundary or the privacy of a full transcript"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "publish-terse",
+      "skill": "publish-session",
+      "prompt": "publish this session so my other subscription can grab it",
+      "expected_output": "Same mechanics as eval 0 from a one-line request, with no extra hand-holding needed.",
+      "files": [],
+      "assertions": [
+        "Echoed a nonce in an earlier, separate Bash call and reused it verbatim",
+        "Used publish_session.py instead of hand-copying a transcript",
+        "Exactly one transcript landed in the shared dir, parses, and is the id reported to the user",
+        "Reply gives the session id AND the consume-session command to run",
+        "Reply flags the snapshot boundary or the privacy of a full transcript"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "consume-digest-and-summarise",
+      "skill": "consume-session",
+      "prompt": "My personal account published session 7c2f19a4-3b8e-4d51-9a02-6f4e1c88b3d7 over to me. Pull it in and tell me where they actually got to, then clean up after yourself.",
+      "expected_output": "Digest produced via the script (not a raw read of the 0.5 MB jsonl), summary naming the double-counting root cause and the unfinished work, then a keep-or-delete question.",
+      "files": [
+        "iteration-1/shared-consume/7c2f19a4-3b8e-4d51-9a02-6f4e1c88b3d7.jsonl"
+      ],
+      "assertions": [
+        "Used consume_session.py rather than parsing the transcript by hand",
+        "Produced a digest of the shared session",
+        "Did not dump the raw 0.5 MB transcript into context",
+        "Whole run cost under 120k tokens",
+        "Summary names the real root cause (portions double-counted per school and per menu)",
+        "Summary carries forward the unfinished work (root Dockerfile / missing index)",
+        "Asked the user whether to keep or delete the staged copy"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "consume-discover-newest",
+      "skill": "consume-session",
+      "prompt": "i shared a session over from my other login earlier but i've lost the id. whats waiting for me, and can you get me up to speed on it?",
+      "expected_output": "Discovers the session via `list`, digests it, summarises, asks keep-or-delete.",
+      "files": [
+        "iteration-1/shared-consume/7c2f19a4-3b8e-4d51-9a02-6f4e1c88b3d7.jsonl"
+      ],
+      "assertions": [
+        "Used consume_session.py rather than parsing the transcript by hand",
+        "Produced a digest of the shared session",
+        "Did not dump the raw 0.5 MB transcript into context",
+        "Whole run cost under 120k tokens",
+        "Summary names the real root cause (portions double-counted per school and per menu)",
+        "Summary carries forward the unfinished work (root Dockerfile / missing index)",
+        "Asked the user whether to keep or delete the staged copy",
+        "Found the session id itself \u2014 it was not in the prompt"
+      ]
+    }
+  ]
+}

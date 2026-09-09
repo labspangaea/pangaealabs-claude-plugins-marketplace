@@ -18,3 +18,4 @@ dev/*/iteration-*/
 
 # playwright MCP scratch output
 .playwright-mcp/
+dev/*/session-share/

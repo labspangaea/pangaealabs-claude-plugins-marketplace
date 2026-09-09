@@ -29,9 +29,10 @@ subscriptions on one machine, sharing one config).
 | `plugins/dkv/skills/design-fundamentals/` | the only user-facing skill (`SKILL.md` router + rubric) |
 | `plugins/dkv/skills/design-fundamentals/references/` | `color.md`, `typography.md`, `layout.md`, `gestalt.md`, `principles.md` — section-numbered so `SKILL.md` cites `§N`. **`principles.md` is an index, not a peer doc** — contrast/hierarchy/repetition live where they're operationalised; don't restate them there. |
 | `plugins/{go-scaffolder,elysia-scaffolder}/` | the two service scaffolders (5 skills each) |
-| `plugins/claude-profiles/` | sixth plugin — **multi-subscription setup**; one skill, three python3 scripts, no assets/agents |
+| `plugins/claude-profiles/` | sixth plugin — **multi-subscription setup + session hand-off**; three skills, no assets/agents |
+| `plugins/claude-profiles/skills/{publish-session,consume-session}/` | the session hand-off pair — `publish_session.py` (nonce-grep → copy to `~/claude-profiles/shared-conversation/`) and `consume_session.py` (`list`/`digest`/`resume`/`delete`). Tested by `dev/claude-profiles-workspace/test_session_share.py`. |
 | `plugins/claude-profiles/skills/setup-claude-profiles/scripts/` | `profiles_doctor.py` (read-only report + `--selfcheck`), `link_shared_config.py` (dry-run-first symlink sharing, reversible), `sync_mcp.py` (mirrors `mcpServers`), `shell_wrapper.py` (registers the per-profile launcher in `~/.zshrc`/`~/.bashrc`). Shared helpers in `_profiles.py`. |
-| `dev/claude-profiles-workspace/test_*.py` / `test_*.mjs` | the test suite — `python3 -m unittest discover -s dev/claude-profiles-workspace -p 'test_*.py'` (35 unit tests) and `node dev/claude-profiles-workspace/test_wizard.mjs /tmp/wiz` (installer wizard, end to end). Both run against a temporary HOME and assert the real profiles are untouched. |
+| `dev/claude-profiles-workspace/test_*.py` / `test_*.mjs` | the test suite — `python3 -m unittest discover -s dev/claude-profiles-workspace -p 'test_*.py'` (67 unit tests) and `node dev/claude-profiles-workspace/test_wizard.mjs /tmp/wiz` (installer wizard, end to end). Both run against a temporary HOME and assert the real profiles are untouched. |
 | `dev/` | **dev/eval workspaces — NOT shipped** (moved out of `plugins/` on purpose) |
 | `dev/docsmith-workspace/trigger-evals.json` | the skill-triggering eval set (20 queries) |
 
@@ -77,6 +78,27 @@ from a captured `/proc/mounts` table so the WSL logic is exercised on a non-WSL 
 4. The marketplace registry is split between `settings.json` (`extraKnownMarketplaces`) and the
    per-profile `plugins/known_marketplaces.json` — so `plugins/` must be shared as a whole
    directory, or plugins from a marketplace known only to the first profile vanish with no error.
+
+**The session hand-off finds the current transcript by nonce, not by mtime — that is deliberate.**
+Transcripts live at `$CLAUDE_CONFIG_DIR/projects/<slugified-cwd>/<session-id>.jsonl`, so profiles
+cannot see each other's sessions at all. `publish-session` locates *this* session by grepping every
+profile's transcripts for a string the caller echoed one Bash call earlier; "newest `.jsonl` in this
+project dir" is wrong precisely when it matters, because someone juggling two subscriptions usually
+has two sessions open in the same project. The echo and the grep must be **separate tool calls** —
+the transcript only flushes once a call returns. `consume_session.py digest` is the cheap path
+(conversation only; thinking, tool results and sidechains dropped — 0.6 MB → 8 KB on a real
+transcript) and `resume` is the full-fidelity one that installs into the consuming profile's
+`projects/` dir, deriving the directory name as `re.sub(r'[^A-Za-z0-9]', '-', cwd)`. `delete`
+refuses anything outside the shared directory, so a published copy can never take the original
+with it.
+
+**A session is the `.jsonl` PLUS a same-named sidecar directory — copying only the file is silent
+data loss.** `<session-id>/subagents/` holds subagent transcripts and `<session-id>/tool-results/`
+holds outputs too large to inline; on a real session here that sidecar was **4.0 MB against 1.4 MB
+of transcript**. Publish, resume and delete all carry it. The digest path does not care (it drops
+sidechains and tool results anyway), so the bug only shows up on `resume`, replaying a session whose
+subagent runs and big outputs have quietly vanished. Found by the eval loop's *baseline* arm, which
+did the thorough thing the first draft of the script did not.
 
 `link_shared_config.py` is dry-run by default and backs up anything it displaces into
 `<target>/backups/profile-link-<ts>/`; `--unlink --apply` restores from there. Keep both properties.
